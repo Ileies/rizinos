@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+    themes: autumn --default, sunset --prefersdark, valentine;
+}
+/*autumn>garden>bumblebee>cupcake>pastel; dum,sunset,dracula,forest,dark*/

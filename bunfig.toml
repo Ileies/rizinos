@@ -1,0 +1,4 @@
+[install.alias]
+$db = "./src/lib/server/db"
+$types = "./src/lib/types"
+$lib = "./src/lib"
