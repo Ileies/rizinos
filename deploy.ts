@@ -18,6 +18,6 @@ console.log('Uploading new files to the server...');
 await $`rsync -avz ./build/ ${server}:${remotePath}`;
 
 console.log('Restarting the application with PM2...');
-await $`ssh ${server} "cd ${remotePath}; bun i; pm2 delete ${name}; pm2 start pm2.config.cjs; pm2 save"`;
+await $`ssh -t ${server} "cd ${remotePath}; bun i; pm2 delete ${name}; pm2 start pm2.config.cjs; pm2 save"`;
 
 console.log('Deployment complete!');
