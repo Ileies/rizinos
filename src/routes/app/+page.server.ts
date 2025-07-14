@@ -14,6 +14,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	// TODO: Project needs an app store
 	// TODO: Rethink desktop.ini
 	// TODO: CB.write('file', {path, isMoving})
+	// TODO: At some point support these languages too:  'es', 'fr', 'pt', 'hi', 'ar'
 
 	return {
 		username: locals.user.username

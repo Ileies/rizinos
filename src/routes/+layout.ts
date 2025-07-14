@@ -28,7 +28,7 @@ export const load = () => {
 		pageTitle: m.title(),
 		pageDescription: m.description(),
 		twitterCard: 'summary_large_image',
-		twitterSite: `@rizin_os`,
+		twitterSite: `@rizinos`,
 		ogType: 'website',
 		ogUrl: `https://${PUBLIC_ORIGIN}/`,
 		ogImage: `${PUBLIC_ORIGIN}/socialcard.jpeg`,
