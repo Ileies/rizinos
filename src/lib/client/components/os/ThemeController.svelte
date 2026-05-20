@@ -1,7 +1,7 @@
 <script lang="ts">
 	import os from '$lib/os.svelte';
 	import { Theme } from '$types';
-	import { Moon, Sun } from 'lucide-svelte';
+	import { Moon, Sun } from '@lucide/svelte';
 	import { browser } from '$app/environment';
 
 	$effect(() => {

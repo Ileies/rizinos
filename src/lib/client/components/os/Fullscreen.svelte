@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Maximize, Minimize } from 'lucide-svelte';
+	import { Maximize, Minimize } from '@lucide/svelte';
 
 	let fullscreenEnabled = $state(false);
 

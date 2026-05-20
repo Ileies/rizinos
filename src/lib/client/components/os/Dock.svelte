@@ -13,7 +13,7 @@
 		Volume1,
 		Volume2,
 		VolumeX
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import DockField from '$ui/os/DockField.svelte';
 	import { focusProcess, launchApp } from '$lib/client/index.svelte';
 	import ThemeController from '$ui/os/ThemeController.svelte';

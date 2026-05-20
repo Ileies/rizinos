@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { ChevronDown, ExternalLink, Github, Menu, X } from 'lucide-svelte';
+	import { ChevronDown, ExternalLink, Menu, X } from '@lucide/svelte';
+	import { SiGithub } from '@icons-pack/svelte-simple-icons';
 	import { goto } from '$app/navigation';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import { browser } from '$app/environment';
@@ -123,11 +124,11 @@
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						<Github size={20} />
+						<SiGithub size={20} />
 					</a>
 
 					<button
-						class="px-6 py-2.5 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-medium
+						class="px-6 py-2.5 bg-linear-to-r from-primary to-secondary text-white rounded-full font-medium
             transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-100"
 						onclick={() => goto('/app')}
 					>

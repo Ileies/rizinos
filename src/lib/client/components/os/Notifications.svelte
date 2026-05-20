@@ -1,6 +1,6 @@
 <script lang="ts">
 	import os from '$lib/os.svelte';
-	import { CircleAlert, CircleCheck, Info, OctagonX } from 'lucide-svelte';
+	import { CircleAlert, CircleCheck, Info, OctagonX } from '@lucide/svelte';
 	import type { Notification } from '$types';
 	import { fly } from 'svelte/transition';
 	// TODO: Transition doesn't work yet

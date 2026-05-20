@@ -1,7 +1,7 @@
 <script lang="ts">
 	import os from '$lib/os.svelte';
 	import { type Process } from '$types/os';
-	import { Maximize, Minimize, Minus, X } from 'lucide-svelte';
+	import { Maximize, Minimize, Minus, X } from '@lucide/svelte';
 	import { closeProcess, focusProcess } from '$lib/client/index.svelte';
 
 	const { processData }: { processData: Process } = $props();
