@@ -175,41 +175,6 @@
 										</div>
 									</div>
 
-									<div class="border-t pt-4">
-										<h4 class="font-semibold text-sm mb-3 flex items-center gap-2">
-											<Zap class="h-4 w-4" />
-											Adjust Credit
-										</h4>
-										{#if !editingCredit[user.id]}
-											<Button.Root
-												variant="outline"
-												size="sm"
-												onclick={() => toggleCreditEdit(user.id)}
-											>
-												Edit Credit
-											</Button.Root>
-										{:else}
-											<form
-												method="POST"
-												action="?/creditAdjust"
-												use:enhance
-												class="flex gap-2"
-												onsubmit={() => toggleCreditEdit(user.id)}
-											>
-												<input type="hidden" name="userId" value={user.id} />
-												<Input.Root class="flex-1" placeholder="0" name="amount" type="number" />
-												<Button.Root type="submit" size="sm">Apply</Button.Root>
-												<Button.Root
-													type="button"
-													variant="ghost"
-													size="sm"
-													onclick={() => toggleCreditEdit(user.id)}
-												>
-													Cancel
-												</Button.Root>
-											</form>
-										{/if}
-									</div>
 								</div>
 							</div>
 						{/if}
