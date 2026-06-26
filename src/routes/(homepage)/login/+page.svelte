@@ -11,22 +11,6 @@
 	onMount(() => {
 		emailElement.focus();
 	});
-
-	const handleSubmit = enhance(async ({ formElement, formData, action, cancel }) => {
-		error = null;
-
-		return async ({ result, update }) => {
-			if (result.type === 'error') {
-				error = 'Request failed. Please try again.';
-				cancel();
-			} else if (result.type === 'failure') {
-				// Form validation errors are handled by `form?.error`
-				await update();
-			} else {
-				await update();
-			}
-		};
-	});
 </script>
 
 <div class="bg-base-200 flex flex-grow items-center justify-center">
@@ -43,7 +27,20 @@
 				</div>
 			{/if}
 
-			<form class="space-y-6" method="post" use:handleSubmit>
+			<form
+				class="space-y-6"
+				method="post"
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						if (result.type === 'error') {
+							error = 'Request failed. Please try again.';
+						} else {
+							error = null;
+							await update();
+						}
+					};
+				}}
+			>
 				<!-- Email Input -->
 				<div class="form-control">
 					<label class="label" for="email">
