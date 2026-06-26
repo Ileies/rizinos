@@ -109,5 +109,63 @@ export const actions: Actions = {
 			.set({ gender: gender || null })
 			.where(eq(users.id, userId as any));
 		return { success: true };
+	},
+
+	userUpdateUsername: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const username = data.get('username') as string;
+
+		if (!userId || !username) return fail(400, { message: 'User ID and username required' });
+
+		try {
+			await db
+				.update(users)
+				.set({ username })
+				.where(eq(users.id, userId as any));
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'Username already taken' });
+		}
+	},
+
+	userUpdateEmail: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const email = data.get('email') as string;
+
+		if (!userId || !email) return fail(400, { message: 'User ID and email required' });
+
+		try {
+			await db
+				.update(users)
+				.set({ email })
+				.where(eq(users.id, userId as any));
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'Email already in use' });
+		}
+	},
+
+	userUpdatePassword: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const newPassword = data.get('newPassword') as string;
+
+		if (!userId || !newPassword) return fail(400, { message: 'User ID and password required' });
+
+		const passwordHash = await Bun.password.hash(newPassword);
+
+		await db
+			.update(users)
+			.set({ passwordHash })
+			.where(eq(users.id, userId as any));
+		return { success: true };
 	}
 };

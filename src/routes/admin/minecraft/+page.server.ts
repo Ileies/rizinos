@@ -143,7 +143,7 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const oldName = data.get('oldName') as string;
 		const name = data.get('name') as string;
-		const location = data.get('location') as string;
+		let location = data.get('location') as string;
 		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
 			[]) as Restrict[];
 

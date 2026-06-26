@@ -3,48 +3,60 @@
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import type { LinkList } from '$types/seo';
 	import * as m from '$lib/messages';
-	import { locale } from '$lib/messages';
+	import { locale as localeStore } from '$lib/messages';
 	import { discord, github, twitter } from '$lib/config';
 
-	let legal: LinkList = $derived({
-		'/privacy': m.privacy_policy(),
-		'/terms': m.terms_of_service(),
-		'/privacy/#cookies': m.cookies(),
-		'/legal': m.imprint()
-	});
+	let legal: LinkList = $derived((() => {
+		$localeStore;
+		return {
+			'/privacy': m.privacy_policy(),
+			'/terms': m.terms_of_service(),
+			'/privacy/#cookies': m.cookies(),
+			'/legal': m.imprint()
+		};
+	})());
 
-	let links: { title: string; items: LinkList }[] = $derived([
-		{
-			title: m.product(),
-			items: {
-				'/#features': m.features(),
-				'/#security': m.security(),
-				'/enterprise': m.enterprise(),
-				'/pricing': m.pricing()
+	let links: { title: string; items: LinkList }[] = $derived((() => {
+		$localeStore;
+		const legalLinks = {
+			'/privacy': m.privacy_policy(),
+			'/terms': m.terms_of_service(),
+			'/privacy/#cookies': m.cookies(),
+			'/legal': m.imprint()
+		};
+		return [
+			{
+				title: m.product(),
+				items: {
+					'/#features': m.features(),
+					'/#security': m.security(),
+					'/enterprise': m.enterprise(),
+					'/pricing': m.pricing()
+				}
+			},
+			{
+				title: m.resources(),
+				items: {
+					'/docs': m.documentation(),
+					'/docs#api': m.api_reference(),
+					'/status': m.status(),
+					'/blog': m.blog()
+				}
+			},
+			{
+				title: m.company(),
+				items: {
+					'/about': m.about_us(),
+					'/careers': m.careers(),
+					'/about#contact': m.contact()
+				}
+			},
+			{
+				title: m.legal(),
+				items: legalLinks
 			}
-		},
-		{
-			title: m.resources(),
-			items: {
-				'/docs': m.documentation(),
-				'/docs#api': m.api_reference(),
-				'/status': m.status(),
-				'/blog': m.blog()
-			}
-		},
-		{
-			title: m.company(),
-			items: {
-				'/about': m.about_us(),
-				'/careers': m.careers(),
-				'/about#contact': m.contact()
-			}
-		},
-		{
-			title: m.legal(),
-			items: legal
-		}
-	]);
+		];
+	})());
 </script>
 
 <div class="h-1 bg-primary"></div>

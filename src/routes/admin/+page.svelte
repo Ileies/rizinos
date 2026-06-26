@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Role } from '$types';
-	import { ChevronDown, Users, Zap, Settings, Edit2, Check, X } from '@lucide/svelte';
+	import { ChevronDown, Users, Zap, Settings } from '@lucide/svelte';
 	import * as Card from '$shadcn/card';
 	import * as Button from '$shadcn/button';
 	import { Badge } from '$shadcn/badge';
-	import * as Input from '$shadcn/input';
+	import InlineEdit from '$lib/components/InlineEdit.svelte';
 
 	let { data } = $props();
 
 	let expandedUsers = $state<Record<string, boolean>>({});
-	let editingCredit = $state<Record<string, boolean>>({});
-	let editingGender = $state<Record<string, boolean>>({});
 
 	const ROLES = [
 		Role.Admin,
@@ -24,14 +22,6 @@
 
 	function toggleUser(userId: string) {
 		expandedUsers[userId] = !expandedUsers[userId];
-	}
-
-	function toggleCreditEdit(userId: string) {
-		editingCredit[userId] = !editingCredit[userId];
-	}
-
-	function toggleGenderEdit(userId: string) {
-		editingGender[userId] = !editingGender[userId];
 	}
 </script>
 
@@ -95,63 +85,66 @@
 
 						{#if expandedUsers[user.id]}
 							<div class="border-t px-6 py-4 bg-muted/30">
-								<div class="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
+								<div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2 lg:grid-cols-3">
+									<InlineEdit
+										value={user.username}
+										label="Username"
+										action="?/userUpdateUsername"
+										fieldName="username"
+										hiddenFields={{ userId: user.id }}
+									/>
+
+									<InlineEdit
+										value={user.email}
+										label="Email"
+										action="?/userUpdateEmail"
+										fieldName="email"
+										hiddenFields={{ userId: user.id }}
+										type="text"
+									/>
+
+									<InlineEdit
+										value="*"
+										label="Password"
+										action="?/userUpdatePassword"
+										fieldName="newPassword"
+										hiddenFields={{ userId: user.id }}
+										type="text"
+									>
+										<p class="text-sm text-muted-foreground">Set new password</p>
+									</InlineEdit>
+
+									<InlineEdit
+										value={user.credit}
+										label="Credit"
+										action="?/creditSet"
+										fieldName="credit"
+										hiddenFields={{ userId: user.id }}
+										type="number"
+									/>
+
+									<InlineEdit
+										value={user.gender || ''}
+										label="Gender"
+										action="?/userUpdate"
+										fieldName="gender"
+										hiddenFields={{ userId: user.id }}
+										type="select"
+										selectOptions={[
+											{ value: 'male', label: 'Male' },
+											{ value: 'female', label: 'Female' },
+											{ value: 'other', label: 'Other' }
+										]}
+									/>
+
 									<div>
-										<p class="text-xs font-medium text-muted-foreground uppercase mb-2">Credit</p>
-										{#if !editingCredit[user.id]}
-											<div class="flex items-center justify-between">
-												<p class="text-lg font-semibold">{user.credit}</p>
-												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleCreditEdit(user.id)}>
-													<Edit2 size={14} />
-												</Button.Root>
-											</div>
-										{:else}
-											<form method="POST" action="?/creditSet" use:enhance class="flex gap-2" onsubmit={() => toggleCreditEdit(user.id)}>
-												<input type="hidden" name="userId" value={user.id} />
-												<Input.Root name="credit" type="number" value={user.credit.toString()} required class="text-sm" />
-												<Button.Root type="submit" variant="ghost" size="sm">
-													<Check size={14} />
-												</Button.Root>
-												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleCreditEdit(user.id)}>
-													<X size={14} />
-												</Button.Root>
-											</form>
-										{/if}
+										<p class="text-xs font-medium text-muted-foreground uppercase">User ID</p>
+										<p class="text-xs font-mono mt-3 break-all">{user.id}</p>
 									</div>
-									<div>
-										<p class="text-xs font-medium text-muted-foreground uppercase mb-2">Gender</p>
-										{#if !editingGender[user.id]}
-											<div class="flex items-center justify-between">
-												<p class="capitalize text-sm">{user.gender || '-'}</p>
-												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleGenderEdit(user.id)}>
-													<Edit2 size={14} />
-												</Button.Root>
-											</div>
-										{:else}
-											<form method="POST" action="?/userUpdate" use:enhance class="flex gap-2" onsubmit={() => toggleGenderEdit(user.id)}>
-												<input type="hidden" name="userId" value={user.id} />
-												<select name="gender" class="flex-1 px-2 py-1 border rounded-md bg-background text-sm">
-													<option value="">Select gender</option>
-													<option value="male" selected={user.gender === 'male'}>Male</option>
-													<option value="female" selected={user.gender === 'female'}>Female</option>
-													<option value="other" selected={user.gender === 'other'}>Other</option>
-												</select>
-												<Button.Root type="submit" variant="ghost" size="sm">
-													<Check size={14} />
-												</Button.Root>
-												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleGenderEdit(user.id)}>
-													<X size={14} />
-												</Button.Root>
-											</form>
-										{/if}
-									</div>
+
 									<div>
 										<p class="text-xs font-medium text-muted-foreground uppercase">Last Online</p>
-										<p class="text-sm mt-1">{new Date(user.lastOnline).toLocaleDateString()}</p>
-									</div>
-									<div>
-										<p class="text-xs font-medium text-muted-foreground uppercase">ID</p>
-										<p class="text-sm font-mono mt-1">{user.id.slice(0, 8)}...</p>
+										<p class="text-sm mt-3">{new Date(user.lastOnline).toLocaleDateString()}</p>
 									</div>
 								</div>
 
