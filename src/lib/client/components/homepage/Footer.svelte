@@ -46,7 +46,7 @@
 	];
 </script>
 
-<div class="from-primary to-secondary h-2 bg-gradient-to-r"></div>
+<div class="h-1 bg-primary"></div>
 
 <footer class="bg-base-200 border-base-300 border-t pt-20 pb-12">
 	<div class="container mx-auto px-4 lg:px-8">
@@ -54,7 +54,7 @@
 			<!-- Brand Section -->
 			<div class="lg:col-span-2">
 				<a
-					class="from-primary to-secondary bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent"
+					class="text-2xl font-bold text-primary"
 					href="/"
 				>
 					{PUBLIC_APP_NAME}

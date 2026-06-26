@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { ChevronDown, ExternalLink, Menu, X } from '@lucide/svelte';
+	import { ChevronDown, ExternalLink, Menu, X, Globe } from '@lucide/svelte';
 	import { SiGithub } from '@icons-pack/svelte-simple-icons';
 	import { goto } from '$app/navigation';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
@@ -8,6 +8,13 @@
 	import { github } from '$lib/config';
 	import { setLocale } from '$lib/paraglide/runtime';
 	import { m } from '$lib/paraglide/messages.js';
+
+	const languages = [
+		{ code: 'en', name: 'English', flag: '🇬🇧' },
+		{ code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+		{ code: 'ru', name: 'Русский', flag: '🇷🇺' },
+		{ code: 'cn', name: '简体中文', flag: '🇨🇳' }
+	];
 
 	// Navigation items with dropdowns
 	const navItems = [
@@ -38,6 +45,7 @@
 	let isScrolled = $state(false);
 	let innerWidth = $state(0);
 	let activeDropdown: string | null = $state(null);
+	let isLanguageDropdownOpen = $state(false);
 	let isMobile = $derived(innerWidth <= 768);
 
 	if (browser) {
@@ -52,6 +60,11 @@
 	function closeDropdowns() {
 		activeDropdown = null;
 	}
+
+	function selectLanguage(code: string) {
+		setLocale(code);
+		isLanguageDropdownOpen = false;
+	}
 </script>
 
 <svelte:window bind:innerWidth />
@@ -65,20 +78,39 @@
 		<nav class="flex h-20 items-center justify-between">
 			<!-- Logo -->
 			<a
-				class="from-primary to-secondary relative bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent"
+				class="relative text-2xl font-bold text-primary"
 				href="/"
 			>
 				{PUBLIC_APP_NAME}
 				<div
-					class="from-primary to-secondary absolute -bottom-1 left-0 h-0.5 w-full scale-x-0 transform bg-gradient-to-r transition-transform duration-300 hover:scale-x-100"
+					class="absolute -bottom-1 left-0 h-0.5 w-full scale-x-0 transform bg-primary transition-transform duration-300 hover:scale-x-100"
 				></div>
 			</a>
 
-			<div>
-				<button onclick={() => setLocale('en')}>en</button>
-				<button onclick={() => setLocale('de')}>de</button>
-				<button onclick={() => setLocale('ru')}>ru</button>
-				<button onclick={() => setLocale('cn')}>cn</button>
+			<div class="relative">
+				<button
+					onclick={() => (isLanguageDropdownOpen = !isLanguageDropdownOpen)}
+					class="p-2 text-gray-700 transition-colors duration-200 hover:text-gray-900"
+					aria-label="Select language"
+				>
+					<Globe size={20} />
+				</button>
+
+				{#if isLanguageDropdownOpen}
+					<div
+						class="absolute top-full right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-xl z-50"
+					>
+						{#each languages as lang (lang.code)}
+							<button
+								onclick={() => selectLanguage(lang.code)}
+								class="w-full px-4 py-3 flex items-center space-x-3 text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 text-left"
+							>
+								<span class="text-lg">{lang.flag}</span>
+								<span>{lang.name}</span>
+							</button>
+						{/each}
+					</div>
+				{/if}
 			</div>
 
 			<!-- Desktop Navigation -->
@@ -137,8 +169,8 @@
 					</a>
 
 					<button
-						class="from-primary to-secondary rounded-full bg-linear-to-r px-6 py-2.5 font-medium text-white
-            transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-100"
+						class="rounded-full bg-primary px-6 py-2.5 font-medium text-white
+            transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-primary/50 active:scale-100"
 						onclick={() => goto('/app')}
 					>
 						{m.getting_started()}
@@ -212,8 +244,8 @@
 				</a>
 
 				<button
-					class="from-primary to-secondary hover:shadow-primary/25 mt-4 w-full rounded-full bg-gradient-to-r px-6 py-3 font-medium
-          text-white transition-all duration-200 hover:shadow-lg"
+					class="mt-4 w-full rounded-full bg-primary px-6 py-3 font-medium
+          text-white transition-all duration-200 hover:shadow-lg hover:shadow-primary/50"
 					onclick={() => goto('/app')}
 				>
 					{m.getting_started()}
