@@ -1,0 +1,136 @@
+import { redirect, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
+import { db } from '$db';
+import { mcWarps, mcWorlds, mcWorldGroups, mcUsers } from '$db/schema';
+import { eq } from 'drizzle-orm';
+import { Role, type Restrict } from '$types';
+import { hasRole } from '$lib/server/models/User';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	if (!locals.user) redirect(302, '/login');
+	if (!hasRole(locals.user, Role.Admin)) redirect(302, '/app');
+
+	const [allWarps, allWorlds, allGroups, allMcUsers] = await Promise.all([
+		db.query.mcWarps.findMany(),
+		db.query.mcWorlds.findMany(),
+		db.query.mcWorldGroups.findMany(),
+		db.query.mcUsers.findMany({
+			with: { user: { columns: { passwordHash: false, isOnline: false } } }
+		})
+	]);
+
+	return {
+		warps: allWarps,
+		worlds: allWorlds,
+		groups: allGroups,
+		mcUsers: allMcUsers
+	};
+};
+
+export const actions: Actions = {
+	warpCreate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const name = data.get('name') as string;
+		const location = data.get('location') as string;
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) || []) as Restrict[];
+
+		if (!name || !location) return fail(400, { message: 'Name and location required' });
+
+		try {
+			await db.insert(mcWarps).values({ name, location, restrict });
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'Warp already exists' });
+		}
+	},
+
+	warpDelete: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const name = data.get('name') as string;
+
+		if (!name) return fail(400, { message: 'Warp name required' });
+
+		await db.delete(mcWarps).where(eq(mcWarps.name, name));
+		return { success: true };
+	},
+
+	worldCreate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const name = data.get('name') as string;
+		const groupName = data.get('groupName') as string;
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) || []) as Restrict[];
+
+		if (!name || !groupName) return fail(400, { message: 'Name and group required' });
+
+		try {
+			await db.insert(mcWorlds).values({ name, groupName, restrict });
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'World already exists' });
+		}
+	},
+
+	worldDelete: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const name = data.get('name') as string;
+
+		if (!name) return fail(400, { message: 'World name required' });
+
+		await db.delete(mcWorlds).where(eq(mcWorlds.name, name));
+		return { success: true };
+	},
+
+	groupCreate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const name = data.get('name') as string;
+		const gameMode = parseInt(data.get('gameMode') as string) || 0;
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) || []) as Restrict[];
+
+		if (!name) return fail(400, { message: 'Name required' });
+
+		try {
+			await db.insert(mcWorldGroups).values({ name, gameMode, restrict });
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'Group already exists' });
+		}
+	},
+
+	groupDelete: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const name = data.get('name') as string;
+
+		if (!name) return fail(400, { message: 'Group name required' });
+
+		await db.delete(mcWorldGroups).where(eq(mcWorldGroups.name, name));
+		return { success: true };
+	},
+
+	mcUserDelete: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const uuid = data.get('uuid') as string;
+
+		if (!uuid) return fail(400, { message: 'UUID required' });
+
+		try {
+			await db.delete(mcUsers).where(eq(mcUsers.uuid, uuid));
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'Failed to delete Minecraft user' });
+		}
+	}
+};
