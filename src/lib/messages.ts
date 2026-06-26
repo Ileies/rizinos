@@ -7,16 +7,17 @@ import { writable } from 'svelte/store';
 
 let _storage: import('node:async_hooks').AsyncLocalStorage<{ locale: string }> | null | undefined = undefined;
 
+let _currentLocale = 'en';
 const _localeStore = writable('en');
+
+_localeStore.subscribe(l => _currentLocale = l);
 
 export const locale = _localeStore;
 
 export function getLocale(): string {
   if (_storage) { const s = _storage.getStore(); if (s?.locale) return s.locale; }
-  let currentLocale = 'en';
-  _localeStore.subscribe(l => currentLocale = l)();
   if (typeof document !== 'undefined') { const l = document.documentElement.lang; if (l) return l; }
-  return currentLocale;
+  return _currentLocale;
 }
 
 export function getLocales() { return locales; }

@@ -16,6 +16,8 @@
 	let showWorldForm = $state(false);
 	let showGroupForm = $state(false);
 	let openGameModeDropdown = $state<string | null>(null);
+	let editingPermissions = $state<string | null>(null);
+	let permissionsInput = $state<Record<string, { text: string; items: string[] }>>({});
 
 	const gameModeIcons = {
 		0: { icon: Pickaxe, label: 'Survival', name: 'Survival' },
@@ -26,6 +28,38 @@
 
 	function togglePlayer(uuid: string) {
 		expandedPlayers[uuid] = !expandedPlayers[uuid];
+	}
+
+	function startEditingPermissions(uuid: string, permissions: string[]) {
+		editingPermissions = uuid;
+		permissionsInput[uuid] = { text: '', items: [...permissions] };
+	}
+
+	function handlePermissionInput(uuid: string, event: KeyboardEvent) {
+		const input = event.target as HTMLInputElement;
+		const char = input.value[input.value.length - 1];
+
+		if (char === ',' || char === ' ') {
+			event.preventDefault();
+			const text = input.value.slice(0, -1).trim();
+			if (text && permissionsInput[uuid]) {
+				if (!permissionsInput[uuid].items.includes(text)) {
+					permissionsInput[uuid].items.push(text);
+				}
+				input.value = '';
+			}
+		}
+	}
+
+	function removePermission(uuid: string, perm: string) {
+		if (permissionsInput[uuid]) {
+			permissionsInput[uuid].items = permissionsInput[uuid].items.filter(p => p !== perm);
+		}
+	}
+
+	function cancelEditingPermissions() {
+		editingPermissions = null;
+		permissionsInput = {};
 	}
 </script>
 
@@ -104,20 +138,60 @@
 												hiddenFields={{ uuid: mcUser.uuid, welcomeMessage: mcUser.welcomeMessage || '' }}
 											/>
 
-											<InlineEdit
-												value={mcUser.permissions.join(', ')}
-												label={`Permissions (${mcUser.permissions.length})`}
-												action="?/mcUserUpdatePermissions"
-												fieldName="permissions"
-												hiddenFields={{ uuid: mcUser.uuid }}
-												type="text"
-											>
-												<div class="flex flex-wrap gap-1">
-													{#each mcUser.permissions as perm}
-														<Badge variant="secondary">{perm}</Badge>
-													{/each}
+											<div>
+												<div class="flex items-center justify-between mb-2">
+													<p class="text-xs font-medium text-muted-foreground uppercase">Permissions ({mcUser.permissions.length})</p>
+													{#if editingPermissions !== mcUser.uuid}
+														<button
+															type="button"
+															class="text-xs text-primary hover:underline"
+															onclick={() => startEditingPermissions(mcUser.uuid, mcUser.permissions)}
+														>
+															Edit
+														</button>
+													{/if}
 												</div>
-											</InlineEdit>
+												{#if editingPermissions === mcUser.uuid}
+													<form method="POST" action="?/mcUserUpdatePermissions" use:enhance class="space-y-2">
+														<input type="hidden" name="uuid" value={mcUser.uuid} />
+														<input type="hidden" name="permissions" value={permissionsInput[mcUser.uuid]?.items.join(',') || ''} />
+
+														<div class="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/30">
+															{#each permissionsInput[mcUser.uuid]?.items || [] as perm (perm)}
+																<div class="flex items-center gap-1 bg-primary text-primary-foreground px-2 py-1 rounded text-sm">
+																	<span>{perm}</span>
+																	<button
+																		type="button"
+																		class="hover:opacity-75 ml-1"
+																		onclick={() => removePermission(mcUser.uuid, perm)}
+																	>
+																		×
+																	</button>
+																</div>
+															{/each}
+															<input
+																type="text"
+																placeholder="Type and press space or comma to add"
+																class="flex-1 min-w-32 px-2 py-1 border rounded bg-background text-sm"
+																onkeydown={(e) => handlePermissionInput(mcUser.uuid, e)}
+															/>
+														</div>
+
+														<div class="flex gap-2">
+															<Button.Root type="submit" size="sm">Save</Button.Root>
+															<Button.Root type="button" variant="ghost" size="sm" onclick={cancelEditingPermissions}>
+																Cancel
+															</Button.Root>
+														</div>
+													</form>
+												{:else}
+													<div class="flex flex-wrap gap-1">
+														{#each mcUser.permissions as perm}
+															<Badge variant="secondary">{perm}</Badge>
+														{/each}
+													</div>
+												{/if}
+											</div>
 
 											{#if mcUser.bannedUntil}
 												<div>
