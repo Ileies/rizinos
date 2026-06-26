@@ -1,4 +1,4 @@
-import { paraglideVitePlugin } from '@inlang/paraglide-js';
+import { i18nPlugin } from './src/lib/i18n-plugin';
 import devtoolsJson from 'vite-plugin-devtools-json';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -9,10 +9,7 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		devtoolsJson(),
-		paraglideVitePlugin({
-			project: './project.inlang',
-			outdir: './src/lib/paraglide'
-		})
+		i18nPlugin()
 	],
 	server: {
 		proxy: {

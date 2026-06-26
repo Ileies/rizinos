@@ -2,7 +2,7 @@ import { PUBLIC_GOOGLE_ANALYTICS_ID, PUBLIC_ORIGIN } from '$env/static/public';
 import type { DefaultSeo } from '$types/seo';
 //import posthog from 'posthog-js';
 import { browser } from '$app/environment';
-import { m } from '$lib/paraglide/messages.js';
+import * as m from '$lib/messages';
 
 export const load = () => {
 	if (browser) {

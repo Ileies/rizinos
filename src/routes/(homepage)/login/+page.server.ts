@@ -28,6 +28,17 @@ export const actions = {
 		const password = data.get('password')?.toString();
 		const keep = data.get('keep')?.toString();
 
+		console.log('Login attempt:', {
+			email,
+			password: password ? '***' : undefined,
+			keep,
+			ip,
+			contentType: request.headers.get('content-type'),
+			origin: request.headers.get('origin'),
+			referer: request.headers.get('referer'),
+			formDataKeys: Array.from(data.keys())
+		});
+
 		if (!email || !password) {
 			console.log({ email, password, keep, ip });
 			return fail(401, { error: 'Email and password are required.' });

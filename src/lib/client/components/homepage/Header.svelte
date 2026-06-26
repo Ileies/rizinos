@@ -6,8 +6,8 @@
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import { browser } from '$app/environment';
 	import { github } from '$lib/config';
-	import { setLocale } from '$lib/paraglide/runtime';
-	import { m } from '$lib/paraglide/messages.js';
+	import { setLocale } from '$lib/messages';
+	import * as m from '$lib/messages';
 
 	const languages = [
 		{ code: 'en', name: 'English', flag: '🇬🇧' },
@@ -238,7 +238,7 @@
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<Github size={20} />
+					<SiGithub size={20} />
 					<span>GitHub</span>
 					<ExternalLink size={14} class="text-gray-400" />
 				</a>

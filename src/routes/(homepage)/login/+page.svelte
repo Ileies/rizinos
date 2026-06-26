@@ -27,20 +27,7 @@
 				</div>
 			{/if}
 
-			<form
-				class="space-y-6"
-				method="post"
-				use:enhance={() => {
-					return async ({ result, update }) => {
-						if (result.type === 'error') {
-							error = 'Request failed. Please try again.';
-						} else {
-							error = null;
-							await update();
-						}
-					};
-				}}
-			>
+			<form class="space-y-6" method="post" use:enhance>
 				<!-- Email Input -->
 				<div class="form-control">
 					<label class="label" for="email">

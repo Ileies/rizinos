@@ -2,7 +2,7 @@
 	import { SiGithub, SiX } from '@icons-pack/svelte-simple-icons';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import type { LinkList } from '$types/seo';
-	import { m } from '$lib/paraglide/messages.js';
+	import * as m from '$lib/messages';
 	import { discord, github, twitter } from '$lib/config';
 
 	const legal: LinkList = {

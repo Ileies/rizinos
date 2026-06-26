@@ -5,23 +5,24 @@ import { eq } from 'drizzle-orm';
 import Logger from '$lib/server/models/Logger';
 import { authenticate } from '$lib/server/auth';
 import { sequence } from '@sveltejs/kit/hooks';
-import { paraglideMiddleware } from '$lib/paraglide/server';
 import { getToken } from '$lib/server/models/token';
 import { TokenType } from '$types';
+import { locales, cookieName } from '$lib/messages';
 
 const ignoredUrls = ['/api/mc/getCredit'];
 
 // Reset online status for all users on server startup
 await db.update(users).set({ isOnline: false }).where(eq(users.isOnline, true));
 
-const handleParaglide: Handle = ({ event, resolve }) =>
-	paraglideMiddleware(event.request, ({ request, locale }) => {
-		event.request = request;
+const handleLocale: Handle = ({ event, resolve }) => {
+	const localeCookie = event.cookies.get(cookieName) ?? '';
+	const locale = (locales as readonly string[]).includes(localeCookie) ? localeCookie : (locales[0] as string);
+	event.locals.locale = locale;
 
-		return resolve(event, {
-			transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
-		});
+	return resolve(event, {
+		transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
 	});
+};
 
 const checks: Handle = async ({ event, resolve }) => {
 	// Get client IP, preferring forwarded IP from proxy if available
@@ -30,6 +31,17 @@ const checks: Handle = async ({ event, resolve }) => {
 	// Skip logging for specific endpoints to reduce noise
 	if (!ignoredUrls.includes(event.url.pathname))
 		console.log(new Date().toISOString(), event.url.href);
+
+	// Log POST requests with details for debugging
+	if (event.request.method === 'POST' && event.url.pathname === '/login') {
+		console.log('POST /login request details:', {
+			origin: event.request.headers.get('origin'),
+			referer: event.request.headers.get('referer'),
+			contentType: event.request.headers.get('content-type'),
+			cookie: event.request.headers.get('cookie') ? 'present' : 'missing',
+			host: event.request.headers.get('host')
+		});
+	}
 
 	// Verify database connectivity
 	await db.execute('select 1').catch((e: unknown) => {
@@ -63,4 +75,4 @@ const api: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(checks, api, handleParaglide);
+export const handle: Handle = sequence(checks, api, handleLocale);
