@@ -7,7 +7,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		csrf: {
-			checkOrigin: true
+			checkOrigin: false
 		},
 		alias: {
 			$db: './src/lib/server/db',
