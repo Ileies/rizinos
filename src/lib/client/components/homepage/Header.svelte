@@ -6,7 +6,7 @@
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import { browser } from '$app/environment';
 	import { github } from '$lib/config';
-	import { setLocale } from '$lib/messages';
+	import { setLocale, locale } from '$lib/messages';
 	import * as m from '$lib/messages';
 
 	const languages = [
@@ -16,8 +16,7 @@
 		{ code: 'cn', name: '简体中文', flag: '🇨🇳' }
 	];
 
-	// Navigation items with dropdowns
-	const navItems = [
+	let navItems = $derived([
 		{
 			label: m.features(),
 			href: '/features',
@@ -39,7 +38,7 @@
 		},
 		{ label: m.pricing(), href: '/pricing' },
 		{ label: m.enterprise(), href: '/enterprise' }
-	];
+	]);
 
 	let isMenuOpen = $state(false);
 	let isScrolled = $state(false);

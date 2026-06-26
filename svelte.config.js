@@ -6,6 +6,9 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter(),
+		csrf: {
+			checkOrigin: true
+		},
 		alias: {
 			$db: './src/lib/server/db',
 			$types: './src/types',

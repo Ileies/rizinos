@@ -55,21 +55,31 @@ export const locales = ${JSON.stringify(Array.from(locales))} as const;
 export const cookieName = 'LOCALE';
 export const cookieMaxAge = 34560000;
 
+import { writable } from 'svelte/store';
+
 let _storage: import('node:async_hooks').AsyncLocalStorage<{ locale: string }> | null | undefined = undefined;
+
+const _localeStore = writable('${locales[0]}');
+
+export const locale = _localeStore;
 
 export function getLocale(): string {
   if (_storage) { const s = _storage.getStore(); if (s?.locale) return s.locale; }
+  let currentLocale = '${locales[0]}';
+  _localeStore.subscribe(l => currentLocale = l)();
   if (typeof document !== 'undefined') { const l = document.documentElement.lang; if (l) return l; }
-  return '${locales[0]}';
+  return currentLocale;
 }
 
 export function getLocales() { return locales; }
 
 export function setLocale(locale: string): void {
-  if (typeof document === 'undefined') return;
   if (!(locales as readonly string[]).includes(locale)) return;
-  document.documentElement.lang = locale;
-  document.cookie = cookieName + '=' + locale + '; path=/; max-age=' + cookieMaxAge;
+  _localeStore.set(locale);
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = locale;
+    document.cookie = cookieName + '=' + locale + '; path=/; max-age=' + cookieMaxAge;
+  }
 }
 
 export function getTextDirection(locale: string): string {

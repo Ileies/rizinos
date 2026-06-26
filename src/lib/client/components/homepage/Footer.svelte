@@ -3,16 +3,17 @@
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import type { LinkList } from '$types/seo';
 	import * as m from '$lib/messages';
+	import { locale } from '$lib/messages';
 	import { discord, github, twitter } from '$lib/config';
 
-	const legal: LinkList = {
+	let legal: LinkList = $derived({
 		'/privacy': m.privacy_policy(),
 		'/terms': m.terms_of_service(),
 		'/privacy/#cookies': m.cookies(),
 		'/legal': m.imprint()
-	};
+	});
 
-	const links: { title: string; items: LinkList }[] = [
+	let links: { title: string; items: LinkList }[] = $derived([
 		{
 			title: m.product(),
 			items: {
@@ -43,7 +44,7 @@
 			title: m.legal(),
 			items: legal
 		}
-	];
+	]);
 </script>
 
 <div class="h-1 bg-primary"></div>
