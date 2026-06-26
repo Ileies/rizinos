@@ -4,10 +4,12 @@ import { eq } from 'drizzle-orm';
 import type { Device } from '$types';
 
 export async function deviceLastOnline(deviceToken: string): Promise<Date | undefined> {
-	return (await db.query.devices.findFirst({
-		where: { deviceToken },
-		columns: { lastOnline: true }
-	}))?.lastOnline;
+	return (
+		await db.query.devices.findFirst({
+			where: { deviceToken },
+			columns: { lastOnline: true }
+		})
+	)?.lastOnline;
 }
 
 export async function getDeviceByToken(deviceToken: string): Promise<Device | undefined> {

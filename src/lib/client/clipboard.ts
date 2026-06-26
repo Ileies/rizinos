@@ -170,7 +170,7 @@ export class ClipboardHistory implements Stack<ClipboardEntry> {
 	 * @param type Der gesuchte MIME-Type
 	 */
 	getAllByType(type: ClipboardType): ClipboardEntry[] {
-		return this.stack.filter(entry => entry.type === type);
+		return this.stack.filter((entry) => entry.type === type);
 	}
 
 	/**
@@ -224,7 +224,7 @@ export function getClipboard(): ClipboardHistory {
 // clipboard.add("Hello, world!", "text/plain");
 // clipboard.add({ name: "John", age: 30 });
 // clipboard.add(new Uint8Array([1, 2, 3]));
-// 
+//
 // if (clipboard.hasType("text/plain")) {
 //   const text = clipboard.getCurrentAs<string>();
 //   console.log(text); // "Hello, world!"

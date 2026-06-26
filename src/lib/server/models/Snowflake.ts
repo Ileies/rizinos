@@ -26,8 +26,10 @@ export class Snowflake {
 	 * @param dataCenterId - The data center ID (defaults to 0).
 	 * @param workerId - The worker ID (defaults to 0).
 	 */
-	constructor(private dataCenterId = 0, private workerId = 0) {
-	}
+	constructor(
+		private dataCenterId = 0,
+		private workerId = 0
+	) {}
 
 	/**
 	 * Extracts the timestamp from a given Snowflake ID.

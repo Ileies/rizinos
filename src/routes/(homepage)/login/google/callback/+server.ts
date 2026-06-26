@@ -30,7 +30,10 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	try {
 		const tokens = await google.validateAuthorizationCode(code, code_verifier);
-		const rawPayload = Buffer.from(tokens.idToken().split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+		const rawPayload = Buffer.from(
+			tokens.idToken().split('.')[1].replace(/-/g, '+').replace(/_/g, '/'),
+			'base64'
+		);
 		const payload: unknown = JSON.parse(new TextDecoder().decode(rawPayload));
 
 		const google_user = payload as GoogleUser;

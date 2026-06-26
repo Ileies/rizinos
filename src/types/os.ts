@@ -77,5 +77,5 @@ export interface OSData {
 	wallpaperUrl: string | null;
 	theme: Theme;
 	language: string;
-	screenSize: { width: number; height: number; };
+	screenSize: { width: number; height: number };
 }

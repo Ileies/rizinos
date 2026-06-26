@@ -41,7 +41,7 @@
 	let isMobile = $derived(innerWidth <= 768);
 
 	if (browser) {
-		const handleScroll = () => isScrolled = window.scrollY > 20;
+		const handleScroll = () => (isScrolled = window.scrollY > 20);
 		window.addEventListener('scroll', handleScroll);
 	}
 
@@ -54,21 +54,24 @@
 	}
 </script>
 
-<svelte:window bind:innerWidth={innerWidth} />
+<svelte:window bind:innerWidth />
 
 <header
-	class="sticky w-full top-0 z-50 transition-all duration-300 {isScrolled ? 'bg-white-80 backdrop-blur-lg shadow-lg bg-transparent' : ''}"
+	class="sticky top-0 z-50 w-full transition-all duration-300 {isScrolled
+		? 'bg-white-80 bg-transparent shadow-lg backdrop-blur-lg'
+		: ''}"
 >
 	<div class="container mx-auto px-4">
-		<nav class="flex items-center justify-between h-20">
+		<nav class="flex h-20 items-center justify-between">
 			<!-- Logo -->
 			<a
-				class="relative font-bold text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+				class="from-primary to-secondary relative bg-gradient-to-r bg-clip-text text-2xl font-bold text-transparent"
 				href="/"
 			>
 				{PUBLIC_APP_NAME}
 				<div
-					class="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-primary to-secondary transform scale-x-0 transition-transform duration-300 hover:scale-x-100"></div>
+					class="from-primary to-secondary absolute -bottom-1 left-0 h-0.5 w-full scale-x-0 transform bg-gradient-to-r transition-transform duration-300 hover:scale-x-100"
+				></div>
 			</a>
 
 			<div>
@@ -83,32 +86,38 @@
 				<div class="flex items-center space-x-8">
 					{#each navItems as item (item.href)}
 						<div
-							class="relative group"
+							class="group relative"
 							onpointerenter={() => item.dropdown && toggleDropdown(item.label)}
 							onpointerleave={closeDropdowns}
 						>
 							<a
 								href={item.href}
-								class="flex items-center space-x-1 py-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
+								class="flex items-center space-x-1 py-2 text-gray-700 transition-colors duration-200 hover:text-gray-900"
 								class:text-blue-600={page.url.pathname.startsWith(item.href)}
 							>
 								<span>{item.label}</span>
 								{#if item.dropdown}
-									<ChevronDown size={16}
-															 class="transition-transform duration-200 {activeDropdown === item.label ? 'rotate-180' : ''}" />
+									<ChevronDown
+										size={16}
+										class="transition-transform duration-200 {activeDropdown === item.label
+											? 'rotate-180'
+											: ''}"
+									/>
 								{/if}
 							</a>
 
 							{#if item.dropdown && activeDropdown === item.label}
 								<div
-									class="absolute top-full left-1/2 transform -translate-x-1/2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 mt-2">
+									class="absolute top-full left-1/2 mt-2 w-64 -translate-x-1/2 transform rounded-xl border border-gray-100 bg-white py-2 shadow-xl"
+								>
 									<!--transition:slide={{ duration: 200, easing: cubicInOut }}-->
 									<div
-										class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100"></div>
+										class="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 transform border-t border-l border-gray-100 bg-white"
+									></div>
 									{#each item.dropdown as dropItem (dropItem.href)}
 										<a
 											href={dropItem.href}
-											class="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-200"
+											class="hover:text-primary block px-4 py-2 text-gray-700 transition-colors duration-200 hover:bg-gray-50"
 										>
 											{dropItem.label}
 										</a>
@@ -120,7 +129,7 @@
 
 					<a
 						href={github}
-						class="space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
+						class="space-x-2 text-gray-700 transition-colors duration-200 hover:text-gray-900"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
@@ -128,8 +137,8 @@
 					</a>
 
 					<button
-						class="px-6 py-2.5 bg-linear-to-r from-primary to-secondary text-white rounded-full font-medium
-            transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-100"
+						class="from-primary to-secondary rounded-full bg-linear-to-r px-6 py-2.5 font-medium text-white
+            transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-100"
 						onclick={() => goto('/app')}
 					>
 						{m.getting_started()}
@@ -138,8 +147,8 @@
 			{:else}
 				<!-- Mobile Menu Button -->
 				<button
-					onclick={() => isMenuOpen = !isMenuOpen}
-					class="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+					onclick={() => (isMenuOpen = !isMenuOpen)}
+					class="p-2 text-gray-600 transition-colors duration-200 hover:text-gray-900"
 					aria-label="Toggle menu"
 				>
 					{#if isMenuOpen}
@@ -154,29 +163,32 @@
 		<!-- Mobile Navigation -->
 		{#if isMobile && isMenuOpen}
 			<div
-				class="absolute top-20 left-0 w-full bg-white/80 backdrop-blur-lg shadow-xl py-4 px-4 border-t border-gray-100">
+				class="absolute top-20 left-0 w-full border-t border-gray-100 bg-white/80 px-4 py-4 shadow-xl backdrop-blur-lg"
+			>
 				<!--transition:slide={{ duration: 200, easing: cubicInOut }}-->
 				{#each navItems as item (item.label)}
 					<div class="py-1">
 						<button
-							class="w-full flex items-center justify-between py-2 text-gray-700 hover:text-gray-900"
+							class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-gray-900"
 							onclick={() => toggleDropdown(item.label)}
 						>
 							<span>{item.label}</span>
 							{#if item.dropdown}
 								<ChevronDown
 									size={16}
-									class="transition-transform duration-200 {activeDropdown === item.label ? 'rotate-180' : ''}"
+									class="transition-transform duration-200 {activeDropdown === item.label
+										? 'rotate-180'
+										: ''}"
 								/>
 							{/if}
 						</button>
 
 						{#if item.dropdown && activeDropdown === item.label}
-							<div class="ml-4 border-l-2 border-gray-100 pl-4 mt-2 space-y-2">
+							<div class="mt-2 ml-4 space-y-2 border-l-2 border-gray-100 pl-4">
 								{#each item.dropdown as dropItem (dropItem.href)}
 									<a
 										href={dropItem.href}
-										class="block py-2 text-gray-600 hover:text-primary transition-colors duration-200"
+										class="hover:text-primary block py-2 text-gray-600 transition-colors duration-200"
 									>
 										{dropItem.label}
 									</a>
@@ -186,7 +198,7 @@
 					</div>
 				{/each}
 
-				<div class="h-px w-full bg-gray-100 my-4"></div>
+				<div class="my-4 h-px w-full bg-gray-100"></div>
 
 				<a
 					href={github}
@@ -199,10 +211,13 @@
 					<ExternalLink size={14} class="text-gray-400" />
 				</a>
 
-				<button class="w-full mt-4 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-medium
-          transition-all duration-200 hover:shadow-lg hover:shadow-primary/25" onclick={() => goto('/app')}>
+				<button
+					class="from-primary to-secondary hover:shadow-primary/25 mt-4 w-full rounded-full bg-gradient-to-r px-6 py-3 font-medium
+          text-white transition-all duration-200 hover:shadow-lg"
+					onclick={() => goto('/app')}
+				>
 					{m.getting_started()}
-					</button>
+				</button>
 			</div>
 		{/if}
 	</div>

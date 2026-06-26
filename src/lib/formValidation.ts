@@ -7,12 +7,10 @@ export const maxAge = subYears(new Date(), 80).getTime();
 // Zod schema for signup form validation
 export const formSchema = z.object({
 	gender: z.enum(['male', 'female']),
-	birthdate: z
-		.iso.date('Must be in YYYY-MM-DD format')
-		.refine((date) => {
-			const dateTime = new Date(date).getTime();
-			return !(dateTime < minAge || dateTime > maxAge);
-		}, 'You must be between 12 and 80 years old'),
+	birthdate: z.iso.date('Must be in YYYY-MM-DD format').refine((date) => {
+		const dateTime = new Date(date).getTime();
+		return !(dateTime < minAge || dateTime > maxAge);
+	}, 'You must be between 12 and 80 years old'),
 	firstName: z
 		.string()
 		.trim()
@@ -29,7 +27,10 @@ export const formSchema = z.object({
 		.string()
 		.min(5, 'Username must be at least 5 characters')
 		.max(20, 'Username must be 20 characters or less')
-		.regex(/^[a-z][a-z0-9]*$/, 'Username must start with a letter and contain only lowercase letters and numbers'),
+		.regex(
+			/^[a-z][a-z0-9]*$/,
+			'Username must start with a letter and contain only lowercase letters and numbers'
+		),
 	password: z
 		.string()
 		.min(10, 'Password must be at least 10 characters')
@@ -43,4 +44,3 @@ export const formSchema = z.object({
 
 // Export the type for better TypeScript support
 export type FormData = z.infer<typeof formSchema>;
-

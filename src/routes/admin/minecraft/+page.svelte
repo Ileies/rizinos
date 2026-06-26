@@ -2,9 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { Trash2, Plus, ChevronDown } from '@lucide/svelte';
 
-	let {
-		data
-	} = $props();
+	let { data } = $props();
 
 	let currentTab = $state('players');
 	let expandedPlayers = $state<Record<string, boolean>>({});
@@ -17,16 +15,14 @@
 	}
 </script>
 
-<div class="min-h-screen bg-base-200 p-4">
+<div class="bg-base-200 min-h-screen p-4">
 	<div class="mx-auto max-w-6xl">
 		<div class="mb-8 flex items-center justify-between">
 			<h1 class="text-3xl font-bold">Minecraft Management</h1>
-			<a href="/admin" class="btn btn-outline">
-				Back to Users
-			</a>
+			<a href="/admin" class="btn btn-outline"> Back to Users </a>
 		</div>
 
-		<div class="tabs mb-6 border-b border-base-300">
+		<div class="tabs border-base-300 mb-6 border-b">
 			<button
 				class="tab {currentTab === 'players' ? 'tab-active' : ''}"
 				onclick={() => (currentTab = 'players')}
@@ -56,7 +52,7 @@
 		<!-- PLAYERS TAB -->
 		{#if currentTab === 'players'}
 			<div class="space-y-4">
-				<p class="text-sm text-base-content/60">
+				<p class="text-base-content/60 text-sm">
 					{data.mcUsers.length} Minecraft players linked to accounts
 				</p>
 				{#each data.mcUsers as mcUser (mcUser.uuid)}
@@ -68,7 +64,7 @@
 							>
 								<div>
 									<h3 class="font-semibold">{mcUser.name}</h3>
-									<p class="text-sm text-base-content/60">
+									<p class="text-base-content/60 text-sm">
 										Linked to: {mcUser.user.username}
 									</p>
 								</div>
@@ -77,7 +73,7 @@
 
 							{#if expandedPlayers[mcUser.uuid]}
 								<div class="mt-4 space-y-2 border-t pt-4 text-sm">
-									<p class="font-mono text-xs text-base-content/60">
+									<p class="text-base-content/60 font-mono text-xs">
 										UUID: {mcUser.uuid}
 									</p>
 									{#if mcUser.homeLocation}
@@ -142,10 +138,7 @@
 		{#if currentTab === 'warps'}
 			<div class="space-y-4">
 				{#if !showWarpForm}
-					<button
-						class="btn btn-primary"
-						onclick={() => (showWarpForm = true)}
-					>
+					<button class="btn btn-primary" onclick={() => (showWarpForm = true)}>
 						<Plus size={18} />
 						Create Warp
 					</button>
@@ -175,11 +168,7 @@
 							/>
 							<div class="flex gap-2">
 								<button type="submit" class="btn btn-primary">Create</button>
-								<button
-									type="button"
-									class="btn btn-ghost"
-									onclick={() => (showWarpForm = false)}
-								>
+								<button type="button" class="btn btn-ghost" onclick={() => (showWarpForm = false)}>
 									Cancel
 								</button>
 							</div>
@@ -194,9 +183,9 @@
 								<div class="flex items-start justify-between">
 									<div>
 										<h3 class="font-semibold">{warp.name}</h3>
-										<p class="text-sm text-base-content/60">{warp.location}</p>
+										<p class="text-base-content/60 text-sm">{warp.location}</p>
 										{#if warp.restrict && warp.restrict.length > 0}
-											<p class="text-xs text-base-content/50">
+											<p class="text-base-content/50 text-xs">
 												Restrictions: {warp.restrict.join(', ')}
 											</p>
 										{/if}
@@ -219,10 +208,7 @@
 		{#if currentTab === 'worlds'}
 			<div class="space-y-4">
 				{#if !showWorldForm}
-					<button
-						class="btn btn-primary"
-						onclick={() => (showWorldForm = true)}
-					>
+					<button class="btn btn-primary" onclick={() => (showWorldForm = true)}>
 						<Plus size={18} />
 						Create World
 					</button>
@@ -251,11 +237,7 @@
 							/>
 							<div class="flex gap-2">
 								<button type="submit" class="btn btn-primary">Create</button>
-								<button
-									type="button"
-									class="btn btn-ghost"
-									onclick={() => (showWorldForm = false)}
-								>
+								<button type="button" class="btn btn-ghost" onclick={() => (showWorldForm = false)}>
 									Cancel
 								</button>
 							</div>
@@ -270,11 +252,11 @@
 								<div class="flex items-start justify-between">
 									<div>
 										<h3 class="font-semibold">{world.name}</h3>
-										<p class="text-sm text-base-content/60">
+										<p class="text-base-content/60 text-sm">
 											Group: {world.groupName}
 										</p>
 										{#if world.restrict && world.restrict.length > 0}
-											<p class="text-xs text-base-content/50">
+											<p class="text-base-content/50 text-xs">
 												Restrictions: {world.restrict.join(', ')}
 											</p>
 										{/if}
@@ -297,10 +279,7 @@
 		{#if currentTab === 'groups'}
 			<div class="space-y-4">
 				{#if !showGroupForm}
-					<button
-						class="btn btn-primary"
-						onclick={() => (showGroupForm = true)}
-					>
+					<button class="btn btn-primary" onclick={() => (showGroupForm = true)}>
 						<Plus size={18} />
 						Create Group
 					</button>
@@ -329,11 +308,7 @@
 							/>
 							<div class="flex gap-2">
 								<button type="submit" class="btn btn-primary">Create</button>
-								<button
-									type="button"
-									class="btn btn-ghost"
-									onclick={() => (showGroupForm = false)}
-								>
+								<button type="button" class="btn btn-ghost" onclick={() => (showGroupForm = false)}>
 									Cancel
 								</button>
 							</div>
@@ -348,13 +323,13 @@
 								<div class="flex items-start justify-between">
 									<div>
 										<h3 class="font-semibold">{group.name}</h3>
-										<p class="text-sm text-base-content/60">
+										<p class="text-base-content/60 text-sm">
 											Game Mode: {['Survival', 'Creative', 'Adventure', 'Spectator'][
 												group.gameMode
 											]}
 										</p>
 										{#if group.restrict && group.restrict.length > 0}
-											<p class="text-xs text-base-content/50">
+											<p class="text-base-content/50 text-xs">
 												Restrictions: {group.restrict.join(', ')}
 											</p>
 										{/if}

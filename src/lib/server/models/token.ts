@@ -8,7 +8,10 @@ import { tokens } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import type { Token, TokenType } from '$types';
 
-export async function getToken(token: string, type: TokenType | null = null): Promise<Token | undefined> {
+export async function getToken(
+	token: string,
+	type: TokenType | null = null
+): Promise<Token | undefined> {
 	return db.query.tokens.findFirst({
 		where: type ? { token, type } : { token }
 	});

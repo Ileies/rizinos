@@ -1,7 +1,7 @@
 export enum FileType {
 	File = 'file',
 	Directory = 'directory',
-	Symlink = 'symlink',
+	Symlink = 'symlink'
 }
 
 export interface FileSystemObject {

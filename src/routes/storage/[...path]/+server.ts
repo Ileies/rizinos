@@ -11,16 +11,19 @@ export const GET: RequestHandler = async ({ params }) => {
 	const absolutePath = path.resolve('./', params.path);
 
 	// Überprüfe, ob die Datei existiert
-	if (!await Bun.file(absolutePath).exists()) {
+	if (!(await Bun.file(absolutePath).exists())) {
 		error(404, 'Datei nicht gefunden.');
 	}
 
 	// Lese den Dateinamen aus dem Pfad
 	const fileName = path.basename(absolutePath);
 
-	const isDirectory = await Bun.file(absolutePath).stat().then(f => f.isDirectory());
+	const isDirectory = await Bun.file(absolutePath)
+		.stat()
+		.then((f) => f.isDirectory());
 
-	if (isDirectory) { // TODO: Implement this correctly once database has a table for the file system
+	if (isDirectory) {
+		// TODO: Implement this correctly once database has a table for the file system
 		error(400, 'Pfad ist ein Verzeichnis.');
 	}
 
@@ -33,4 +36,4 @@ export const GET: RequestHandler = async ({ params }) => {
 			'Content-Length': String(fileBuffer.size)
 		}
 	});
-}
+};

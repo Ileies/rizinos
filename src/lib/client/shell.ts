@@ -6,19 +6,19 @@
 
 // Define types for our parser
 type TokenType =
-	'word' |
-	'operator' |
-	'redirection' |
-	'background' |
-	'variable' |
-	'semicolon' |
-	'subshell_start' |
-	'subshell_end' |
-	'command_substitution_start' |
-	'command_substitution_end' |
-	'brace_expansion' |
-	'heredoc' |
-	'herestring';
+	| 'word'
+	| 'operator'
+	| 'redirection'
+	| 'background'
+	| 'variable'
+	| 'semicolon'
+	| 'subshell_start'
+	| 'subshell_end'
+	| 'command_substitution_start'
+	| 'command_substitution_end'
+	| 'brace_expansion'
+	| 'heredoc'
+	| 'herestring';
 
 interface Token {
 	type: TokenType;
@@ -131,7 +131,7 @@ function tokenize(str: string): Token[] {
 		}
 
 		// Handle quotes
-		if (char === '\'' && !inDoubleQuote) {
+		if (char === "'" && !inDoubleQuote) {
 			inSingleQuote = !inSingleQuote;
 			current += char;
 			continue;
@@ -269,7 +269,12 @@ function tokenize(str: string): Token[] {
 		}
 
 		// Handle whitespace
-		if ((char === ' ' || char === '\t') && !inVariableBrace && !inCommandSubstitution && braceDepth === 0) {
+		if (
+			(char === ' ' || char === '\t') &&
+			!inVariableBrace &&
+			!inCommandSubstitution &&
+			braceDepth === 0
+		) {
 			if (current) {
 				tokens.push(processVariables(current));
 				current = '';
@@ -386,10 +391,19 @@ function tokenize(str: string): Token[] {
 			}
 
 			// File descriptor redirections
-			if (/\d/.test(char) && (nextChar === '>' || (nextChar === '&' && i + 2 < str.length && str[i + 2] === '>'))) {
+			if (
+				/\d/.test(char) &&
+				(nextChar === '>' || (nextChar === '&' && i + 2 < str.length && str[i + 2] === '>'))
+			) {
 				const isAmpersand = nextChar === '&';
 				const redirectChar = isAmpersand ? str[i + 2] : nextChar;
-				const thirdChar = isAmpersand ? (i + 3 < str.length ? str[i + 3] : '') : (i + 2 < str.length ? str[i + 2] : '');
+				const thirdChar = isAmpersand
+					? i + 3 < str.length
+						? str[i + 3]
+						: ''
+					: i + 2 < str.length
+						? str[i + 2]
+						: '';
 
 				if (redirectChar === '>' && thirdChar === '>') {
 					// e.g. 2>>, 2&>>
@@ -432,7 +446,7 @@ function parseBraceExpansion(token: Token): BraceExpansion {
 
 	if (braceContent.includes('..')) {
 		// Range expansion
-		const [start, end] = braceContent.split('..').map(s => parseInt(s.trim()));
+		const [start, end] = braceContent.split('..').map((s) => parseInt(s.trim()));
 		if (!isNaN(start) && !isNaN(end)) {
 			const step = start <= end ? 1 : -1;
 			for (let i = start; step > 0 ? i <= end : i >= end; i += step) {
@@ -441,14 +455,17 @@ function parseBraceExpansion(token: Token): BraceExpansion {
 		}
 	} else if (braceContent.includes(',')) {
 		// List expansion
-		values = braceContent.split(',').map(s => s.trim());
+		values = braceContent.split(',').map((s) => s.trim());
 	}
 
 	return { type: 'brace_expansion', values };
 }
 
 // Parse a command substitution
-function parseCommandSubstitution(tokens: Token[], startIndex: number): [CommandSubstitution, number] {
+function parseCommandSubstitution(
+	tokens: Token[],
+	startIndex: number
+): [CommandSubstitution, number] {
 	let endIndex = startIndex;
 	let depth = 1;
 	const substitutionTokens: Token[] = [];
@@ -466,7 +483,7 @@ function parseCommandSubstitution(tokens: Token[], startIndex: number): [Command
 		substitutionTokens.push(tokens[i]);
 	}
 
-	const commandStr = substitutionTokens.map(t => t.raw ?? t.value).join(' ');
+	const commandStr = substitutionTokens.map((t) => t.raw ?? t.value).join(' ');
 
 	return [{ type: 'command_substitution', command: commandStr }, endIndex];
 }
@@ -492,10 +509,11 @@ function parseCommand(tokens: Token[]): Command {
 		const token = tokens[i];
 
 		// Handle redirections
-		if ((token.type === 'redirection' || token.type === 'heredoc' || token.type === 'herestring') &&
+		if (
+			(token.type === 'redirection' || token.type === 'heredoc' || token.type === 'herestring') &&
 			i + 1 < tokens.length &&
-			(tokens[i + 1].type === 'word' || tokens[i + 1].type === 'variable')) {
-
+			(tokens[i + 1].type === 'word' || tokens[i + 1].type === 'variable')
+		) {
 			const target = tokens[i + 1].value;
 			const redirection: Redirection = { type: 'input', target };
 
@@ -620,7 +638,7 @@ function parse(input: string): ParsedCommand {
 
 	for (const block of semicolonBlocks) {
 		// Process logical operators (&&, ||)
-		const logicalBlocks: { tokens: Token[], operator?: '&&' | '||' }[] = [];
+		const logicalBlocks: { tokens: Token[]; operator?: '&&' | '||' }[] = [];
 		let currentLogicalBlock: Token[] = [];
 
 		for (const token of block) {
@@ -659,7 +677,7 @@ function parse(input: string): ParsedCommand {
 			}
 
 			// Parse each command in the pipeline
-			const commands = pipeTokens.map(cmdTokens => parseCommand(cmdTokens));
+			const commands = pipeTokens.map((cmdTokens) => parseCommand(cmdTokens));
 
 			pipelines.push({
 				commands,
@@ -678,4 +696,3 @@ function parse(input: string): ParsedCommand {
 
 	return { pipelines };
 }
-	

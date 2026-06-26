@@ -21,7 +21,11 @@ const redirect_url = `${PUBLIC_ORIGIN}/login/google/callback`;
 export const google = new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirect_url);
 
 export async function createLogin(cookies: Cookies, userId: UserID, keep = false) {
-	const token = await generateToken(userId, TokenType.Login, keep ? addMonths(new Date(), 1) : addDays(new Date(), 1));
+	const token = await generateToken(
+		userId,
+		TokenType.Login,
+		keep ? addMonths(new Date(), 1) : addDays(new Date(), 1)
+	);
 	cookies.set('loginToken', token.token, cookieData(keep ? addMonths(new Date(), 1) : undefined));
 	return token;
 }

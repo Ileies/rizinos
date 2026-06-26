@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 
-	let { onclose, children }: { onclose: () => void, children: Snippet } = $props();
+	let { onclose, children }: { onclose: () => void; children: Snippet } = $props();
 
 	onMount(() => {
 		document.addEventListener('click', onclose, true);

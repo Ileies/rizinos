@@ -15,8 +15,8 @@ export function showContextMenu(event: MouseEvent, actions: ContextMenuAction[])
 		y += (parentWindowNode as HTMLElement).offsetTop + 32;
 		x += (parentWindowNode as HTMLElement).offsetLeft + 1;
 	}
-	if (x > (document.documentElement.scrollWidth / 2)) x -= 199;
-	if (y > (document.documentElement.scrollHeight / 2)) y -= actions.length * 22 + 7;
+	if (x > document.documentElement.scrollWidth / 2) x -= 199;
+	if (y > document.documentElement.scrollHeight / 2) y -= actions.length * 22 + 7;
 
 	os.contextMenu = { actions, target, x, y };
 }
@@ -61,7 +61,10 @@ export function textMenu(): ContextMenuAction[] {
 				if ('value' in x) {
 					const y = x as HTMLInputElement | HTMLTextAreaElement;
 					t = y.value.slice(y.selectionStart as number, y.selectionEnd as number);
-					if (!y.disabled) y.value = y.value.slice(0, y.selectionStart as number) + y.value.slice(y.selectionEnd as number);
+					if (!y.disabled)
+						y.value =
+							y.value.slice(0, y.selectionStart as number) +
+							y.value.slice(y.selectionEnd as number);
 				} else t = getSelectionText();
 				if (!t) return;
 				//cb.data = { type: 'text', value: t };
@@ -76,7 +79,7 @@ export function textMenu(): ContextMenuAction[] {
 				}
 				return !getSelectionText();
 			},
-			action: x => {
+			action: (x) => {
 				let t;
 				if ('value' in x) {
 					const y = x as HTMLInputElement | HTMLTextAreaElement;
@@ -97,7 +100,7 @@ export function textMenu(): ContextMenuAction[] {
 				}
 				return true;
 			},
-			action: async x => {
+			action: async (x) => {
 				if ('value' in x) {
 					//const y = x as HTMLInputElement | HTMLTextAreaElement;
 					//y.value = y.value.slice(0, y.selectionStart as number) + (cb.type === 'text' ? cb.data : '') + x.value.slice(x.selectionEnd);
@@ -109,7 +112,7 @@ export function textMenu(): ContextMenuAction[] {
 		},
 		{
 			title: 'Select all',
-			action: x => {
+			action: (x) => {
 				if (x instanceof HTMLInputElement || x instanceof HTMLTextAreaElement) {
 					x.select();
 				} else {

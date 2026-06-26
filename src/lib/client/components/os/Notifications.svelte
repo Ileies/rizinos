@@ -7,13 +7,14 @@
 
 	const showSeconds = 5;
 	const icons = {
-		'info': Info,
-		'success': CircleCheck,
-		'warning': CircleAlert,
-		'error': OctagonX
+		info: Info,
+		success: CircleCheck,
+		warning: CircleAlert,
+		error: OctagonX
 	};
 
-	const filter = (notification: Notification) => notification.createdAt.getTime() > (new Date().getTime() - showSeconds * 1000);
+	const filter = (notification: Notification) =>
+		notification.createdAt.getTime() > new Date().getTime() - showSeconds * 1000;
 
 	$effect(() => {
 		setTimeout(() => {
@@ -25,7 +26,7 @@
 </script>
 
 {#if os.notifications.length > 0}
-	<div class="toast right-0 z-[2147483634] {os.isMobile ? 'w-full top-0' : 'w-72 bottom-10'}">
+	<div class="toast right-0 z-[2147483634] {os.isMobile ? 'top-0 w-full' : 'bottom-10 w-72'}">
 		{#if os.notifications.length > 4}
 			<div>
 				{os.notifications.length - 4} ...
@@ -43,7 +44,12 @@
 				<span>{notification}</span>
 				<div>
 					{#each notification.actions as { title, action } (title)}
-						<button onclick={e => {e.stopPropagation();action();}}>{title}</button>
+						<button
+							onclick={(e) => {
+								e.stopPropagation();
+								action();
+							}}>{title}</button
+						>
 					{/each}
 				</div>
 			</div>

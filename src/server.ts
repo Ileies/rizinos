@@ -19,7 +19,11 @@ const server = Bun.serve({
 
 		// Serve static client assets
 		let pathname: string;
-		try { pathname = decodeURIComponent(url.pathname); } catch { pathname = url.pathname; }
+		try {
+			pathname = decodeURIComponent(url.pathname);
+		} catch {
+			pathname = url.pathname;
+		}
 
 		const file = Bun.file(join(clientDir, pathname));
 		if (await file.exists()) {
@@ -32,9 +36,7 @@ const server = Bun.serve({
 
 		return app.respond(req, {
 			getClientAddress: () =>
-				req.headers.get('x-forwarded-for') ??
-				server.requestIP(req)?.address ??
-				'::1'
+				req.headers.get('x-forwarded-for') ?? server.requestIP(req)?.address ?? '::1'
 		});
 	},
 	websocket: websocketHandlers

@@ -9,37 +9,39 @@
 
 	function showSubMenu(actions: ContextMenuAction[] | ((target: EventTarget) => void)) {
 		if (!os.contextMenu) return;
-		if (typeof actions !== 'function') subMenu = {
-			// TODO: Calculate the position of the sub-menu
-			x: 1,
-			y: 1,
-			target: os.contextMenu.target,
-			actions
-		};
+		if (typeof actions !== 'function')
+			subMenu = {
+				// TODO: Calculate the position of the sub-menu
+				x: 1,
+				y: 1,
+				target: os.contextMenu.target,
+				actions
+			};
 	}
 </script>
 
 {#snippet menu(context: ContextMenu)}
 	<div class="fixed flex flex-col" style={`top:${context.y}px;left:${context.x}px;`}>
 		{#each context.actions as { action, title } (title)}
-			{#if (typeof action == 'function') }
-				<button class="hover:bg-gray-800"
-								onclick={(event) => {
-									if (typeof action === 'function') action(context.target);
-									else event.stopPropagation();
-								}}
-								onpointerover={() => showSubMenu(action)}
-								onfocus={() => showSubMenu(action)}
-				>{title}</button>
+			{#if typeof action == 'function'}
+				<button
+					class="hover:bg-gray-800"
+					onclick={(event) => {
+						if (typeof action === 'function') action(context.target);
+						else event.stopPropagation();
+					}}
+					onpointerover={() => showSubMenu(action)}
+					onfocus={() => showSubMenu(action)}>{title}</button
+				>
 			{/if}
 		{/each}
 	</div>
 {/snippet}
 
-{#if (os.contextMenu)}
-	<Overlay onclose={() => os.contextMenu = null}>
+{#if os.contextMenu}
+	<Overlay onclose={() => (os.contextMenu = null)}>
 		{@render menu(os.contextMenu)}
-		{#if (subMenu)}
+		{#if subMenu}
 			<div>
 				{@render menu(subMenu)}
 			</div>

@@ -14,4 +14,3 @@ export const files = pgTable('file_meta', {
 	created_at: timestamp('created_at').defaultNow(),
 	updated_at: timestamp('updated_at').defaultNow()
 });
-

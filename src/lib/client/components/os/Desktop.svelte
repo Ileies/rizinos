@@ -17,16 +17,16 @@
 			{ title: 'Sort by', action: [] },
 			{ title: 'Upload', action: () => promptUploadFiles('/desktop') },
 			{
-				title: 'Paste', action: x => {
-				}
+				title: 'Paste',
+				action: (x) => {}
 			},
 			{
-				title: 'New', action: x => {
-				}
+				title: 'New',
+				action: (x) => {}
 			},
 			{
-				title: 'Properties', action: x => {
-				}
+				title: 'Properties',
+				action: (x) => {}
 			}
 		];
 
@@ -55,21 +55,24 @@
 
 <div class="w-full flex-grow overflow-hidden">
 	{#each os.processList as processData (processData)}
-		<Window {processData} sendMessage={sendMessage}></Window>
+		<Window {processData} {sendMessage}></Window>
 	{/each}
 	<div
-		class="w-full h-full grid grid-cols-{os.desktop.cols} grid-rows-[{os.desktop.rows}] left-0 p-1.25"
+		class="grid h-full w-full grid-cols-{os.desktop.cols} grid-rows-[{os.desktop
+			.rows}] left-0 p-1.25"
 		id="desktop"
 		{oncontextmenu}
-		ondragover={e => e.preventDefault()}
+		ondragover={(e) => e.preventDefault()}
 		ondrop={dropHandler}
 		onpointerdown={pointerDown}
 		role="grid"
 		tabindex="0"
 	>
 		{#each os.desktop.files as fso (fso)}
-			<div class="border border-transparent p-1.25 m-0.25 w-25 hover:bg-gray-800 hover:border-gray-600">
-				{#if (fso === null)}
+			<div
+				class="m-0.25 w-25 border border-transparent p-1.25 hover:border-gray-600 hover:bg-gray-800"
+			>
+				{#if fso === null}
 					<div></div>
 				{:else}
 					<!--<FileSystemObject fso={fso}></FileSystemObject>-->

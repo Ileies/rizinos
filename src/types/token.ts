@@ -17,7 +17,7 @@ export enum TokenType {
 	/** Discord verification */
 	Discord = 'discord',
 	/** Minecraft verification */
-	Minecraft = 'minecraft',
+	Minecraft = 'minecraft'
 }
 
 /**

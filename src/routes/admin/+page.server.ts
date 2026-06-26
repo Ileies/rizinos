@@ -70,7 +70,10 @@ export const actions: Actions = {
 		if (!user) return fail(404, { message: 'User not found' });
 
 		const newCredit = Math.max(0, user.credit + amount);
-		await db.update(users).set({ credit: newCredit }).where(eq(users.id, userId as any));
+		await db
+			.update(users)
+			.set({ credit: newCredit })
+			.where(eq(users.id, userId as any));
 		return { success: true };
 	}
 };

@@ -34,7 +34,8 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const name = data.get('name') as string;
 		const location = data.get('location') as string;
-		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) || []) as Restrict[];
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
+			[]) as Restrict[];
 
 		if (!name || !location) return fail(400, { message: 'Name and location required' });
 
@@ -64,7 +65,8 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const name = data.get('name') as string;
 		const groupName = data.get('groupName') as string;
-		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) || []) as Restrict[];
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
+			[]) as Restrict[];
 
 		if (!name || !groupName) return fail(400, { message: 'Name and group required' });
 
@@ -94,7 +96,8 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const name = data.get('name') as string;
 		const gameMode = parseInt(data.get('gameMode') as string) || 0;
-		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) || []) as Restrict[];
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
+			[]) as Restrict[];
 
 		if (!name) return fail(400, { message: 'Name required' });
 

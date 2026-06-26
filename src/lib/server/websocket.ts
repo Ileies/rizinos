@@ -11,7 +11,8 @@ export async function handleWebSocketUpgrade(req: Request, server: Server) {
 	if (!cookies) return new Response('Upgrade failed: No cookies', { status: 500 });
 	const loginToken = cookies.find((c) => c.startsWith('loginToken='))?.split('=')[1];
 	const deviceToken = cookies.find((c) => c.startsWith('deviceToken='))?.split('=')[1];
-	if (!loginToken || !deviceToken) return new Response('Upgrade failed: No login token', { status: 500 });
+	if (!loginToken || !deviceToken)
+		return new Response('Upgrade failed: No login token', { status: 500 });
 	const device = await getDeviceByToken(deviceToken);
 	const user = await getUserByToken(loginToken);
 	if (!user || !device) return new Response('Upgrade failed: No user or device', { status: 500 });
@@ -22,15 +23,22 @@ export async function handleWebSocketUpgrade(req: Request, server: Server) {
 
 export const websocketHandlers = {
 	async open(ws: ServerWebSocket<WebsocketData>) {
-		console.log(`WebSocket connected with user ${ws.data.user.username} on device ${ws.data.device.deviceToken}`);
-		await db.update(users).set({
-			isOnline: true,
-			lastOnline: new Date()
-		}).where(eq(users.id, ws.data.user.id));
-		ws.send(JSON.stringify({
-			action: 'startup',
-			data: {}
-		}));
+		console.log(
+			`WebSocket connected with user ${ws.data.user.username} on device ${ws.data.device.deviceToken}`
+		);
+		await db
+			.update(users)
+			.set({
+				isOnline: true,
+				lastOnline: new Date()
+			})
+			.where(eq(users.id, ws.data.user.id));
+		ws.send(
+			JSON.stringify({
+				action: 'startup',
+				data: {}
+			})
+		);
 	},
 
 	message(ws: ServerWebSocket<WebsocketData>, message: string | Uint8Array) {
@@ -47,10 +55,17 @@ export const websocketHandlers = {
 	},
 
 	async close(ws: ServerWebSocket<WebsocketData>, code: number, message: string) {
-		await db.update(users).set({
-			isOnline: false,
-			lastOnline: new Date()
-		}).where(eq(users.id, ws.data.user.id));
-		console.log(`WebSocket closed with user ${ws.data.user.username} on device ${ws.data.device.deviceToken}`, code, message);
+		await db
+			.update(users)
+			.set({
+				isOnline: false,
+				lastOnline: new Date()
+			})
+			.where(eq(users.id, ws.data.user.id));
+		console.log(
+			`WebSocket closed with user ${ws.data.user.username} on device ${ws.data.device.deviceToken}`,
+			code,
+			message
+		);
 	}
-}; 
+};

@@ -77,13 +77,21 @@ export default class Transaction {
 		try {
 			return await db.transaction(async (tx) => {
 				// Update both users' credits atomically
-				const [senderUpdated] = isSystemUser(sender) ? [1] : await tx.update(users)
-					.set({ credit: sender.credit })
-					.where(eq(users.id, sender.id)).returning({ id: users.id });
+				const [senderUpdated] = isSystemUser(sender)
+					? [1]
+					: await tx
+							.update(users)
+							.set({ credit: sender.credit })
+							.where(eq(users.id, sender.id))
+							.returning({ id: users.id });
 
-				const [receiverUpdated] = isSystemUser(receiver) ? [1] : await tx.update(users)
-					.set({ credit: receiver.credit })
-					.where(eq(users.id, receiver.id)).returning({ id: users.id });
+				const [receiverUpdated] = isSystemUser(receiver)
+					? [1]
+					: await tx
+							.update(users)
+							.set({ credit: receiver.credit })
+							.where(eq(users.id, receiver.id))
+							.returning({ id: users.id });
 
 				if (!senderUpdated || !receiverUpdated) {
 					throw new TransactionError('Failed to update user balances');
@@ -125,7 +133,13 @@ export default class Transaction {
 	}
 
 	static async gift(user: UserData, amount: number, reason = '') {
-		return await Transaction.transfer(await getSystemUser(), user, amount, reason, TransactionType.Gift);
+		return await Transaction.transfer(
+			await getSystemUser(),
+			user,
+			amount,
+			reason,
+			TransactionType.Gift
+		);
 	}
 
 	/**
@@ -133,7 +147,10 @@ export default class Transaction {
 	 * @throws {TransactionError} If refund fails or is invalid
 	 */
 	async refund(reason = 'Refund'): Promise<Transaction> {
-		if (this.data.status !== TransactionStatus.Completed || this.data.type === TransactionType.Refund) {
+		if (
+			this.data.status !== TransactionStatus.Completed ||
+			this.data.type === TransactionType.Refund
+		) {
 			throw new TransactionError('Transaction cannot be refunded');
 		}
 
@@ -154,9 +171,13 @@ export default class Transaction {
 			TransactionType.Refund
 		);
 
-		const updated = (await db.update(transactions)
-			.set({ status: TransactionStatus.Refunded })
-			.where(eq(transactions.id, this.data.id)).returning({ id: transactions.id }))[0];
+		const updated = (
+			await db
+				.update(transactions)
+				.set({ status: TransactionStatus.Refunded })
+				.where(eq(transactions.id, this.data.id))
+				.returning({ id: transactions.id })
+		)[0];
 
 		if (!updated) {
 			Logger.error('Refund failed', { transactionId: this.data.id });

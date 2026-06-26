@@ -3,31 +3,34 @@
 	import { Role } from '$types';
 	import { Trash2, ChevronDown } from '@lucide/svelte';
 
-	let {
-		data
-	} = $props();
+	let { data } = $props();
 
 	let expandedUsers = $state<Record<string, boolean>>({});
 	let showCreditForm = $state<string | null>(null);
 
-	const ROLES = [Role.Admin, Role.Moderator, Role.BetaTester, Role.User, Role.Developer, Role.Supporter];
+	const ROLES = [
+		Role.Admin,
+		Role.Moderator,
+		Role.BetaTester,
+		Role.User,
+		Role.Developer,
+		Role.Supporter
+	];
 
 	function toggleUser(userId: string) {
 		expandedUsers[userId] = !expandedUsers[userId];
 	}
 </script>
 
-<div class="min-h-screen bg-base-200 p-4">
+<div class="bg-base-200 min-h-screen p-4">
 	<div class="mx-auto max-w-6xl">
 		<div class="mb-8 flex items-center justify-between">
 			<h1 class="text-3xl font-bold">Admin Dashboard</h1>
-			<a href="/admin/minecraft" class="btn btn-outline">
-				Manage Minecraft
-			</a>
+			<a href="/admin/minecraft" class="btn btn-outline"> Manage Minecraft </a>
 		</div>
 
 		<div class="space-y-4">
-			<p class="text-sm text-base-content/60">
+			<p class="text-base-content/60 text-sm">
 				{data.users.length} users total
 			</p>
 
@@ -40,7 +43,7 @@
 						>
 							<div>
 								<h3 class="font-semibold">{user.username}</h3>
-								<p class="text-sm text-base-content/60">{user.email}</p>
+								<p class="text-base-content/60 text-sm">{user.email}</p>
 							</div>
 							<ChevronDown size={20} class={expandedUsers[user.id] ? 'rotate-180' : ''} />
 						</button>
@@ -97,19 +100,11 @@
 
 								<!-- Adjust Credit -->
 								{#if !showCreditForm || showCreditForm !== user.id}
-									<button
-										class="btn btn-sm btn-outline"
-										onclick={() => (showCreditForm = user.id)}
-									>
+									<button class="btn btn-sm btn-outline" onclick={() => (showCreditForm = user.id)}>
 										Adjust Credit
 									</button>
 								{:else}
-									<form
-										method="POST"
-										action="?/creditAdjust"
-										use:enhance
-										class="space-y-2"
-									>
+									<form method="POST" action="?/creditAdjust" use:enhance class="space-y-2">
 										<input type="hidden" name="userId" value={user.id} />
 										<div class="flex gap-2">
 											<input
@@ -118,9 +113,7 @@
 												placeholder="Amount (can be negative)"
 												class="input input-sm input-bordered flex-1"
 											/>
-											<button type="submit" class="btn btn-sm btn-primary">
-												Add
-											</button>
+											<button type="submit" class="btn btn-sm btn-primary"> Add </button>
 											<button
 												type="button"
 												class="btn btn-sm btn-ghost"

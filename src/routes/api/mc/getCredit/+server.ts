@@ -6,19 +6,24 @@ export async function POST(event: RequestEvent) {
 	const { uuid, uuids } = await event.request.json();
 
 	if (uuid) {
-		const credit = (await db.query.mcUsers.findFirst({
-			where: { uuid },
-			with: { user: { columns: { credit: true } } },
-			columns: { uuid: true }
-		}))?.user.credit ?? null;
+		const credit =
+			(
+				await db.query.mcUsers.findFirst({
+					where: { uuid },
+					with: { user: { columns: { credit: true } } },
+					columns: { uuid: true }
+				})
+			)?.user.credit ?? null;
 		console.log('[mc/getCredit:14] single lookup uuid=%s → credit=%s', uuid, credit);
 		return json(credit);
 	} else if (uuids) {
-		const credits = (await db.query.mcUsers.findMany({
-			where: { uuid: { in: uuids } },
-			with: { user: { columns: { credit: true } } },
-			columns: { uuid: true }
-		})).map(credit => {
+		const credits = (
+			await db.query.mcUsers.findMany({
+				where: { uuid: { in: uuids } },
+				with: { user: { columns: { credit: true } } },
+				columns: { uuid: true }
+			})
+		).map((credit) => {
 			return { uuid: credit.uuid, credit: credit.user.credit };
 		});
 		return json(credits);

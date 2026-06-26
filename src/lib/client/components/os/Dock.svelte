@@ -19,41 +19,52 @@
 	import ThemeController from '$ui/os/ThemeController.svelte';
 	import { Spring } from 'svelte/motion';
 
-
 	const iconSize = 18;
 	// TODO: Different layouts for os.isMobile
 
-	let taskbar: TaskbarItem[] = $derived([...new Set([...os.taskbar, ...os.processList.map(process => process.appId).filter(appId => !os.taskbar.includes(appId))])].map(appId => {
-		const processes = os.processList.filter(process => process.appId === appId && !process.isHidden).map(process => process.id);
-		return {
-			appId,
-			isPinned: true,
-			isFocused: processes.find(id => id === os.focusedProcessId) !== undefined,
-			hasWindows: processes.length
-		};
-	}));
+	let taskbar: TaskbarItem[] = $derived(
+		[
+			...new Set([
+				...os.taskbar,
+				...os.processList
+					.map((process) => process.appId)
+					.filter((appId) => !os.taskbar.includes(appId))
+			])
+		].map((appId) => {
+			const processes = os.processList
+				.filter((process) => process.appId === appId && !process.isHidden)
+				.map((process) => process.id);
+			return {
+				appId,
+				isPinned: true,
+				isFocused: processes.find((id) => id === os.focusedProcessId) !== undefined,
+				hasWindows: processes.length
+			};
+		})
+	);
 
 	function taskbarAppClick(item: TaskbarItem, e: MouseEvent) {
 		e.stopPropagation();
 		if (item.hasWindows) {
-			const processList = os.processList.filter(process => process.appId === item.appId && !process.isHidden);
-			if (processList.find(process => process.id === os.focusedProcessId)) {
+			const processList = os.processList.filter(
+				(process) => process.appId === item.appId && !process.isHidden
+			);
+			if (processList.find((process) => process.id === os.focusedProcessId)) {
 				os.focusedProcessId = null;
-				processList.forEach(process => process.isMinimized = true);
+				processList.forEach((process) => (process.isMinimized = true));
 			} else {
-				processList.forEach(process => focusProcess(process));
+				processList.forEach((process) => focusProcess(process));
 			}
 		} else launchApp(item.appId);
 	}
 
 	function taskbarAppPointerDown(item: TaskbarItem, e: PointerEvent) {
-		os.processList.forEach(process => {
+		os.processList.forEach((process) => {
 			if (process.appId === item.appId && process.id === os.focusedProcessId) {
 				e.stopPropagation();
 			}
 		});
 	}
-
 
 	const scale = new Spring(1, {
 		stiffness: 0.2,
@@ -66,32 +77,48 @@
 	}
 </script>
 
-<div class="flex justify-between h-10 bg-base-100 w-full z-[100000] overflow-hidden"
-		 oncontextmenu={e => showContextMenu(e, [])}
-		 onpointerdown={() => os.focusedProcessId = null}
-		 ondrop={e => {
-			 	const data = e.dataTransfer?.getData('file');
-				if (!data) return;
-				//if(data.toLowerCase().endsWith(".link"))
-		 }}
-		 role="menu"
-		 tabindex="0"
+<div
+	class="bg-base-100 z-[100000] flex h-10 w-full justify-between overflow-hidden"
+	oncontextmenu={(e) => showContextMenu(e, [])}
+	onpointerdown={() => (os.focusedProcessId = null)}
+	ondrop={(e) => {
+		const data = e.dataTransfer?.getData('file');
+		if (!data) return;
+		//if(data.toLowerCase().endsWith(".link"))
+	}}
+	role="menu"
+	tabindex="0"
 >
 	<div class="flex">
-		<DockField innerClasses="group-hover:bg-base-300" onclick={() => os.isAppLauncherOpen = true}
-							 title="Start Menu">
-			<div class="avatar placeholder aspect-square" onclick={handleClick} role="none" style="transform: scale({scale})">
+		<DockField
+			innerClasses="group-hover:bg-base-300"
+			onclick={() => (os.isAppLauncherOpen = true)}
+			title="Start Menu"
+		>
+			<div
+				class="avatar placeholder aspect-square"
+				onclick={handleClick}
+				role="none"
+				style="transform: scale({scale})"
+			>
 				<div class="bg-base-content text-base-200 w-8 rounded-full">
 					<span class="text-xs">{os.username}</span>
 				</div>
 			</div>
 		</DockField>
 		{#each taskbar as item (item.appId)}
-			<DockField title={item.appId}
-								 innerClasses="aspect-square {item.hasWindows ? 'bg-base-content ' + (item.isFocused ? 'bg-opacity-40 group-hover:bg-opacity-50' : 'bg-opacity-20 group-hover:bg-opacity-30') : 'group-hover:bg-base-300'}"
-								 onpointerdown={e => item.hasWindows && taskbarAppPointerDown(item, e)}
-								 onclick={e => taskbarAppClick(item, e)}>
-				<img alt={item.appId} draggable="false" src="assets/img/ico/{item.appId}.ico">
+			<DockField
+				title={item.appId}
+				innerClasses="aspect-square {item.hasWindows
+					? 'bg-base-content ' +
+						(item.isFocused
+							? 'bg-opacity-40 group-hover:bg-opacity-50'
+							: 'bg-opacity-20 group-hover:bg-opacity-30')
+					: 'group-hover:bg-base-300'}"
+				onpointerdown={(e) => item.hasWindows && taskbarAppPointerDown(item, e)}
+				onclick={(e) => taskbarAppClick(item, e)}
+			>
+				<img alt={item.appId} draggable="false" src="assets/img/ico/{item.appId}.ico" />
 			</DockField>
 		{/each}
 	</div>
@@ -131,9 +158,11 @@
 			<Clock />
 		</DockField>
 		<!-- Show Desktop -->
-		<button aria-label="Show Desktop"
-						class="w-2 border-l border-base-300"
-						onclick={() => os.processList.forEach(process => process.isMinimized = true)}>
+		<button
+			aria-label="Show Desktop"
+			class="border-base-300 w-2 border-l"
+			onclick={() => os.processList.forEach((process) => (process.isMinimized = true))}
+		>
 		</button>
 	</div>
 </div>

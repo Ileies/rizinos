@@ -1,7 +1,9 @@
-export async function getVideo(constraints: MediaStreamConstraints = {
-	video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { min: 30 } },
-	audio: true
-}): Promise<MediaRecorder> {
+export async function getVideo(
+	constraints: MediaStreamConstraints = {
+		video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { min: 30 } },
+		audio: true
+	}
+): Promise<MediaRecorder> {
 	try {
 		const stream = await navigator.mediaDevices.getUserMedia(constraints);
 		const recorder = new MediaRecorder(stream);
@@ -30,7 +32,7 @@ export async function getScreen(): Promise<MediaRecorder> {
 
 export function saveRecord(recorder: MediaRecorder): Promise<string> {
 	return new Promise((resolve, reject) => {
-		recorder.ondataavailable = e => {
+		recorder.ondataavailable = (e) => {
 			resolve(URL.createObjectURL(new Blob([e.data], { type: 'video/webm' })));
 		};
 		recorder.onerror = reject;
@@ -47,7 +49,11 @@ export function takePicture(videoElement: HTMLVideoElement): string | null {
 	return canvas.toDataURL('image/png');
 }
 
-export function snapshot(videoElement: HTMLVideoElement, canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): string {
+export function snapshot(
+	videoElement: HTMLVideoElement,
+	canvas: HTMLCanvasElement,
+	context: CanvasRenderingContext2D
+): string {
 	canvas.width = videoElement.videoWidth;
 	canvas.height = videoElement.videoHeight;
 	context.drawImage(videoElement, 0, 0);

@@ -9,7 +9,7 @@ export enum Role {
 	Developer = 'developer',
 	Supporter = 'supporter',
 	BetaTester = 'beta',
-	Trusted = 'trusted',
+	Trusted = 'trusted'
 }
 
 export type UserID = ID;

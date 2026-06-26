@@ -20,4 +20,4 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	return json({ success: false, error: 'Error sending email' }, { status: 500 });
-}
+};

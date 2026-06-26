@@ -5,7 +5,8 @@
 	let fullscreenEnabled = $state(false);
 
 	function toggleFullscreen() {
-		if (document.fullscreenElement) { // Or: window.fullScreen
+		if (document.fullscreenElement) {
+			// Or: window.fullScreen
 			document.exitFullscreen();
 		} else {
 			document.documentElement.requestFullscreen();
@@ -23,7 +24,7 @@
 </script>
 
 <button onclick={toggleFullscreen}>
-	{#if (fullscreenEnabled)}
+	{#if fullscreenEnabled}
 		<Minimize />
 	{:else}
 		<Maximize />

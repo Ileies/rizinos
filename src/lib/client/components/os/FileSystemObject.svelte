@@ -6,13 +6,13 @@
 
 	let { fso }: { fso: FileSystemObject } = $props();
 
-	function getSymlinkTarget(fso: FileSystemObject): FileSystemObject {
+	function getSymlinkTarget(fso: FileSystemObject): FileSystemObject {}
 
-
-	}
-
-	function dropHandler(event: DragEvent) {
-		if (fso.type === FileType.Directory || (fso.type === FileType.Symlink && getSymlinkTarget(fso).type === FileType.Directory)) {
+	async function dropHandler(event: DragEvent) {
+		if (
+			fso.type === FileType.Directory ||
+			(fso.type === FileType.Symlink && getSymlinkTarget(fso).type === FileType.Directory)
+		) {
 			event.preventDefault();
 			event.stopPropagation();
 			if (!event.dataTransfer) return;
@@ -43,31 +43,32 @@
 			}
 		}
 		await promptUploadFiles(allFiles);
-
 	}
-	}
-
 </script>
 
 <div
-	class="border p-1.25 m-0.25 w-25 {fso.isSelected ? 'bg-gray-800 border-gray-600 hover:bg-gray-800' : 'border-transparent hover:bg-gray-600'}"
+	class="m-0.25 w-25 border p-1.25 {fso.isSelected
+		? 'border-gray-600 bg-gray-800 hover:bg-gray-800'
+		: 'border-transparent hover:bg-gray-600'}"
 	draggable="true"
-	oncontextmenu={e=> showContextMenu(e, ...)}
+	oncontextmenu={(e) => showContextMenu(e, fso)}
 	ondblclick={() => {
-			 run(`start "${fso.url}"`);
-		 }}
+		run(`start "${fso.url}"`);
+	}}
 	ondragstart={(e) => e.dataTransfer?.setData('file', fso.url)}
 	ondrop={dropHandler}
-	onkeydown={()=>{}}
+	onkeydown={() => {}}
 	onpointerdown={(e) => {
-			 e.stopPropagation();
-			 fso.isSelected = true;
-		 }}
+		e.stopPropagation();
+		fso.isSelected = true;
+	}}
 	role="gridcell"
 	tabindex="0"
 >
-	<div class="m-0 auto w-22.5">
-		<img alt="Icon" class="h-22.5 w-22.5" draggable="false" src="/api/icon?icon={fso.icon}">
+	<div class="auto m-0 w-22.5">
+		<img alt="Icon" class="h-22.5 w-22.5" draggable="false" src="/api/icon?icon={fso.icon}" />
 	</div>
-	<div class="cursor-default text-white text-xs m-0 auto text-center break-words">{fso.url.split('/').at(-1)}</div>
+	<div class="auto m-0 cursor-default text-center text-xs break-words text-white">
+		{fso.url.split('/').at(-1)}
+	</div>
 </div>

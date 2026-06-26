@@ -7,16 +7,20 @@ import { epoch } from '$lib/server/models/Snowflake';
 import { addMonths } from 'date-fns';
 
 export async function getUserByToken(token: string): Promise<UserData | undefined> {
-	return db.query.tokens.findFirst({
-		where: { token: token, type: TokenType.Login, expires: { gt: new Date() } },
-		columns: { userId: true }, with: {
-			user: {
-				columns: {
-					passwordHash: false, isOnline: false
+	return db.query.tokens
+		.findFirst({
+			where: { token: token, type: TokenType.Login, expires: { gt: new Date() } },
+			columns: { userId: true },
+			with: {
+				user: {
+					columns: {
+						passwordHash: false,
+						isOnline: false
+					}
 				}
 			}
-		}
-	}).then(data => data?.user);
+		})
+		.then((data) => data?.user);
 }
 
 export async function getUserByEmail(email: string) {
@@ -29,14 +33,21 @@ export async function getUserByEmail(email: string) {
 /** Fetch a `User` from its ID */
 export async function getUserById(id: UserID): Promise<UserData | undefined> {
 	return db.query.users.findFirst({
-		where: { id: id }, columns: {
-			passwordHash: false, isOnline: false
+		where: { id: id },
+		columns: {
+			passwordHash: false,
+			isOnline: false
 		}
 	});
 }
 
 // TODO: Maybe data has to be something else than undefined
-export async function generateToken(userId: UserID, type: TokenType, expires: Date = addMonths(new Date(), 1), data: unknown = undefined): Promise<Token> {
+export async function generateToken(
+	userId: UserID,
+	type: TokenType,
+	expires: Date = addMonths(new Date(), 1),
+	data: unknown = undefined
+): Promise<Token> {
 	const timestamp = Math.floor((Date.now() - epoch) / 1000);
 	const base64UserId = Buffer.from(userId).toString('base64url');
 	const base64Timestamp = Buffer.from(timestamp.toString()).toString('base64url');
@@ -62,7 +73,8 @@ export function addCredit(user: UserData, amount: number): boolean {
 
 export async function getSystemUser(): Promise<UserData> {
 	const data = await db.query.users.findFirst({
-		where: { username: 'system' }, columns: { passwordHash: false, isOnline: false }
+		where: { username: 'system' },
+		columns: { passwordHash: false, isOnline: false }
 	});
 	if (!data) throw new Error('System user not found');
 	return data;
@@ -90,9 +102,12 @@ export function hasRole(user: UserData, role: Role): boolean {
 }
 
 export async function getLastOnline(userId: UserID): Promise<Date | undefined> {
-	return (await db.query.users.findFirst({
-		where: { id: userId }, columns: { lastOnline: true }
-	}))?.lastOnline;
+	return (
+		await db.query.users.findFirst({
+			where: { id: userId },
+			columns: { lastOnline: true }
+		})
+	)?.lastOnline;
 }
 
 export async function login(email: string, password: string): Promise<UserData | undefined> {
@@ -100,26 +115,37 @@ export async function login(email: string, password: string): Promise<UserData |
 		where: { email: email },
 		columns: { isOnline: false }
 	});
-	if (!userData || !await Bun.password.verify(password, userData.passwordHash)) return;
+	if (!userData || !(await Bun.password.verify(password, userData.passwordHash))) return;
 	return userData;
 }
 
 export async function userAddRole(user: UserData, role: Role): Promise<void> {
 	if (user.roles.includes(role)) return;
-	await db.update(users).set({ roles: [...user.roles, role] }).where(eq(users.id, user.id));
+	await db
+		.update(users)
+		.set({ roles: [...user.roles, role] })
+		.where(eq(users.id, user.id));
 	user.roles.push(role);
 }
 
 export async function removeRole(user: UserData, role: Role): Promise<void> {
 	if (!user.roles.includes(role)) return;
-	await db.update(users).set({ roles: user.roles.filter(r => r !== role) }).where(eq(users.id, user.id));
-	user.roles = user.roles.filter(r => r !== role);
+	await db
+		.update(users)
+		.set({ roles: user.roles.filter((r) => r !== role) })
+		.where(eq(users.id, user.id));
+	user.roles = user.roles.filter((r) => r !== role);
 }
 
 export async function isOnline(userId: UserID): Promise<boolean> {
-	return (await db.query.users.findFirst({
-		where: { id: userId }, columns: { isOnline: true }
-	}))?.isOnline ?? false;
+	return (
+		(
+			await db.query.users.findFirst({
+				where: { id: userId },
+				columns: { isOnline: true }
+			})
+		)?.isOnline ?? false
+	);
 }
 
 export function isSystemUser(user: UserData): boolean {
@@ -127,13 +153,21 @@ export function isSystemUser(user: UserData): boolean {
 }
 
 export async function setOnline(user: UserData, online: boolean): Promise<void> {
-	const data: { isOnline: boolean, lastOnline?: Date } = { isOnline: online };
+	const data: { isOnline: boolean; lastOnline?: Date } = { isOnline: online };
 	if (!online) data.lastOnline = new Date();
 	await db.update(users).set(data).where(eq(users.id, user.id));
 }
 
 export function getHighestRole(user: UserData): Role | null {
-	for (const role of [Role.User, Role.Bot, Role.Admin, Role.Moderator, Role.Developer, Role.Supporter, Role.BetaTester]) {
+	for (const role of [
+		Role.User,
+		Role.Bot,
+		Role.Admin,
+		Role.Moderator,
+		Role.Developer,
+		Role.Supporter,
+		Role.BetaTester
+	]) {
 		if (user.roles.includes(role)) return role;
 	}
 	return null;

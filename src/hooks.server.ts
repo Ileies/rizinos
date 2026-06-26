@@ -28,7 +28,8 @@ const checks: Handle = async ({ event, resolve }) => {
 	event.locals.ip = event.request.headers.get('x-forwarded-for') ?? event.getClientAddress();
 
 	// Skip logging for specific endpoints to reduce noise
-	if (!ignoredUrls.includes(event.url.pathname)) console.log(new Date().toISOString(), event.url.href);
+	if (!ignoredUrls.includes(event.url.pathname))
+		console.log(new Date().toISOString(), event.url.href);
 
 	// Verify database connectivity
 	await db.execute('select 1').catch((e: unknown) => {
@@ -44,7 +45,8 @@ const checks: Handle = async ({ event, resolve }) => {
 
 const api: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith('/api/mc/')) {
-		if (event.url.host !== 'localhost') return json({ message: 'Not authenticated' }, { status: 401 });
+		if (event.url.host !== 'localhost')
+			return json({ message: 'Not authenticated' }, { status: 401 });
 	}
 
 	if (event.url.pathname.startsWith('/api/')) {

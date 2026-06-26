@@ -12,13 +12,13 @@
 	});
 </script>
 
-<div class="flex-grow flex items-center justify-center bg-base-200">
-	<div class="card w-full max-w-lg md:max-w-xl lg:max-w-2xl shadow-2xl bg-base-100">
+<div class="bg-base-200 flex flex-grow items-center justify-center">
+	<div class="card bg-base-100 w-full max-w-lg shadow-2xl md:max-w-xl lg:max-w-2xl">
 		<div class="card-body">
 			<h2 class="card-title text-center text-3xl font-bold">Login</h2>
 
 			{#if form?.error}
-				<div class="alert alert-error shadow-lg mt-4">
+				<div class="alert alert-error mt-4 shadow-lg">
 					<div>
 						<span class="font-semibold">Fehler:</span>
 						<span>{form.error}</span>
@@ -64,14 +64,12 @@
 
 				<!-- Submit Button -->
 				<div class="form-control mt-4">
-					<button class="btn btn-primary w-full" type="submit">
-						Login
-					</button>
+					<button class="btn btn-primary w-full" type="submit"> Login </button>
 				</div>
 			</form>
 
 			<!-- Additional Links -->
-			<div class="text-center mt-6">
+			<div class="mt-6 text-center">
 				<p class="text-sm">
 					Noch kein Konto?
 					<a class="text-primary hover:underline" href="/signup">Registrieren</a>

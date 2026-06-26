@@ -21,7 +21,7 @@
 		window.dispatchEvent(new Event('resize'));
 
 		if ('getBattery' in navigator) {
-			navigator.getBattery().then(battery => {
+			navigator.getBattery().then((battery) => {
 				battery.addEventListener('levelchange', () => {
 					os.battery.level = battery.level;
 				});
@@ -44,9 +44,13 @@
 		}
 
 		const localTheme = localStorage.getItem('theme') as Theme;
-		os.theme = Object.values(Theme).includes(localTheme) ? localTheme : window.matchMedia('(prefers-color-scheme: dark)').matches ? Theme.Dark : Theme.Light;
+		os.theme = Object.values(Theme).includes(localTheme)
+			? localTheme
+			: window.matchMedia('(prefers-color-scheme: dark)').matches
+				? Theme.Dark
+				: Theme.Light;
 
-		window.addEventListener('message', e => {
+		window.addEventListener('message', (e) => {
 			// TODO: Think through if apps should contact the OS directly using onmessage or via WebSocket
 
 			// Only handle messages from our own domain
@@ -80,8 +84,10 @@
 </script>
 
 <div
-	class="flex flex-col w-svh h-svh bg-accent bg-cover bg-center bg-no-repeat overflow-hidden select-none cursor-default"
-	style:background-image={os.wallpaperUrl ? `url("/storage/${os.wallpaperUrl}?t=${Date.now()}")` : 'none'}
+	class="bg-accent flex h-svh w-svh cursor-default flex-col overflow-hidden bg-cover bg-center bg-no-repeat select-none"
+	style:background-image={os.wallpaperUrl
+		? `url("/storage/${os.wallpaperUrl}?t=${Date.now()}")`
+		: 'none'}
 >
 	<Desktop />
 	<Dock />

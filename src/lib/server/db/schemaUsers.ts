@@ -24,15 +24,26 @@ export const users = pgTable('users', {
 
 export const tokens = pgTable('tokens', {
 	token: text('token').notNull().unique(),
-	userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).$type<UserID>(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' })
+		.$type<UserID>(),
 	type: text('type').notNull().$type<TokenType>(),
-	expires: timestamp('expires').notNull().$defaultFn(() => sql`CURRENT_TIMESTAMP + INTERVAL '1 month'`),
+	expires: timestamp('expires')
+		.notNull()
+		.$defaultFn(() => sql`CURRENT_TIMESTAMP + INTERVAL '1 month'`),
 	data: jsonb('data')
 });
 
 export const devices = pgTable('devices', {
-	deviceToken: text('device_token').notNull().unique().references(() => tokens.token, { onDelete: 'cascade' }),
-	sessionToken: text('session_token').notNull().unique().references(() => tokens.token, { onDelete: 'no action' }),
+	deviceToken: text('device_token')
+		.notNull()
+		.unique()
+		.references(() => tokens.token, { onDelete: 'cascade' }),
+	sessionToken: text('session_token')
+		.notNull()
+		.unique()
+		.references(() => tokens.token, { onDelete: 'no action' }),
 	userAgent: text('user_agent').notNull(),
 	ip: text('ip').notNull(),
 	countryCode: text('cc').notNull(),
@@ -44,8 +55,14 @@ export const devices = pgTable('devices', {
 // TODO: Maybe transactions need tokens
 export const transactions = pgTable('transactions', {
 	id,
-	senderId: text('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }).$type<UserID>(),
-	receiverId: text('receiver_id').notNull().references(() => users.id, { onDelete: 'cascade' }).$type<UserID>(),
+	senderId: text('sender_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' })
+		.$type<UserID>(),
+	receiverId: text('receiver_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' })
+		.$type<UserID>(),
 	amount: integer('amount').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	reason: text('reason').notNull(),

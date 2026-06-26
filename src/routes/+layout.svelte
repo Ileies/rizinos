@@ -20,7 +20,8 @@
 	<meta content={page.data.seo.pageTitle} property="og:title" />
 	<meta content={page.data.seo.pageDescription} property="og:description" />
 	<meta content={page.data.seo.ogImage} property="og:image" />
-	<meta content="en_US" name="og:locale"> <!-- TODO: When paraglide is installed, add dynamic language -->
+	<meta content="en_US" name="og:locale" />
+	<!-- TODO: When paraglide is installed, add dynamic language -->
 	<title>{page.data.seo.pageTitle}</title>
 </svelte:head>
 

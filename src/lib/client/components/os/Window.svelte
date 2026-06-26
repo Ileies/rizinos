@@ -83,10 +83,13 @@
 	function appLoadHandler() {
 		// Notify the OS that the app is ready
 		if (app.contentWindow) {
-			app.contentWindow.postMessage({
-				type: 'app:ready', // TODO: Think about actual important message types
-				data: { processId: processData.id }
-			}, '*');
+			app.contentWindow.postMessage(
+				{
+					type: 'app:ready', // TODO: Think about actual important message types
+					data: { processId: processData.id }
+				},
+				'*'
+			);
 		}
 	}
 
@@ -95,61 +98,87 @@
 		const target = document.elementFromPoint(event.clientX, event.clientY);
 		(event.target as HTMLElement).style.pointerEvents = 'auto';
 		if (target) {
-			target.dispatchEvent(new PointerEvent(event.type, {
-				bubbles: true,
-				clientX: event.clientX,
-				clientY: event.clientY
-			}));
+			target.dispatchEvent(
+				new PointerEvent(event.type, {
+					bubbles: true,
+					clientX: event.clientX,
+					clientY: event.clientY
+				})
+			);
 		}
 	}
 </script>
 
 <div
 	bind:this={windowContainer}
-	class="fixed flex flex-col box-border text-base-content bg-neutral {os.isMobile ? '' : 'border shadow-lg ' + (os.focusedProcessId === processData.id ? 'border-neutral-content' : 'border-neutral')}"
+	class="text-base-content bg-neutral fixed box-border flex flex-col {os.isMobile
+		? ''
+		: 'border shadow-lg ' +
+			(os.focusedProcessId === processData.id ? 'border-neutral-content' : 'border-neutral')}"
 	class:hidden={processData.isHidden || processData.isMinimized}
-	onpointerdown={e => {e.stopPropagation();focusProcess(processData);}}
-	style={(os.isMobile || processData.isMaximized) ? 'top:0;left:0;bottom:2.5rem;right:0;' : `top:${size.top}px;left:${size.left}px;width:${size.width}px;height:${size.height}px;`}
+	onpointerdown={(e) => {
+		e.stopPropagation();
+		focusProcess(processData);
+	}}
+	style={os.isMobile || processData.isMaximized
+		? 'top:0;left:0;bottom:2.5rem;right:0;'
+		: `top:${size.top}px;left:${size.left}px;width:${size.width}px;height:${size.height}px;`}
 	style:z-index={processData.zIndex}
 >
 	<!--Navigation bar-->
 	<div
-		class="flex justify-between h-8 z-10 {os.focusedProcessId === processData.id ? 'bg-base-100' : 'bg-base-300'}"
+		class="z-10 flex h-8 justify-between {os.focusedProcessId === processData.id
+			? 'bg-base-100'
+			: 'bg-base-300'}"
 		onpointerdown={pointerDown}
 	>
-		<img alt="Icon" class="w-5.5 h-5.5 m-1" src={icon}>
-		<div onpointerdown={e => {e.stopPropagation();focusProcess(processData);}}>
-			<button class="h-full aspect-[1.5] place-items-center hover:bg-black"
-							onclick={() => {
-								processData.isMinimized = true;
-								os.focusedProcessId = null;
-							}}>
-				<Minus size=16 />
+		<img alt="Icon" class="m-1 h-5.5 w-5.5" src={icon} />
+		<div
+			onpointerdown={(e) => {
+				e.stopPropagation();
+				focusProcess(processData);
+			}}
+		>
+			<button
+				class="aspect-[1.5] h-full place-items-center hover:bg-black"
+				onclick={() => {
+					processData.isMinimized = true;
+					os.focusedProcessId = null;
+				}}
+			>
+				<Minus size="16" />
 			</button>
 			{#if !os.isMobile}
-				<button class="h-full aspect-[1.5] place-items-center hover:bg-black"
-								onclick={() => processData.isMaximized = !processData.isMaximized}>
+				<button
+					class="aspect-[1.5] h-full place-items-center hover:bg-black"
+					onclick={() => (processData.isMaximized = !processData.isMaximized)}
+				>
 					{#if processData.isMaximized}
-						<Minimize size=16 />
+						<Minimize size="16" />
 					{:else}
-						<Maximize size=16 />
+						<Maximize size="16" />
 					{/if}
 				</button>
 			{/if}
-			<button class="h-full aspect-[1.5] place-items-center hover:bg-black" onclick={() => closeProcess(processData)}>
-				<X size=16 />
+			<button
+				class="aspect-[1.5] h-full place-items-center hover:bg-black"
+				onclick={() => closeProcess(processData)}
+			>
+				<X size="16" />
 			</button>
 		</div>
 	</div>
 
 	<!--App Content Window-->
 	<button aria-label="Iframe" onclick={proxyClick}>
-		<iframe bind:this={app}
-						class="border-none w-full flex-grow"
-						onload={appLoadHandler}
-						src={url}
-						style:pointer-events={isMoving || os.focusedProcessId !== processData.id ? 'none': null}
-						title="">
+		<iframe
+			bind:this={app}
+			class="w-full flex-grow border-none"
+			onload={appLoadHandler}
+			src={url}
+			style:pointer-events={isMoving || os.focusedProcessId !== processData.id ? 'none' : null}
+			title=""
+		>
 		</iframe>
 	</button>
 </div>

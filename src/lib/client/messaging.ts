@@ -29,7 +29,7 @@ export function sendMessageToApp<T>(processId: number, message: AppMessage<T>): 
  * @param message The message to broadcast
  */
 export function broadcastToApps<T>(message: AppMessage<T>): void {
-	os.processList.forEach(process => {
+	os.processList.forEach((process) => {
 		sendMessageToApp(process.id, message);
 	});
 }
@@ -41,8 +41,8 @@ export function broadcastToApps<T>(message: AppMessage<T>): void {
  */
 export function sendMessageToAppType<T>(appId: string, message: AppMessage<T>): void {
 	os.processList
-		.filter(process => process.appId === appId)
-		.forEach(process => {
+		.filter((process) => process.appId === appId)
+		.forEach((process) => {
 			sendMessageToApp(process.id, message);
 		});
-} 
+}

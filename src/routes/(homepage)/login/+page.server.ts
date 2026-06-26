@@ -48,14 +48,18 @@ export const actions = {
 		// TODO: Make better use of the device token. How can this be used for security and ease of use?
 
 		if (locals.device) {
-			db.update(devices).set({ sessionToken: token.token }).where(eq(devices.deviceToken, locals.device.deviceToken));
+			db.update(devices)
+				.set({ sessionToken: token.token })
+				.where(eq(devices.deviceToken, locals.device.deviceToken));
 		} else {
 			const expires = addYears(new Date(), 1);
 			const deviceToken = await generateToken(user.id, TokenType.Device, expires);
-			const { countryCode, city, timezone } = await (await fetch('/api/os/ip', {
-				method: 'POST',
-				body: JSON.stringify({ ip })
-			})).json() as IpInfo;
+			const { countryCode, city, timezone } = (await (
+				await fetch('/api/os/ip', {
+					method: 'POST',
+					body: JSON.stringify({ ip })
+				})
+			).json()) as IpInfo;
 
 			await db.insert(devices).values({
 				deviceToken: deviceToken.token,

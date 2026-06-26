@@ -18,13 +18,16 @@ export default class Sound {
 			fetch(sound.url, {
 				method: 'GET',
 				headers: { 'Content-Type': 'audio/mpeg' }
-			}).then(response => response.arrayBuffer()).then(async buffer => {
-				sound.buffer = await context.decodeAudioData(buffer);
-				resolve(sound);
-			}).catch(err => {
-				console.log('Sound fetch error:', err);
-				reject(err);
-			});
+			})
+				.then((response) => response.arrayBuffer())
+				.then(async (buffer) => {
+					sound.buffer = await context.decodeAudioData(buffer);
+					resolve(sound);
+				})
+				.catch((err) => {
+					console.log('Sound fetch error:', err);
+					reject(err);
+				});
 		});
 	}
 

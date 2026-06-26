@@ -11,7 +11,10 @@ export const minechatHooks = pgTable('minechat_hooks', {
 	webhookId: text('webhook').notNull().unique(),
 	channelId: text('channel').notNull().unique(),
 	token: text('token').notNull().unique(),
-	minecraftServerId: text('mc_server_id').notNull().unique().references(() => minechatServers.serverId, { onDelete: 'cascade' }),
+	minecraftServerId: text('mc_server_id')
+		.notNull()
+		.unique()
+		.references(() => minechatServers.serverId, { onDelete: 'cascade' }),
 	prefix: text('prefix').notNull().default('<%1> ')
 });
 

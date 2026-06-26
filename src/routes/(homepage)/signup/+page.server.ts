@@ -19,7 +19,6 @@ export const actions = {
 			// Process the data (e.g., save to database)
 			console.log('Valid data:', data);
 		} catch (e) {
-
 			if (e instanceof z.ZodError) {
 				console.log(z.treeifyError(e));
 				// Return validation errors to the frontend
