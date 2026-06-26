@@ -8,11 +8,8 @@ import { addMonths } from 'date-fns';
 
 export async function getUserByToken(token: string): Promise<UserData | undefined> {
 	return db.query.tokens.findFirst({
-		where: (tokens, { eq, and, gt }) => and(
-			eq(tokens.token, token),
-			eq(tokens.type, TokenType.Login),
-			gt(tokens.expires, new Date()) // TODO: Testen, ob das so geprüft werden kann
-		), columns: { userId: true }, with: {
+		where: { token: token, type: TokenType.Login, expires: { gt: new Date() } },
+		columns: { userId: true }, with: {
 			user: {
 				columns: {
 					passwordHash: false, isOnline: false
@@ -24,7 +21,7 @@ export async function getUserByToken(token: string): Promise<UserData | undefine
 
 export async function getUserByEmail(email: string) {
 	return db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.email, email),
+		where: { email: email },
 		columns: { passwordHash: false, isOnline: false }
 	});
 }
@@ -32,7 +29,7 @@ export async function getUserByEmail(email: string) {
 /** Fetch a `User` from its ID */
 export async function getUserById(id: UserID): Promise<UserData | undefined> {
 	return db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.id, id), columns: {
+		where: { id: id }, columns: {
 			passwordHash: false, isOnline: false
 		}
 	});
@@ -65,8 +62,7 @@ export function addCredit(user: UserData, amount: number): boolean {
 
 export async function getSystemUser(): Promise<UserData> {
 	const data = await db.query.users.findFirst({
-		where: (users, { eq }) =>
-			eq(users.username, 'system'), columns: { passwordHash: false, isOnline: false }
+		where: { username: 'system' }, columns: { passwordHash: false, isOnline: false }
 	});
 	if (!data) throw new Error('System user not found');
 	return data;
@@ -95,13 +91,13 @@ export function hasRole(user: UserData, role: Role): boolean {
 
 export async function getLastOnline(userId: UserID): Promise<Date | undefined> {
 	return (await db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.id, userId), columns: { lastOnline: true }
+		where: { id: userId }, columns: { lastOnline: true }
 	}))?.lastOnline;
 }
 
 export async function login(email: string, password: string): Promise<UserData | undefined> {
 	const userData = await db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.email, email),
+		where: { email: email },
 		columns: { isOnline: false }
 	});
 	if (!userData || !await Bun.password.verify(password, userData.passwordHash)) return;
@@ -122,7 +118,7 @@ export async function removeRole(user: UserData, role: Role): Promise<void> {
 
 export async function isOnline(userId: UserID): Promise<boolean> {
 	return (await db.query.users.findFirst({
-		where: (users, { eq }) => eq(users.id, userId), columns: { isOnline: true }
+		where: { id: userId }, columns: { isOnline: true }
 	}))?.isOnline ?? false;
 }
 

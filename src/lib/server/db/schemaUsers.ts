@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { boolean, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { emptyTextArray, id } from './lib';
 import { mcUsers } from './schemaMinecraft';
@@ -14,24 +14,13 @@ export const users = pgTable('users', {
 	firstName: text('first_name').notNull(),
 	lastName: text('last_name').notNull(),
 	passwordHash: text('password_hash').notNull(),
-	roles: text('roles').array().notNull().$type<Role[]>().default(emptyTextArray),
+	roles: text('roles').array().notNull().$type<Role>().default(emptyTextArray),
 	gender: text('gender').notNull().$type<'male' | 'female'>(),
 	credit: integer('credit').notNull().default(0),
 	birthdate: timestamp('birthdate').notNull(),
 	lastOnline: timestamp('last_online').notNull().defaultNow(),
 	isOnline: boolean('is_online').notNull().default(false)
 });
-export const usersRelations = relations(users, ({ one, many }) => ({
-	tokens: many(tokens),
-	mcUser: one(mcUsers, {
-		fields: [users.id],
-		references: [mcUsers.userId]
-	}),
-	dcUser: one(dcUsers, {
-		fields: [users.id],
-		references: [dcUsers.userId]
-	})
-}));
 
 export const tokens = pgTable('tokens', {
 	token: text('token').notNull().unique(),
@@ -40,20 +29,6 @@ export const tokens = pgTable('tokens', {
 	expires: timestamp('expires').notNull().$defaultFn(() => sql`CURRENT_TIMESTAMP + INTERVAL '1 month'`),
 	data: jsonb('data')
 });
-export const tokensRelations = relations(tokens, ({ one }) => ({
-	user: one(users, {
-		fields: [tokens.userId],
-		references: [users.id]
-	}),
-	deviceByDeviceToken: one(devices, {
-		fields: [tokens.token],
-		references: [devices.deviceToken]
-	}),
-	deviceBySessionToken: one(devices, {
-		fields: [tokens.token],
-		references: [devices.sessionToken]
-	})
-}));
 
 export const devices = pgTable('devices', {
 	deviceToken: text('device_token').notNull().unique().references(() => tokens.token, { onDelete: 'cascade' }),
@@ -65,16 +40,6 @@ export const devices = pgTable('devices', {
 	timezone: text('timezone').notNull(),
 	lastOnline: timestamp('last_online').notNull().defaultNow()
 });
-export const devicesRelations = relations(devices, ({ one }) => ({
-	deviceTokenRelation: one(tokens, {
-		fields: [devices.deviceToken],
-		references: [tokens.token]
-	}),
-	sessionTokenRelation: one(tokens, {
-		fields: [devices.sessionToken],
-		references: [tokens.token]
-	})
-}));
 
 // TODO: Maybe transactions need tokens
 export const transactions = pgTable('transactions', {
@@ -87,15 +52,5 @@ export const transactions = pgTable('transactions', {
 	type: text('type').notNull().$type<TransactionType>(),
 	status: text('status').notNull().$type<TransactionStatus>().default(TransactionStatus.Completed)
 });
-export const transactionsRelations = relations(transactions, ({ one }) => ({
-	sender: one(users, {
-		fields: [transactions.senderId],
-		references: [users.id]
-	}),
-	receiver: one(users, {
-		fields: [transactions.receiverId],
-		references: [users.id]
-	})
-}));
 
 export type usersInsertType = typeof users.$inferInsert;

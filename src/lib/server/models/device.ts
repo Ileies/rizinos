@@ -5,17 +5,17 @@ import type { Device } from '$types';
 
 export async function deviceLastOnline(deviceToken: string): Promise<Date | undefined> {
 	return (await db.query.devices.findFirst({
-		where: eq(devices.deviceToken, deviceToken),
+		where: { deviceToken },
 		columns: { lastOnline: true }
 	}))?.lastOnline;
 }
 
 export async function getDeviceByToken(deviceToken: string): Promise<Device | undefined> {
-	return db.query.devices.findFirst({ where: eq(devices.deviceToken, deviceToken) });
+	return db.query.devices.findFirst({ where: { deviceToken } });
 }
 
 export async function getDeviceBySession(sessionToken: string): Promise<Device | undefined> {
-	return db.query.devices.findFirst({ where: eq(devices.sessionToken, sessionToken) });
+	return db.query.devices.findFirst({ where: { sessionToken } });
 }
 
 // TODO: Think about this. Repair it

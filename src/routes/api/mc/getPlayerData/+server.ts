@@ -7,8 +7,10 @@ import { Role } from '$types';
 
 export async function POST(event: RequestEvent) {
 	const { uuid } = await event.request.json() as { uuid: string | null };
+	console.log('[mc/getPlayerData:10] POST received: uuid=%s', uuid);
+
 	const data = await db.query.mcUsers.findFirst({
-		where: (mcUsers, { eq }) => eq(mcUsers.uuid, uuid ?? ''),
+		where: { uuid: uuid ?? '' },
 		with: {
 			user: { columns: { passwordHash: false } }
 		},
@@ -21,8 +23,12 @@ export async function POST(event: RequestEvent) {
 			bannedReason: true
 		}
 	});
+	console.log('[mc/getPlayerData:25] db lookup result:', data
+		? `found (username=${data.user.username}, basePermissions=${data.permissions.length}, muted=${data.mutedUntil}, banned=${data.bannedUntil})`
+		: 'null → returning null');
 	if (!data) return json(null);
 
+	const permsBefore = data.permissions.length;
 	if (hasRole(data.user, Role.User)) [
 		'mikosav.user',
 		'plots.plot.1',
@@ -46,7 +52,11 @@ export async function POST(event: RequestEvent) {
 	].forEach(i => data.permissions.push(i));
 	if (hasRole(data.user, Role.Admin)) data.permissions.push('mikosav.admin');
 
-	return json({
+	const addedPerms = data.permissions.slice(permsBefore);
+	console.log('[mc/getPlayerData:55] role injection: was %d, now %d permissions. Added: [%s]',
+		permsBefore, data.permissions.length, addedPerms.join(', ') || 'none');
+
+	const response = {
 		username: data.user.username,
 		welcomeMessage: data.welcomeMessage ?? '',
 		permissions: data.permissions,
@@ -55,7 +65,10 @@ export async function POST(event: RequestEvent) {
 		mutedUntil: data.mutedUntil,
 		bannedUntil: data.bannedUntil,
 		bannedReason: data.bannedReason
-	});
+	};
+	console.log('[mc/getPlayerData:67] returning response for username=%s: credit=%s, home=%s, permissions=%d',
+		response.username, response.credit, response.home, response.permissions.length);
+	return json(response);
 }
 
 export const GET = invalidMethod;

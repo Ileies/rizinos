@@ -34,7 +34,7 @@ export default class Transaction {
 	static async get(id: string): Promise<Transaction | undefined> {
 		try {
 			const data = await db.query.transactions.findFirst({
-				where: (transactions, { eq }) => eq(transactions.id, id)
+				where: { id }
 			});
 			return data ? new Transaction(data) : undefined;
 		} catch (error) {

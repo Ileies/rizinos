@@ -10,10 +10,7 @@ import type { Token, TokenType } from '$types';
 
 export async function getToken(token: string, type: TokenType | null = null): Promise<Token | undefined> {
 	return db.query.tokens.findFirst({
-		where: (tokens, { eq, and }) => and(
-			eq(tokens.token, token),
-			type ? eq(tokens.type, type) : undefined // TODO: Maybe I can't use undefined here
-		)
+		where: type ? { token, type } : { token }
 	});
 }
 
