@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Trash2, Plus, ChevronDown, Settings } from '@lucide/svelte';
+	import { Trash2, Plus, ChevronDown, Settings, Pickaxe, Wand2, Compass, Eye } from '@lucide/svelte';
 	import * as Card from '$shadcn/card';
 	import * as Button from '$shadcn/button';
 	import { Badge } from '$shadcn/badge';
@@ -15,6 +15,14 @@
 	let showWarpForm = $state(false);
 	let showWorldForm = $state(false);
 	let showGroupForm = $state(false);
+	let openGameModeDropdown = $state<string | null>(null);
+
+	const gameModeIcons = {
+		0: { icon: Pickaxe, label: 'Survival', name: 'Survival' },
+		1: { icon: Wand2, label: 'Creative', name: 'Creative' },
+		2: { icon: Compass, label: 'Adventure', name: 'Adventure' },
+		3: { icon: Eye, label: 'Spectator', name: 'Spectator' }
+	} as const;
 
 	function togglePlayer(uuid: string) {
 		expandedPlayers[uuid] = !expandedPlayers[uuid];
@@ -86,7 +94,7 @@
 										<div class="space-y-4">
 											<div>
 												<p class="text-xs font-medium text-muted-foreground uppercase">UUID</p>
-												<p class="text-sm font-mono mt-1">{mcUser.uuid.slice(0, 12)}...</p>
+												<p class="text-xs font-mono mt-1 break-all">{mcUser.uuid}</p>
 											</div>
 
 											<LocationInput
@@ -96,23 +104,20 @@
 												hiddenFields={{ uuid: mcUser.uuid, welcomeMessage: mcUser.welcomeMessage || '' }}
 											/>
 
-											{#if mcUser.permissions.length > 0}
-												<div>
-													<p class="text-xs font-medium text-muted-foreground uppercase">
-														Permissions ({mcUser.permissions.length})
-													</p>
-													<div class="flex flex-wrap gap-1 mt-2">
-														{#each mcUser.permissions.slice(0, 10) as perm}
-															<Badge variant="secondary">{perm}</Badge>
-														{/each}
-														{#if mcUser.permissions.length > 10}
-															<Badge variant="outline">
-																+{mcUser.permissions.length - 10} more
-															</Badge>
-														{/if}
-													</div>
+											<InlineEdit
+												value={mcUser.permissions.join(', ')}
+												label={`Permissions (${mcUser.permissions.length})`}
+												action="?/mcUserUpdatePermissions"
+												fieldName="permissions"
+												hiddenFields={{ uuid: mcUser.uuid }}
+												type="text"
+											>
+												<div class="flex flex-wrap gap-1">
+													{#each mcUser.permissions as perm}
+														<Badge variant="secondary">{perm}</Badge>
+													{/each}
 												</div>
-											{/if}
+											</InlineEdit>
 
 											{#if mcUser.bannedUntil}
 												<div>

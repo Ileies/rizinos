@@ -212,5 +212,26 @@ export const actions: Actions = {
 			})
 			.where(eq(mcUsers.uuid, uuid));
 		return { success: true };
+	},
+
+	mcUserUpdatePermissions: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const uuid = data.get('uuid') as string;
+		const permissionsStr = data.get('permissions') as string;
+
+		if (!uuid) return fail(400, { message: 'UUID required' });
+
+		const permissions = permissionsStr
+			.split(',')
+			.map(p => p.trim())
+			.filter(Boolean);
+
+		await db
+			.update(mcUsers)
+			.set({ permissions })
+			.where(eq(mcUsers.uuid, uuid));
+		return { success: true };
 	}
 };

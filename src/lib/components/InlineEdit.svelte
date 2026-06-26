@@ -54,7 +54,7 @@
 			{#if children}
 				{@render children()}
 			{:else}
-				<p class="text-sm capitalize">{value || '-'}</p>
+				<p class="text-sm">{value || '-'}</p>
 			{/if}
 			<Button.Root type="button" variant="ghost" size="sm" onclick={toggleEdit}>
 				<Edit2 size={14} />

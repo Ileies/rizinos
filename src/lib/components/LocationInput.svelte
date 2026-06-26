@@ -29,21 +29,26 @@
 	let y = $state(0);
 	let z = $state(0);
 
+	let yaw = $state(0);
+	let pitch = $state(0);
+
 	function parseLocation(loc: string | null) {
-		if (!loc) return { x: 0, y: 0, z: 0 };
-		const matches = loc.match(/x:([-\d.]+)\s+y:([-\d.]+)\s+z:([-\d.]+)/i);
+		if (!loc) return { x: 0, y: 0, z: 0, yaw: 0, pitch: 0 };
+		const matches = loc.match(/x:([-\d.]+)\s+y:([-\d.]+)\s+z:([-\d.]+)(?:\s+yaw:([-\d.]+))?(?:\s+pitch:([-\d.]+))?/i);
 		if (matches) {
 			return {
 				x: parseFloat(matches[1]),
 				y: parseFloat(matches[2]),
-				z: parseFloat(matches[3])
+				z: parseFloat(matches[3]),
+				yaw: matches[4] ? parseFloat(matches[4]) : 0,
+				pitch: matches[5] ? parseFloat(matches[5]) : 0
 			};
 		}
-		return { x: 0, y: 0, z: 0 };
+		return { x: 0, y: 0, z: 0, yaw: 0, pitch: 0 };
 	}
 
-	function formatLocation(xVal: number, yVal: number, zVal: number) {
-		return `x:${xVal} y:${yVal} z:${zVal}`;
+	function formatLocation(xVal: number, yVal: number, zVal: number, yawVal: number, pitchVal: number) {
+		return `x:${xVal} y:${yVal} z:${zVal} yaw:${yawVal} pitch:${pitchVal}`;
 	}
 
 	function toggleEdit() {
@@ -52,6 +57,8 @@
 			x = parsed.x;
 			y = parsed.y;
 			z = parsed.z;
+			yaw = parsed.yaw;
+			pitch = parsed.pitch;
 			onEditStart();
 		} else {
 			onEditEnd();
@@ -94,7 +101,7 @@
 				<input type="hidden" {name} value={val} />
 			{/each}
 
-			<div class="grid grid-cols-3 gap-2">
+			<div class="grid grid-cols-2 gap-2 md:grid-cols-5">
 				<div>
 					<label class="text-xs text-muted-foreground">X</label>
 					<Input.Root name="x" type="number" bind:value={x} step="0.1" required />
@@ -107,12 +114,20 @@
 					<label class="text-xs text-muted-foreground">Z</label>
 					<Input.Root name="z" type="number" bind:value={z} step="0.1" required />
 				</div>
+				<div>
+					<label class="text-xs text-muted-foreground">Yaw</label>
+					<Input.Root name="yaw" type="number" bind:value={yaw} step="1" />
+				</div>
+				<div>
+					<label class="text-xs text-muted-foreground">Pitch</label>
+					<Input.Root name="pitch" type="number" bind:value={pitch} step="1" />
+				</div>
 			</div>
 
 			<input
 				type="hidden"
 				name="location"
-				value={formatLocation(x, y, z)}
+				value={formatLocation(x, y, z, yaw, pitch)}
 			/>
 
 			<div class="flex gap-2 pt-2">
