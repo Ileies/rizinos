@@ -4,11 +4,28 @@
 	import { onMount } from 'svelte';
 
 	let { form }: { form: ActionData } = $props();
+	let error = $state<string | null>(null);
 
 	let emailElement: HTMLInputElement;
 
 	onMount(() => {
 		emailElement.focus();
+	});
+
+	const handleSubmit = enhance(async ({ formElement, formData, action, cancel }) => {
+		error = null;
+
+		return async ({ result, update }) => {
+			if (result.type === 'error') {
+				error = 'Request failed. Please try again.';
+				cancel();
+			} else if (result.type === 'failure') {
+				// Form validation errors are handled by `form?.error`
+				await update();
+			} else {
+				await update();
+			}
+		};
 	});
 </script>
 
@@ -17,18 +34,16 @@
 		<div class="card-body">
 			<h2 class="card-title text-center text-3xl font-bold">Login</h2>
 
-			{#if form?.error}
+			{#if form?.error || error}
 				<div class="alert alert-error mt-4 shadow-lg">
 					<div>
 						<span class="font-semibold">Fehler:</span>
-						<span>{form.error}</span>
+						<span>{form?.error || error}</span>
 					</div>
 				</div>
 			{/if}
 
-			<!--<button onclick={()=>{}}>button</button>-->
-
-			<form class="space-y-6" method="post" use:enhance>
+			<form class="space-y-6" method="post" use:handleSubmit>
 				<!-- Email Input -->
 				<div class="form-control">
 					<label class="label" for="email">
