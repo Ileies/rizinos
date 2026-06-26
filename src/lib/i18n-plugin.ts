@@ -6,10 +6,15 @@ const MESSAGES_DIR = join(process.cwd(), 'messages');
 const OUTPUT_PATH = join(process.cwd(), 'src/lib/messages.ts');
 
 function getLocales(): readonly string[] {
-	return readdirSync(MESSAGES_DIR)
+	const files = readdirSync(MESSAGES_DIR)
 		.filter((f) => f.endsWith('.json') && f !== 'package.json')
-		.map((f) => f.replace('.json', ''))
-		.sort();
+		.map((f) => f.replace('.json', ''));
+
+	const preferredOrder = ['en', 'de', 'fr', 'zh', 'cn', 'ru'];
+	const ordered = preferredOrder.filter((l) => files.includes(l));
+	const remaining = files.filter((l) => !ordered.includes(l)).sort();
+
+	return [...ordered, ...remaining];
 }
 
 function loadMessages(): Record<string, string[]> {
@@ -61,7 +66,10 @@ export function getLocale(): string {
 export function getLocales() { return locales; }
 
 export function setLocale(locale: string): void {
-  if (typeof document !== 'undefined' && (locales as readonly string[]).includes(locale)) document.documentElement.lang = locale;
+  if (typeof document === 'undefined') return;
+  if (!(locales as readonly string[]).includes(locale)) return;
+  document.documentElement.lang = locale;
+  document.cookie = cookieName + '=' + locale + '; path=/; max-age=' + cookieMaxAge;
 }
 
 export function getTextDirection(locale: string): string {
