@@ -12,7 +12,8 @@ const config = {
 		alias: {
 			$db: './src/lib/server/db',
 			$types: './src/types',
-			$ui: './src/lib/client/components'
+			$ui: './src/lib/client/components',
+			$shadcn: './src/lib/components/ui'
 		}
 	}
 };
