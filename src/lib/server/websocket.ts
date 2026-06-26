@@ -37,7 +37,7 @@ export const websocketHandlers = {
 		const sendWs = (json: WebsocketMessage) => ws.send(JSON.stringify(json));
 
 		try {
-			const json = JSON.parse(message.toString() + '   ' + ws.data.user.username) as WebsocketMessage;
+			const json = JSON.parse(message.toString()) as WebsocketMessage;
 			sendWs({ action: 'echo', data: json });
 		} catch (e) {
 			console.error('Invalid JSON', e);

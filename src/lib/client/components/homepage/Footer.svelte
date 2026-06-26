@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Github, Twitter } from 'lucide-svelte';
+	import { SiGithub, SiX } from '@icons-pack/svelte-simple-icons';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import type { LinkList } from '$types/seo';
 	import { m } from '$lib/paraglide/messages.js';
@@ -71,11 +71,11 @@
 					</a>
 
 					<a class="text-base-content/50 hover:text-base-content transition-colors duration-200" href={twitter}>
-						<Twitter size={24} />
+						<SiX size={24} />
 					</a>
 
 					<a class="text-base-content/50 hover:text-base-content transition-colors duration-200" href={github}>
-						<Github size={24} />
+						<SiGithub size={24} />
 					</a>
 				</div>
 			</div>

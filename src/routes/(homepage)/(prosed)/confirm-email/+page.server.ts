@@ -19,10 +19,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	// Check if any unique user data has at the time of confirmation already been stored in another new user
 	const existingUser = await db.query.users.findFirst({
-		where: (users, { eq, or }) => or(
-			eq(users.username, data.username),
-			eq(users.email, data.email)
-		),
+		where: { OR: [{ username: data.username }, { email: data.email }] },
 		columns: { id: true }
 	});
 
