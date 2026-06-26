@@ -11,7 +11,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!hasRole(locals.user, Role.Admin)) redirect(302, '/app');
 
 	const allUsers = await db.query.users.findMany({
-		columns: { passwordHash: false, isOnline: false }
+		columns: { passwordHash: false, isOnline: false },
+		orderBy: (users, { asc }) => asc(users.username)
 	});
 
 	return {
@@ -73,6 +74,39 @@ export const actions: Actions = {
 		await db
 			.update(users)
 			.set({ credit: newCredit })
+			.where(eq(users.id, userId as any));
+		return { success: true };
+	},
+
+	creditSet: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const credit = parseInt(data.get('credit') as string) || 0;
+
+		if (!userId) return fail(400, { message: 'User ID required' });
+
+		const newCredit = Math.max(0, credit);
+		await db
+			.update(users)
+			.set({ credit: newCredit })
+			.where(eq(users.id, userId as any));
+		return { success: true };
+	},
+
+	userUpdate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const gender = data.get('gender') as string;
+
+		if (!userId) return fail(400, { message: 'User ID required' });
+
+		await db
+			.update(users)
+			.set({ gender: gender || null })
 			.where(eq(users.id, userId as any));
 		return { success: true };
 	}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Role } from '$types';
-	import { ChevronDown, Users, Zap, Settings } from '@lucide/svelte';
+	import { ChevronDown, Users, Zap, Settings, Edit2, Check, X } from '@lucide/svelte';
 	import * as Card from '$shadcn/card';
 	import * as Button from '$shadcn/button';
 	import { Badge } from '$shadcn/badge';
@@ -11,6 +11,7 @@
 
 	let expandedUsers = $state<Record<string, boolean>>({});
 	let editingCredit = $state<Record<string, boolean>>({});
+	let editingGender = $state<Record<string, boolean>>({});
 
 	const ROLES = [
 		Role.Admin,
@@ -27,6 +28,10 @@
 
 	function toggleCreditEdit(userId: string) {
 		editingCredit[userId] = !editingCredit[userId];
+	}
+
+	function toggleGenderEdit(userId: string) {
+		editingGender[userId] = !editingGender[userId];
 	}
 </script>
 
@@ -61,10 +66,10 @@
 
 		<div class="space-y-3">
 			{#each data.users as user (user.id)}
-				<Card.Root class="overflow-hidden transition-all hover:shadow-md">
+				<Card.Root class="overflow-hidden transition-all hover:shadow-md hover:bg-muted/30">
 					<div class="flex flex-col">
 						<button
-							class="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors"
+							class="flex w-full items-center justify-between px-6 py-4 text-left transition-colors"
 							onclick={() => toggleUser(user.id)}
 						>
 							<div class="flex-1">
@@ -92,12 +97,53 @@
 							<div class="border-t px-6 py-4 bg-muted/30">
 								<div class="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
 									<div>
-										<p class="text-xs font-medium text-muted-foreground uppercase">Credit</p>
-										<p class="text-lg font-semibold mt-1">{user.credit}</p>
+										<p class="text-xs font-medium text-muted-foreground uppercase mb-2">Credit</p>
+										{#if !editingCredit[user.id]}
+											<div class="flex items-center justify-between">
+												<p class="text-lg font-semibold">{user.credit}</p>
+												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleCreditEdit(user.id)}>
+													<Edit2 size={14} />
+												</Button.Root>
+											</div>
+										{:else}
+											<form method="POST" action="?/creditSet" use:enhance class="flex gap-2" onsubmit={() => toggleCreditEdit(user.id)}>
+												<input type="hidden" name="userId" value={user.id} />
+												<Input.Root name="credit" type="number" value={user.credit.toString()} required class="text-sm" />
+												<Button.Root type="submit" variant="ghost" size="sm">
+													<Check size={14} />
+												</Button.Root>
+												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleCreditEdit(user.id)}>
+													<X size={14} />
+												</Button.Root>
+											</form>
+										{/if}
 									</div>
 									<div>
-										<p class="text-xs font-medium text-muted-foreground uppercase">Gender</p>
-										<p class="capitalize text-sm mt-1">{user.gender || '-'}</p>
+										<p class="text-xs font-medium text-muted-foreground uppercase mb-2">Gender</p>
+										{#if !editingGender[user.id]}
+											<div class="flex items-center justify-between">
+												<p class="capitalize text-sm">{user.gender || '-'}</p>
+												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleGenderEdit(user.id)}>
+													<Edit2 size={14} />
+												</Button.Root>
+											</div>
+										{:else}
+											<form method="POST" action="?/userUpdate" use:enhance class="flex gap-2" onsubmit={() => toggleGenderEdit(user.id)}>
+												<input type="hidden" name="userId" value={user.id} />
+												<select name="gender" class="flex-1 px-2 py-1 border rounded-md bg-background text-sm">
+													<option value="">Select gender</option>
+													<option value="male" selected={user.gender === 'male'}>Male</option>
+													<option value="female" selected={user.gender === 'female'}>Female</option>
+													<option value="other" selected={user.gender === 'other'}>Other</option>
+												</select>
+												<Button.Root type="submit" variant="ghost" size="sm">
+													<Check size={14} />
+												</Button.Root>
+												<Button.Root type="button" variant="ghost" size="sm" onclick={() => toggleGenderEdit(user.id)}>
+													<X size={14} />
+												</Button.Root>
+											</form>
+										{/if}
 									</div>
 									<div>
 										<p class="text-xs font-medium text-muted-foreground uppercase">Last Online</p>

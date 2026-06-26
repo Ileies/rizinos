@@ -135,5 +135,82 @@ export const actions: Actions = {
 		} catch (e) {
 			return fail(400, { message: 'Failed to delete Minecraft user' });
 		}
+	},
+
+	warpUpdate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const oldName = data.get('oldName') as string;
+		const name = data.get('name') as string;
+		const location = data.get('location') as string;
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
+			[]) as Restrict[];
+
+		if (!oldName || !name || !location) return fail(400, { message: 'All fields required' });
+
+		await db
+			.update(mcWarps)
+			.set({ name, location, restrict })
+			.where(eq(mcWarps.name, oldName));
+		return { success: true };
+	},
+
+	worldUpdate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const oldName = data.get('oldName') as string;
+		const name = data.get('name') as string;
+		const groupName = data.get('groupName') as string;
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
+			[]) as Restrict[];
+
+		if (!oldName || !name || !groupName) return fail(400, { message: 'All fields required' });
+
+		await db
+			.update(mcWorlds)
+			.set({ name, groupName, restrict })
+			.where(eq(mcWorlds.name, oldName));
+		return { success: true };
+	},
+
+	groupUpdate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const oldName = data.get('oldName') as string;
+		const name = data.get('name') as string;
+		const gameMode = parseInt(data.get('gameMode') as string) || 0;
+		const restrict = ((data.get('restrict') as string)?.split(',').filter(Boolean) ||
+			[]) as Restrict[];
+
+		if (!oldName || !name) return fail(400, { message: 'Name required' });
+
+		await db
+			.update(mcWorldGroups)
+			.set({ name, gameMode, restrict })
+			.where(eq(mcWorldGroups.name, oldName));
+		return { success: true };
+	},
+
+	mcUserUpdate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const uuid = data.get('uuid') as string;
+		const homeLocation = data.get('homeLocation') as string | null;
+		const welcomeMessage = data.get('welcomeMessage') as string | null;
+
+		if (!uuid) return fail(400, { message: 'UUID required' });
+
+		await db
+			.update(mcUsers)
+			.set({
+				homeLocation: homeLocation || null,
+				welcomeMessage: welcomeMessage || null
+			})
+			.where(eq(mcUsers.uuid, uuid));
+		return { success: true };
 	}
 };
