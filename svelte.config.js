@@ -7,7 +7,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		csrf: {
-			checkOrigin: false
+			checkOrigin: false // TODO: Fix this - disabling origin check is a security risk. Investigate why origin validation was failing and re-enable after fixing.
 		},
 		alias: {
 			$db: './src/lib/server/db',
