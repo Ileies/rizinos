@@ -4,6 +4,7 @@
 	import Desktop from '$ui/os/Desktop.svelte';
 	import ContextMenu from '$ui/os/ContextMenu.svelte';
 	import AppLauncher from '$ui/os/AppLauncher.svelte';
+	import PwaInstallBanner from '$ui/os/PwaInstallBanner.svelte';
 	import os from '$lib/os.svelte';
 	import { browser } from '$app/environment';
 	import { Theme } from '$types';
@@ -94,4 +95,5 @@
 	<Notifications />
 	<AppLauncher />
 	<ContextMenu />
+	<PwaInstallBanner />
 </div>

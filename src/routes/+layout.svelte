@@ -2,8 +2,17 @@
 	import '../app.css';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/service-worker.js').catch((err) => {
+				console.warn('Service worker registration failed:', err);
+			});
+		}
+	});
 </script>
 
 <svelte:head>
