@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { ActionResult } from '@sveltejs/kit';
-	import { Plus, Settings, Pencil, Trash2 } from '@lucide/svelte';
+	import { Plus, Settings, Pencil, Trash2, CheckCircle2, XCircle, Loader2 } from '@lucide/svelte';
 	import * as Table from '$shadcn/table';
 	import * as Button from '$shadcn/button';
 	import * as Input from '$shadcn/input';
@@ -14,6 +14,83 @@
 
 	let currentTab = $state('players');
 	let worldNames = $derived(data.worlds.map((w) => w.name));
+
+	// --- Create Player validation ---
+	type VState = 'idle' | 'loading' | 'valid' | 'invalid';
+	let cpName = $state('');
+	let cpUuid = $state('');
+	let cpNameState = $state<VState>('idle');
+	let cpUuidState = $state<VState>('idle');
+	let cpValidateError = $state('');
+
+	$effect(() => {
+		if (!createPlayerOpen) {
+			cpName = ''; cpUuid = '';
+			cpNameState = 'idle'; cpUuidState = 'idle'; cpValidateError = '';
+		}
+	});
+
+	async function cpLookupByName(name: string) {
+		name = name.trim();
+		if (!name) return;
+		cpNameState = 'loading'; cpUuidState = 'idle'; cpValidateError = '';
+		try {
+			const res = await fetch(`/admin/minecraft/validate?type=username&value=${encodeURIComponent(name)}`);
+			const body = await res.json();
+			if (res.ok) {
+				cpName = body.name;
+				cpUuid = body.uuid;
+				cpNameState = 'valid'; cpUuidState = 'valid';
+			} else {
+				cpNameState = 'invalid';
+				cpValidateError = body.error ?? 'Player not found';
+			}
+		} catch {
+			cpNameState = 'invalid';
+			cpValidateError = 'Network error';
+		}
+	}
+
+	async function cpLookupByUuid(uuid: string) {
+		uuid = uuid.trim();
+		if (!uuid) return;
+		cpUuidState = 'loading'; cpNameState = 'idle'; cpValidateError = '';
+		try {
+			const res = await fetch(`/admin/minecraft/validate?type=uuid&value=${encodeURIComponent(uuid)}`);
+			const body = await res.json();
+			if (res.ok) {
+				cpName = body.name;
+				cpUuid = body.uuid;
+				cpUuidState = 'valid'; cpNameState = 'valid';
+			} else {
+				cpUuidState = 'invalid';
+				cpValidateError = body.error ?? 'Player not found';
+			}
+		} catch {
+			cpUuidState = 'invalid';
+			cpValidateError = 'Network error';
+		}
+	}
+
+	function cpHandleNamePaste(e: ClipboardEvent) {
+		const text = e.clipboardData?.getData('text') ?? '';
+		const trimmed = text.trim();
+		if (trimmed) { e.preventDefault(); cpName = trimmed; cpLookupByName(trimmed); }
+	}
+
+	function cpHandleUuidPaste(e: ClipboardEvent) {
+		const text = e.clipboardData?.getData('text') ?? '';
+		const trimmed = text.trim();
+		if (trimmed) { e.preventDefault(); cpUuid = trimmed; cpLookupByUuid(trimmed); }
+	}
+
+	function cpHandleNameBlur() {
+		if (cpNameState === 'idle' && cpName.trim()) cpLookupByName(cpName);
+	}
+
+	function cpHandleUuidBlur() {
+		if (cpUuidState === 'idle' && cpUuid.trim()) cpLookupByUuid(cpUuid);
+	}
 
 	// --- Players ---
 	let editingPlayerUuid = $state<string | null>(null);
@@ -485,13 +562,57 @@
 		</div>
 		<div>
 			<label for="cp-name" class="mb-1 block text-xs font-medium text-muted-foreground">MC Username</label>
-			<Input.Root id="cp-name" name="name" placeholder="Steve" required />
+			<div class="relative">
+				<input
+					id="cp-name"
+					name="name"
+					placeholder="Steve"
+					required
+					value={cpName}
+					oninput={(e) => { cpName = e.currentTarget.value; cpNameState = 'idle'; cpValidateError = ''; }}
+					onpaste={cpHandleNamePaste}
+					onblur={cpHandleNameBlur}
+					class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-8 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring {cpNameState === 'invalid' ? 'border-destructive' : cpNameState === 'valid' ? 'border-green-500' : ''}"
+				/>
+				{#if cpNameState === 'loading'}
+					<Loader2 size={14} class="absolute right-2.5 top-2.5 animate-spin text-muted-foreground" />
+				{:else if cpNameState === 'valid'}
+					<CheckCircle2 size={14} class="absolute right-2.5 top-2.5 text-green-500" />
+				{:else if cpNameState === 'invalid'}
+					<XCircle size={14} class="absolute right-2.5 top-2.5 text-destructive" />
+				{/if}
+			</div>
 		</div>
 		<div>
 			<label for="cp-uuid" class="mb-1 block text-xs font-medium text-muted-foreground">UUID</label>
-			<Input.Root id="cp-uuid" name="uuid" placeholder="00000000-0000-0000-0000-000000000000" class="font-mono" required />
+			<div class="relative">
+				<input
+					id="cp-uuid"
+					name="uuid"
+					placeholder="00000000-0000-0000-0000-000000000000"
+					required
+					value={cpUuid}
+					oninput={(e) => { cpUuid = e.currentTarget.value; cpUuidState = 'idle'; cpValidateError = ''; }}
+					onpaste={cpHandleUuidPaste}
+					onblur={cpHandleUuidBlur}
+					class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-8 font-mono text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring {cpUuidState === 'invalid' ? 'border-destructive' : cpUuidState === 'valid' ? 'border-green-500' : ''}"
+				/>
+				{#if cpUuidState === 'loading'}
+					<Loader2 size={14} class="absolute right-2.5 top-2.5 animate-spin text-muted-foreground" />
+				{:else if cpUuidState === 'valid'}
+					<CheckCircle2 size={14} class="absolute right-2.5 top-2.5 text-green-500" />
+				{:else if cpUuidState === 'invalid'}
+					<XCircle size={14} class="absolute right-2.5 top-2.5 text-destructive" />
+				{/if}
+			</div>
+			{#if cpValidateError}
+				<p class="mt-1 text-xs text-destructive">{cpValidateError}</p>
+			{/if}
+			{#if cpNameState === 'valid'}
+				<p class="mt-1 text-xs text-muted-foreground">Verified with Mojang</p>
+			{/if}
 		</div>
-		<Button.Root type="submit" size="sm">Create</Button.Root>
+		<Button.Root type="submit" size="sm" disabled={cpNameState === 'loading' || cpUuidState === 'loading'}>Create</Button.Root>
 	</form>
 </Modal>
 
