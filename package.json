@@ -8,7 +8,7 @@
 		"dev:vite": "bun --bun vite dev --port 3002",
 		"dev:ws": "bun run --watch src/server.ts",
 		"build": "bun --bun vite build && bun build ./src/server.ts --outdir ./build --target bun --sourcemap=linked",
-		"deploy": "bun run deploy.ts",
+		"deploy": "bun run scripts/deploy.ts",
 		"preview": "bun run ./build/server.js",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

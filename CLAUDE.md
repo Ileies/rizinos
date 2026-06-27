@@ -80,7 +80,7 @@ Schema is split by domain in `src/lib/server/db/`:
 ## Deployment
 
 ```sh
-bun run deploy       # runs deploy.ts
+bun run deploy       # runs scripts/deploy.ts
 ```
 
 PM2 config at `pm2.config.cjs`. Server runs on `PORT` env var (default 3000).
