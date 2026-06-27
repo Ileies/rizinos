@@ -72,21 +72,15 @@
 <svelte:window bind:innerWidth />
 
 <header
-	class="sticky top-0 z-50 w-full transition-all duration-300 {isScrolled
-		? 'bg-white-80 bg-transparent shadow-lg backdrop-blur-lg'
-		: ''}"
+	class="sticky top-0 z-50 w-full border-b bg-white transition-all duration-200 {isScrolled
+		? 'border-gray-200'
+		: 'border-transparent'}"
 >
 	<div class="container mx-auto px-4">
 		<nav class="flex h-20 items-center justify-between">
 			<!-- Logo -->
-			<a
-				class="relative text-2xl font-bold text-primary"
-				href="/"
-			>
+			<a class="text-xl font-black tracking-tight text-gray-900" href="/">
 				{PUBLIC_APP_NAME}
-				<div
-					class="absolute -bottom-1 left-0 h-0.5 w-full scale-x-0 transform bg-primary transition-transform duration-300 hover:scale-x-100"
-				></div>
 			</a>
 
 			<div class="relative">
@@ -163,20 +157,19 @@
 
 					<a
 						href={github}
-						class="space-x-2 text-gray-700 transition-colors duration-200 hover:text-gray-900"
+						class="text-gray-400 transition-colors hover:text-gray-600"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						<SiGithub size={20} />
+						<SiGithub size={18} />
 					</a>
 
-					<button
-						class="rounded-full bg-primary px-6 py-2.5 font-medium text-white
-            transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-primary/50 active:scale-100"
-						onclick={() => goto('/app')}
+					<a
+						href="/login"
+						class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
 					>
-						{m.getting_started()}
-					</button>
+						Log in
+					</a>
 				</div>
 			{:else}
 				<!-- Mobile Menu Button -->
@@ -197,7 +190,7 @@
 		<!-- Mobile Navigation -->
 		{#if isMobile && isMenuOpen}
 			<div
-				class="absolute top-20 left-0 w-full border-t border-gray-100 bg-white/80 px-4 py-4 shadow-xl backdrop-blur-lg"
+				class="absolute top-20 left-0 w-full border-t border-gray-200 bg-white px-4 py-4 shadow-lg"
 			>
 				<!--transition:slide={{ duration: 200, easing: cubicInOut }}-->
 				{#each navItems as item (item.label)}
@@ -245,13 +238,12 @@
 					<ExternalLink size={14} class="text-gray-400" />
 				</a>
 
-				<button
-					class="mt-4 w-full rounded-full bg-primary px-6 py-3 font-medium
-          text-white transition-all duration-200 hover:shadow-lg hover:shadow-primary/50"
-					onclick={() => goto('/app')}
+				<a
+					href="/login"
+					class="mt-4 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
 				>
-					{m.getting_started()}
-				</button>
+					Log in
+				</a>
 			</div>
 		{/if}
 	</div>

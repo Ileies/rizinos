@@ -1,70 +1,560 @@
 <script lang="ts">
-	// Function to handle the "Get Started" button click
-	function handleGetStarted() {
-		// Redirect to the RizinOS dashboard or installation page
-		window.location.href = '/dashboard';
-	}
+	import {
+		ArrowRight,
+		Cpu,
+		Layers,
+		Download,
+		Shield,
+		Zap,
+		Users,
+		Check,
+		Code2,
+		Lock,
+		Globe,
+		Wifi
+	} from '@lucide/svelte';
+	import SignupFlow from '$ui/homepage/SignupFlow.svelte';
+
+	let { loggedIn = false }: { loggedIn?: boolean } = $props();
+
+	const features = [
+		{
+			icon: Cpu,
+			title: 'Rust WASM Engine',
+			description:
+				'Core OS modules written in Rust, compiled to WebAssembly. Near-native performance — entirely in the browser.'
+		},
+		{
+			icon: Layers,
+			title: 'NixOS-like Architecture',
+			description:
+				'Declarative, version-controlled system configuration. Roll back any change at any time.'
+		},
+		{
+			icon: Shield,
+			title: 'Client-Side Encryption',
+			description:
+				'All storage is encrypted before it leaves your device. The server never sees your plaintext.'
+		},
+		{
+			icon: Zap,
+			title: 'Instant Start',
+			description:
+				'No POST. No drivers. No loading. Open a tab and your OS is there, exactly as you left it.'
+		},
+		{
+			icon: Download,
+			title: 'Background App',
+			description:
+				'Optional native companion for file sync, peripheral access, and push notifications from your device.'
+		},
+		{
+			icon: Users,
+			title: 'Real-Time Collaboration',
+			description:
+				'Shared sessions on files and apps, built at the OS level. Not bolted on per-app.'
+		}
+	];
+
+	const apps = [
+		{ name: 'Files', label: 'F' },
+		{ name: 'Terminal', label: '>_' },
+		{ name: 'Browser', label: 'B' },
+		{ name: 'Notes', label: 'N' },
+		{ name: 'Mail', label: 'M' },
+		{ name: 'Chat', label: 'C' },
+		{ name: 'Calendar', label: 'Ca' },
+		{ name: 'Photos', label: 'Ph' },
+		{ name: 'Video', label: 'V' },
+		{ name: 'Music', label: 'Mu' },
+		{ name: 'Settings', label: 'S' },
+		{ name: 'Store', label: 'St' }
+	];
+
+	const syncFeatures = [
+		'Bidirectional file sync between device and cloud VFS',
+		'Native drag-and-drop uploads from your desktop',
+		'Continuous versioned backups with configurable retention',
+		'Push notifications even when the browser tab is closed',
+		'Peripheral bridging: cameras, microphones, USB, serial',
+		'Offline mode with automatic sync on reconnect'
+	];
+
+	const layers = [
+		{ label: 'Applications', sub: 'Files · Terminal · Browser · Notes · Chat · Mail · Calendar...' },
+		{ label: 'System Shell', sub: 'Window manager · Dock · Notifications · Permissions UI' },
+		{ label: 'OS Services', sub: 'Auth · Storage · Networking · IPC bus · Event system' },
+		{ label: 'Rust WASM Kernel', sub: 'Scheduling · Memory isolation · Crypto · Compression' },
+		{ label: 'Browser Runtime', sub: 'WebAssembly · Web APIs · WebGL · WebRTC · WebSockets' }
+	];
 </script>
 
-<div class="hero bg-base-100 py-20">
-	<div class="hero-content text-center">
-		<div class="max-w-4xl">
-			<!-- RizinOS Logo -->
-			<img alt="RizinOS Logo" class="mx-auto mb-8 h-32 w-32 drop-shadow-sm" src="/images/rizinos-logo.png" />
-
-			<!-- Headline -->
-			<h1 class="text-primary mb-4 text-6xl font-bold leading-tight">
-				Welcome to <span class="text-secondary">RizinOS</span>
-			</h1>
-
-			<!-- Subheadline -->
-			<p class="text-base-content mb-8 text-xl leading-relaxed">
-				The world's first operating system running entirely in your browser. Lightweight, fast, and
-				built for the future of the web.
-			</p>
-
-			<!-- Call-to-Action Buttons -->
-			<div class="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-				<button
-					class="btn btn-primary btn-lg shadow-md transition-all hover:shadow-lg hover:scale-105 active:scale-95"
-					on:click={handleGetStarted}
-				>
-					Get Started
-				</button>
-				<button
-					class="btn btn-outline btn-secondary btn-lg transition-all hover:bg-secondary hover:text-base-100 hover:scale-105 active:scale-95"
-				>
-					Learn More
-				</button>
+<div class="flex w-full flex-col">
+	<!-- ===================================================
+	     HERO
+	     =================================================== -->
+	<section class="border-b border-gray-200 bg-white px-6 py-24 lg:py-36">
+		<div class="mx-auto max-w-4xl text-center">
+			<div
+				class="mb-6 inline-flex items-center gap-2 rounded border border-gray-200 px-2.5 py-1 font-mono text-xs text-gray-500"
+			>
+				<span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+				public beta · v11.0.0
 			</div>
 
-			<!-- Feature Highlights -->
-			<div class="mt-20 grid grid-cols-1 gap-8 md:grid-cols-3">
-				<div class="card border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-105">
-					<div class="card-body">
-						<h2 class="card-title text-primary text-lg font-semibold">Blazing Fast</h2>
-						<p class="text-base-content text-sm leading-relaxed">
-							Built with performance in mind, RizinOS delivers a seamless experience.
-						</p>
+			<h1 class="text-5xl font-black leading-[1.08] tracking-tight text-gray-900 lg:text-7xl">
+				The operating system<br />
+				that runs in your browser
+			</h1>
+
+			<p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-500">
+				Built on Rust WASM modules and a NixOS-inspired architecture. No hardware. No drivers. No
+				OS errors — by design. Adapts to your device: feels at home on phones, tablets, and desktops alike.
+			</p>
+
+			<div class="mt-10">
+				<SignupFlow {loggedIn} />
+			</div>
+		</div>
+
+		<!-- OS Mockup -->
+		<div class="mx-auto mt-20 max-w-5xl">
+			<div
+				class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_32px_80px_rgba(0,0,0,0.12)]"
+			>
+				<!-- Browser bar -->
+				<div class="flex items-center gap-2 border-b border-gray-200 bg-gray-100 px-4 py-3">
+					<div class="flex gap-1.5">
+						<div class="h-3 w-3 rounded-full bg-gray-300"></div>
+						<div class="h-3 w-3 rounded-full bg-gray-300"></div>
+						<div class="h-3 w-3 rounded-full bg-gray-300"></div>
+					</div>
+					<div
+						class="mx-3 flex flex-1 items-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs text-gray-500 shadow-sm ring-1 ring-gray-200"
+					>
+						<Lock class="h-3 w-3 text-green-500" />
+						rizinos.com/app
 					</div>
 				</div>
-				<div class="card border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-105">
-					<div class="card-body">
-						<h2 class="card-title text-primary text-lg font-semibold">Browser-Powered</h2>
-						<p class="text-base-content text-sm leading-relaxed">
-							No installations needed. Run RizinOS directly in your browser.
-						</p>
+
+				<!-- Desktop surface -->
+				<div class="relative h-[380px] overflow-hidden bg-slate-100 lg:h-[480px]">
+					<!-- Desktop background pattern -->
+					<div
+						class="absolute inset-0"
+						style="background: linear-gradient(135deg, #e8edf5 0%, #dde4f0 100%)"
+					></div>
+
+					<!-- Desktop icons -->
+					<div class="absolute left-4 top-4 flex flex-col gap-1">
+						{#each ['Files', 'Terminal', 'Browser', 'Notes'] as icon}
+							<div
+								class="flex cursor-default items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/40"
+							>
+								<div class="h-8 w-8 rounded-lg bg-blue-600 shadow-sm"></div>
+								<span class="text-xs font-medium text-gray-700">{icon}</span>
+							</div>
+						{/each}
 					</div>
-				</div>
-				<div class="card border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-105">
-					<div class="card-body">
-						<h2 class="card-title text-primary text-lg font-semibold">Secure & Private</h2>
-						<p class="text-base-content text-sm leading-relaxed">
-							Your data stays safe with end-to-end encryption and privacy-first design.
-						</p>
+
+					<!-- Window: Files -->
+					<div
+						class="absolute left-24 top-8 hidden w-64 overflow-hidden rounded-xl border border-gray-300 bg-white shadow-xl sm:block lg:w-80"
+					>
+						<div class="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-2.5">
+							<div class="flex gap-1.5">
+								<div class="h-2.5 w-2.5 rounded-full bg-gray-300"></div>
+								<div class="h-2.5 w-2.5 rounded-full bg-gray-300"></div>
+								<div class="h-2.5 w-2.5 rounded-full bg-gray-300"></div>
+							</div>
+							<span class="ml-2 text-xs font-medium text-gray-500">Files</span>
+						</div>
+						<div class="divide-y divide-gray-100">
+							{#each ['Documents', 'Downloads', 'Pictures', 'Music', 'Projects'] as folder}
+								<div
+									class="flex cursor-default items-center gap-3 px-4 py-2.5 hover:bg-blue-50"
+								>
+									<div class="h-4 w-4 rounded bg-blue-500/80"></div>
+									<span class="text-sm text-gray-700">{folder}</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+
+					<!-- Window: Terminal -->
+					<div
+						class="absolute right-4 top-10 hidden w-52 overflow-hidden rounded-xl border border-gray-300 bg-gray-900 shadow-xl sm:right-8 sm:block lg:w-64"
+					>
+						<div
+							class="flex items-center gap-2 border-b border-gray-700 bg-gray-800 px-4 py-2.5"
+						>
+							<div class="flex gap-1.5">
+								<div class="h-2.5 w-2.5 rounded-full bg-gray-600"></div>
+								<div class="h-2.5 w-2.5 rounded-full bg-gray-600"></div>
+								<div class="h-2.5 w-2.5 rounded-full bg-gray-600"></div>
+							</div>
+							<span class="ml-2 font-mono text-xs text-gray-400">bash</span>
+						</div>
+						<div class="p-4 font-mono text-xs leading-relaxed">
+							<div class="text-gray-500">user@rizinos ~ %</div>
+							<div class="text-gray-300">uname -a</div>
+							<div class="text-gray-500">RizinOS 11.0.0 wasm64</div>
+							<div class="text-gray-500">Kernel: rzk-wasm-rust</div>
+							<div class="mt-2 text-gray-500">
+								user@rizinos ~ % <span class="animate-pulse text-gray-300">|</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Notification -->
+					<div
+						class="absolute left-1/2 top-4 hidden -translate-x-1/2 items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-lg sm:flex lg:w-64"
+					>
+						<div class="h-7 w-7 flex-shrink-0 rounded-lg bg-green-500"></div>
+						<div class="text-xs text-gray-600">Sync complete - 3 files updated</div>
+					</div>
+
+					<!-- Dock -->
+					<div
+						class="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-gray-200 bg-white/80 px-6 py-2 backdrop-blur-md"
+					>
+						<div class="flex items-center gap-2">
+							{#each Array(6) as _, i}
+								<div
+									class="h-8 w-8 rounded-lg bg-blue-600 shadow-sm transition-transform hover:scale-110 {i === 0 || i === 2 ? 'ring-2 ring-blue-200' : ''}"
+								></div>
+							{/each}
+						</div>
+						<div class="font-mono text-xs text-gray-400">12:34</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
+
+	<!-- ===================================================
+	     ZERO ERRORS
+	     =================================================== -->
+	<section class="bg-gray-50 px-6 py-24">
+		<div class="mx-auto max-w-7xl">
+			<div class="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
+				<div>
+					<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+						The core promise
+					</p>
+					<h2 class="text-4xl font-black leading-tight tracking-tight text-gray-900 lg:text-5xl">
+						The first OS that<br />cannot fail.
+					</h2>
+					<p class="mt-5 text-lg leading-relaxed text-gray-500">
+						Traditional operating systems fail because they depend on hardware, drivers, and mutable
+						state. RizinOS eliminates all three. Running in the browser means no hardware
+						abstractions to break, no drivers to conflict, and no system state to corrupt.
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 gap-4">
+					{#each [
+						{
+							title: 'Hardware-independent',
+							desc: 'No device drivers. No hardware conflicts. The browser is the hardware layer — and browsers are extremely good at that job.'
+						},
+						{
+							title: 'Declarative configuration',
+							desc: 'Every system setting is version-controlled and reproducible. No configuration drift between environments, ever.'
+						},
+						{
+							title: 'Atomic updates',
+							desc: 'System updates apply atomically or not at all. Failed updates roll back automatically. You can undo any change, any time.'
+						}
+					] as item}
+						<div class="rounded-xl border border-gray-200 bg-white p-6">
+							<h3 class="mb-2 font-semibold text-gray-900">{item.title}</h3>
+							<p class="text-sm leading-relaxed text-gray-500">{item.desc}</p>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===================================================
+	     FEATURES
+	     =================================================== -->
+	<section class="bg-white px-6 py-24">
+		<div class="mx-auto max-w-7xl">
+			<div class="mb-16 max-w-xl">
+				<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+					Capabilities
+				</p>
+				<h2 class="text-4xl font-black tracking-tight text-gray-900">
+					Built for the next era of computing.
+				</h2>
+			</div>
+
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+				{#each features as feature}
+					{@const Icon = feature.icon}
+					<div
+						class="rounded-xl border border-gray-200 bg-white p-7 transition-shadow hover:shadow-md"
+					>
+						<div
+							class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50"
+						>
+							<Icon class="h-5 w-5 text-blue-600" />
+						</div>
+						<h3 class="mb-2 font-semibold text-gray-900">{feature.title}</h3>
+						<p class="text-sm leading-relaxed text-gray-500">{feature.description}</p>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</section>
+
+	<!-- ===================================================
+	     BACKGROUND APP
+	     =================================================== -->
+	<section class="border-y border-gray-200 bg-gray-50 px-6 py-24">
+		<div class="mx-auto max-w-7xl">
+			<div class="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+				<div>
+					<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+						Background App
+					</p>
+					<h2 class="text-4xl font-black leading-tight tracking-tight text-gray-900">
+						Extends into your device.
+					</h2>
+					<p class="mt-5 text-lg leading-relaxed text-gray-500">
+						Install the optional Background App to bridge RizinOS with your device. File sync,
+						peripheral access, and native notifications — without giving up the browser-first
+						architecture.
+					</p>
+					<div class="mt-8 space-y-3">
+						{#each syncFeatures as item}
+							<div class="flex items-start gap-3">
+								<Check class="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
+								<span class="text-sm text-gray-600">{item}</span>
+							</div>
+						{/each}
+					</div>
+					<div class="mt-10 flex flex-wrap gap-3">
+						{#each ['Linux', 'macOS', 'Windows'] as platform}
+							<button
+								class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400"
+							>
+								Download for {platform}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Bridge diagram -->
+				<div class="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+					<div class="flex flex-col items-stretch gap-3">
+						<div class="rounded-lg border border-blue-200 bg-blue-50 p-5">
+							<div class="flex items-center gap-3">
+								<Globe class="h-5 w-5 text-blue-600" />
+								<div>
+									<div class="text-sm font-semibold text-gray-900">RizinOS in browser</div>
+									<div class="text-xs text-gray-400">rizinos.com/app</div>
+								</div>
+								<div class="ml-auto h-2 w-2 rounded-full bg-green-400"></div>
+							</div>
+						</div>
+
+						<div class="flex flex-col items-center gap-0.5 py-1">
+							<div class="h-6 w-px bg-gray-300"></div>
+							<div
+								class="rounded-full border border-gray-300 bg-white px-4 py-1 text-xs text-gray-500"
+							>
+								Encrypted bridge
+							</div>
+							<div class="h-6 w-px bg-gray-300"></div>
+						</div>
+
+						<div class="rounded-lg border border-gray-200 bg-gray-50 p-5">
+							<div class="flex items-center gap-3">
+								<Wifi class="h-5 w-5 text-gray-500" />
+								<div>
+									<div class="text-sm font-semibold text-gray-900">Background App</div>
+									<div class="text-xs text-gray-400">Running on your device</div>
+								</div>
+								<div class="ml-auto h-2 w-2 rounded-full bg-green-400"></div>
+							</div>
+						</div>
+
+						<div class="mt-4 grid grid-cols-2 gap-2">
+							{#each ['File Sync', 'Cloud Backup', 'Notifications', 'Offline Mode', 'Peripherals', 'USB Access'] as cap}
+								<div
+									class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-center text-xs text-gray-500"
+								>
+									{cap}
+								</div>
+							{/each}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===================================================
+	     APPS
+	     =================================================== -->
+	<section class="bg-white px-6 py-24">
+		<div class="mx-auto max-w-7xl">
+			<div class="mb-16 max-w-xl">
+				<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+					Applications
+				</p>
+				<h2 class="text-4xl font-black tracking-tight text-gray-900">
+					A full suite. Built in.
+				</h2>
+				<p class="mt-4 text-gray-500">
+					Every app shares a unified permission model, file protocol, and design system. They are OS
+					citizens, not plugins.
+				</p>
+			</div>
+
+			<div class="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-6">
+				{#each apps as app}
+					<div
+						class="group flex cursor-default flex-col items-center gap-2.5 rounded-xl border border-gray-200 p-4 transition-shadow hover:shadow-sm"
+					>
+						<div
+							class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-sm font-bold text-white shadow-sm"
+						>
+							{app.label.length <= 2 ? app.label : app.label[0]}
+						</div>
+						<span class="text-xs font-medium text-gray-500">{app.name}</span>
+					</div>
+				{/each}
+			</div>
+
+			<p class="mt-6 text-sm text-gray-400">
+				+ Minecraft integration, AI assistant, Stripe payments, video calling in the roadmap
+			</p>
+		</div>
+	</section>
+
+	<!-- ===================================================
+	     ARCHITECTURE
+	     =================================================== -->
+	<section class="border-y border-gray-200 bg-gray-50 px-6 py-24">
+		<div class="mx-auto max-w-7xl">
+			<div class="grid grid-cols-1 items-start gap-16 lg:grid-cols-2">
+				<div>
+					<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
+						Architecture
+					</p>
+					<h2 class="text-4xl font-black leading-tight tracking-tight text-gray-900">
+						Clean layers,<br />no shortcuts.
+					</h2>
+					<p class="mt-5 text-lg leading-relaxed text-gray-500">
+						Rust modules compile to WASM and run as the kernel layer. SvelteKit drives the system
+						shell. Each app is an isolated WASM process with its own memory space and typed IPC to
+						the OS. Nothing is shared implicitly.
+					</p>
+
+					<!-- Developer snippet -->
+					<div class="mt-8 overflow-hidden rounded-xl border border-gray-200 bg-gray-900">
+						<div class="border-b border-gray-700 px-5 py-3">
+							<div class="flex items-center gap-2 text-xs text-gray-400">
+								<Code2 class="h-3.5 w-3.5" />
+								my-app/index.ts
+							</div>
+						</div>
+						<div class="p-5 font-mono text-xs leading-relaxed">
+							<div>
+								<span class="text-purple-400">import</span>
+								<span class="text-white"> {'{'} </span>
+								<span class="text-blue-300">App, ipc, fs</span>
+								<span class="text-white"> {'}'} </span>
+								<span class="text-purple-400">from</span>
+								<span class="text-green-400"> 'rizinos-sdk'</span>
+							</div>
+							<div class="mt-3 text-gray-500">{'// declare capabilities at install time'}</div>
+							<div>
+								<span class="text-purple-400">export const</span>
+								<span class="text-yellow-300"> manifest</span>
+								<span class="text-white"> = {'{'}</span>
+							</div>
+							<div class="pl-5">
+								<span class="text-blue-300">permissions</span><span class="text-white">: [</span><span
+									class="text-green-400">'fs:read'</span
+								><span class="text-white">, </span><span class="text-green-400">'network'</span><span
+									class="text-white">]</span
+								>
+							</div>
+							<div><span class="text-white">{'}'}</span></div>
+							<div class="mt-3 text-gray-500">{'// runs as an isolated WASM process'}</div>
+							<div>
+								<span class="text-purple-400">export default</span>
+								<span class="text-purple-400"> new</span>
+								<span class="text-yellow-300"> App</span><span class="text-white">({'{'}</span>
+							</div>
+							<div class="pl-5">
+								<span class="text-blue-300">onMount</span><span class="text-white">: </span><span
+									class="text-purple-400">async</span
+								>
+								<span class="text-white">(ctx) => </span><span class="text-white">{'{'}</span>
+							</div>
+							<div class="pl-10">
+								<span class="text-purple-400">const</span>
+								<span class="text-white"> files = </span><span class="text-purple-400">await </span
+								><span class="text-blue-300">fs</span><span class="text-white">.</span><span
+									class="text-yellow-300">readdir</span
+								><span class="text-white">('~/Documents')</span>
+							</div>
+							<div class="pl-5"><span class="text-white">{'}'}</span></div>
+							<div><span class="text-white">{'}'})</span></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Layer stack -->
+				<div class="flex flex-col gap-2">
+					{#each layers as layer, i}
+						<div
+							class="rounded-lg border border-gray-200 bg-white px-5 py-4 shadow-sm transition-shadow hover:shadow-md"
+						>
+							<div class="flex items-center justify-between">
+								<span class="text-sm font-semibold text-gray-900">{layer.label}</span>
+								<span class="text-xs text-gray-400">Layer {layers.length - i}</span>
+							</div>
+							<div class="mt-1 text-xs text-gray-400">{layer.sub}</div>
+						</div>
+					{/each}
+					<p class="mt-3 text-xs text-gray-400">
+						All layers communicate through typed IPC interfaces
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===================================================
+	     CTA
+	     =================================================== -->
+	<section class="bg-white px-6 py-28">
+		<div class="mx-auto max-w-2xl text-center">
+			<h2 class="text-4xl font-black tracking-tight text-gray-900 lg:text-5xl">
+				Your OS is waiting.<br />Open a tab.
+			</h2>
+			<p class="mt-5 text-lg text-gray-500">
+				No downloads. No setup. Works on any device, any screen size, any browser.
+			</p>
+			<div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+				<a
+					href="/signup"
+					class="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-4 font-semibold text-white transition-colors hover:bg-blue-700"
+				>
+					Create your account
+					<ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+				</a>
+			</div>
+			<p class="mt-4 text-sm text-gray-400">
+				Free tier forever - No credit card - 10 GB cloud storage included
+			</p>
+		</div>
+	</section>
 </div>
