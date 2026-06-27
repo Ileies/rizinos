@@ -257,5 +257,40 @@ export const actions: Actions = {
 			.set({ permissions })
 			.where(eq(mcUsers.uuid, uuid));
 		return { success: true };
+	},
+
+	mcUserBan: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const uuid = data.get('uuid') as string;
+		const until = data.get('until') as string;
+		const reason = (data.get('reason') as string) || null;
+
+		if (!uuid) return fail(400, { message: 'UUID required' });
+
+		const bannedUntil = until ? new Date(until) : null;
+		await db
+			.update(mcUsers)
+			.set({ bannedUntil, bannedReason: bannedUntil ? reason : null })
+			.where(eq(mcUsers.uuid, uuid));
+		return { success: true };
+	},
+
+	mcUserMute: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const uuid = data.get('uuid') as string;
+		const until = data.get('until') as string;
+
+		if (!uuid) return fail(400, { message: 'UUID required' });
+
+		const mutedUntil = until ? new Date(until) : null;
+		await db
+			.update(mcUsers)
+			.set({ mutedUntil })
+			.where(eq(mcUsers.uuid, uuid));
+		return { success: true };
 	}
 };

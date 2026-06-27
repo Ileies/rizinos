@@ -181,6 +181,12 @@
 	const GM_ICON = { 0: Pickaxe, 1: Wand2, 2: Compass, 3: Eye } as const;
 	const GM_LABEL = { 0: 'Survival', 1: 'Creative', 2: 'Adventure', 3: 'Spectator' } as const;
 	const GM_KEYS = [0, 1, 2, 3] as const;
+
+	function homeWorld(loc: string | null) {
+		if (!loc) return null;
+		const m = loc.match(/(?:^|,)world=([^,]+)/);
+		return m ? m[1] : null;
+	}
 </script>
 
 {#snippet rowActions(onEdit: () => void, deleteAction: string, deleteFields: Record<string, string>)}
@@ -267,6 +273,7 @@
 						<Table.Head class="w-36">MC Name</Table.Head>
 						<Table.Head class="w-32">Account</Table.Head>
 						<Table.Head class="w-20 text-center">Perms</Table.Head>
+						<Table.Head class="w-28">Home</Table.Head>
 						<Table.Head class="w-32">Sanctions</Table.Head>
 						<Table.Head class="w-16"></Table.Head>
 					</Table.Row>
@@ -277,6 +284,7 @@
 							<Table.Cell class="py-1.5 font-medium">{mc.name}</Table.Cell>
 							<Table.Cell class="py-1.5 text-xs text-muted-foreground">{mc.user.username}</Table.Cell>
 							<Table.Cell class="py-1.5 text-center text-sm">{mc.permissions.length}</Table.Cell>
+							<Table.Cell class="py-1.5 text-xs text-muted-foreground">{homeWorld(mc.homeLocation) ?? '-'}</Table.Cell>
 							<Table.Cell class="py-1.5">
 								<div class="flex gap-1">
 									{#if mc.bannedUntil}
@@ -458,22 +466,62 @@
 				</form>
 			</div>
 
-			{#if editingPlayer.bannedUntil}
-				<div class="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs dark:border-red-800 dark:bg-red-950/20">
-					<span class="font-medium text-red-700 dark:text-red-400">Banned until:</span>
-					<span class="ml-1 text-red-600">{new Date(editingPlayer.bannedUntil).toLocaleString()}</span>
-					{#if editingPlayer.bannedReason}
-						<span class="ml-1 text-red-500">- {editingPlayer.bannedReason}</span>
-					{/if}
-				</div>
-			{/if}
+			<div class="border-t pt-4 space-y-2">
+				<p class="text-xs font-medium text-muted-foreground">Ban</p>
+				{#if editingPlayer.bannedUntil}
+					<div class="flex items-center justify-between rounded border border-red-200 bg-red-50 px-3 py-2 text-xs dark:border-red-800 dark:bg-red-950/20">
+						<div>
+							<span class="font-medium text-red-700 dark:text-red-400">Until:</span>
+							<span class="ml-1 text-red-600">{new Date(editingPlayer.bannedUntil).toLocaleString()}</span>
+							{#if editingPlayer.bannedReason}
+								<span class="ml-1 text-red-500">- {editingPlayer.bannedReason}</span>
+							{/if}
+						</div>
+						<form method="POST" action="?/mcUserBan" use:enhance class="ml-3 shrink-0">
+							<input type="hidden" name="uuid" value={editingPlayer.uuid} />
+							<input type="hidden" name="until" value="" />
+							<Button.Root type="submit" size="sm" variant="outline" class="h-6 border-red-300 px-2 text-xs text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400">Lift</Button.Root>
+						</form>
+					</div>
+				{/if}
+				<form method="POST" action="?/mcUserBan" use:enhance class="flex items-end gap-2">
+					<input type="hidden" name="uuid" value={editingPlayer.uuid} />
+					<div class="flex-1">
+						<label for="ban-until" class="mb-1 block text-xs text-muted-foreground">Until</label>
+						<Input.Root id="ban-until" type="datetime-local" name="until" required />
+					</div>
+					<div class="flex-1">
+						<label for="ban-reason" class="mb-1 block text-xs text-muted-foreground">Reason</label>
+						<Input.Root id="ban-reason" name="reason" placeholder="Optional" />
+					</div>
+					<Button.Root type="submit" size="sm" variant="destructive" class="shrink-0">Ban</Button.Root>
+				</form>
+			</div>
 
-			{#if editingPlayer.mutedUntil}
-				<div class="rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs dark:border-yellow-800 dark:bg-yellow-950/20">
-					<span class="font-medium text-yellow-700 dark:text-yellow-400">Muted until:</span>
-					<span class="ml-1 text-yellow-600">{new Date(editingPlayer.mutedUntil).toLocaleString()}</span>
-				</div>
-			{/if}
+			<div class="border-t pt-4 space-y-2">
+				<p class="text-xs font-medium text-muted-foreground">Mute</p>
+				{#if editingPlayer.mutedUntil}
+					<div class="flex items-center justify-between rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs dark:border-yellow-800 dark:bg-yellow-950/20">
+						<div>
+							<span class="font-medium text-yellow-700 dark:text-yellow-400">Until:</span>
+							<span class="ml-1 text-yellow-600">{new Date(editingPlayer.mutedUntil).toLocaleString()}</span>
+						</div>
+						<form method="POST" action="?/mcUserMute" use:enhance class="ml-3 shrink-0">
+							<input type="hidden" name="uuid" value={editingPlayer.uuid} />
+							<input type="hidden" name="until" value="" />
+							<Button.Root type="submit" size="sm" variant="outline" class="h-6 border-yellow-300 px-2 text-xs text-yellow-700 hover:bg-yellow-100 dark:border-yellow-700 dark:text-yellow-400">Lift</Button.Root>
+						</form>
+					</div>
+				{/if}
+				<form method="POST" action="?/mcUserMute" use:enhance class="flex items-end gap-2">
+					<input type="hidden" name="uuid" value={editingPlayer.uuid} />
+					<div>
+						<label for="mute-until" class="mb-1 block text-xs text-muted-foreground">Until</label>
+						<Input.Root id="mute-until" type="datetime-local" name="until" required />
+					</div>
+					<Button.Root type="submit" size="sm" variant="outline" class="shrink-0 border-yellow-400 text-yellow-700 hover:bg-yellow-50 dark:border-yellow-600 dark:text-yellow-400">Mute</Button.Root>
+				</form>
+			</div>
 		</div>
 	</Modal>
 {/if}
