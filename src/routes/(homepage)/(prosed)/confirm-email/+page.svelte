@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import * as Button from '$shadcn/button';
 
 	let { data } = $props();
 
@@ -20,7 +21,7 @@
 			<p class="text-gray-500">Your email was successfully verified!</p>
 		{/if}
 		<div>
-			<button class="btn btn-primary" onclick={() => goto('/')}> Return to Homepage </button>
+			<Button.Root class="mt-4" onclick={() => goto('/')}>Return to Homepage</Button.Root>
 		</div>
 	</div>
 </div>

@@ -3,6 +3,7 @@
 	import { CircleAlert, CircleCheck, Info, OctagonX } from '@lucide/svelte';
 	import type { Notification } from '$types';
 	import { fly } from 'svelte/transition';
+	import * as Alert from '$shadcn/alert';
 	// TODO: Transition doesn't work yet
 
 	const showSeconds = 5;
@@ -26,7 +27,7 @@
 </script>
 
 {#if os.notifications.length > 0}
-	<div class="toast right-0 z-[2147483634] {os.isMobile ? 'top-0 w-full' : 'bottom-10 w-72'}">
+	<div class="fixed right-0 z-[2147483634] flex flex-col gap-2 p-4 {os.isMobile ? 'top-0 w-full' : 'bottom-10 w-72'}">
 		{#if os.notifications.length > 4}
 			<div>
 				{os.notifications.length - 4} ...
@@ -34,24 +35,27 @@
 		{/if}
 		{#each freshNotifications as notification (notification)}
 			{@const Icon = icons[notification.type]}
-			<div
-				class="alert {os.isMobile ? 'w-full' : 'border border-gray-300'}"
-				onclick={notification.actions[0].action}
-				role="none"
-				transition:fly
-			>
-				<Icon />
-				<span>{notification}</span>
-				<div>
-					{#each notification.actions as { title, action } (title)}
-						<button
-							onclick={(e) => {
-								e.stopPropagation();
-								action();
-							}}>{title}</button
-						>
-					{/each}
-				</div>
+			<div transition:fly>
+				<Alert.Root
+					variant={notification.type === 'error' ? 'destructive' : 'default'}
+					class="cursor-pointer {os.isMobile ? 'w-full' : ''}"
+					onclick={notification.actions[0].action}
+					role="none"
+				>
+					<Icon />
+					<Alert.Description>{notification.title}</Alert.Description>
+					<div class="flex gap-1">
+						{#each notification.actions as { title, action } (title)}
+							<button
+								onclick={(e) => {
+									e.stopPropagation();
+									action();
+								}}
+								class="text-xs underline">{title}</button
+							>
+						{/each}
+					</div>
+				</Alert.Root>
 			</div>
 		{/each}
 	</div>

@@ -61,7 +61,7 @@
 
 <div class="h-1 bg-primary"></div>
 
-<footer class="bg-base-200 border-base-300 border-t pt-20 pb-12">
+<footer class="border-t border-border bg-muted pt-20 pb-12">
 	<div class="container mx-auto px-4 lg:px-8">
 		<div class="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-6">
 			<!-- Brand Section -->
@@ -70,12 +70,12 @@
 					<img src="/favicon.png" alt={PUBLIC_APP_NAME} class="h-8 w-8" />
 					<span class="text-2xl font-bold text-primary">{PUBLIC_APP_NAME}</span>
 				</a>
-				<p class="text-base-content/70 mt-4 leading-relaxed">
+				<p class="text-foreground/70 mt-4 leading-relaxed">
 					{m.description()}
 				</p>
 				<div class="mt-6 flex space-x-4">
 					<a
-						class="text-base-content/50 hover:text-base-content transition-colors duration-200"
+						class="text-foreground/50 hover:text-foreground transition-colors duration-200"
 						href={discord}
 						aria-label="Discord"
 					>
@@ -93,14 +93,14 @@
 					</a>
 
 					<a
-						class="text-base-content/50 hover:text-base-content transition-colors duration-200"
+						class="text-foreground/50 hover:text-foreground transition-colors duration-200"
 						href={x}
 					>
 						<SiX size={24} />
 					</a>
 
 					<a
-						class="text-base-content/50 hover:text-base-content transition-colors duration-200"
+						class="text-foreground/50 hover:text-foreground transition-colors duration-200"
 						href={github}
 					>
 						<SiGithub size={24} />
@@ -111,12 +111,12 @@
 			<!-- Links Sections -->
 			{#each links as section (section.title)}
 				<div>
-					<h3 class="text-base-content mb-4 font-semibold">{section.title}</h3>
+					<h3 class="text-foreground mb-4 font-semibold">{section.title}</h3>
 					<ul class="space-y-3">
 						{#each Object.entries(section.items) as [href, name] (href)}
 							<li>
 								<a
-									class="text-base-content/70 hover:text-base-content transition-colors duration-200"
+									class="text-foreground/70 hover:text-foreground transition-colors duration-200"
 									{href}
 								>
 									{name}
@@ -129,16 +129,16 @@
 		</div>
 
 		<!-- Footer Bottom -->
-		<div class="border-base-300 mt-12 border-t pt-8">
+		<div class="mt-12 border-t border-border pt-8">
 			<div class="flex flex-col items-center justify-between md:flex-row">
-				<p class="text-base-content/60">
+				<p class="text-foreground/60">
 					&copy; 2019-{new Date().getFullYear()}
 					{PUBLIC_APP_NAME}. {m.copyright()}
 				</p>
 				<div class="mt-4 flex flex-wrap justify-center space-x-6 md:mt-0">
 					{#each Object.entries(legal) as [href, name] (href)}
 						<a
-							class="text-base-content/60 hover:text-base-content transition-colors duration-200"
+							class="text-foreground/60 hover:text-foreground transition-colors duration-200"
 							{href}>{name}</a
 						>
 					{/each}

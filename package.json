@@ -39,7 +39,6 @@
 		"arctic": "^3.7.0",
 		"bits-ui": "^2.16.3",
 		"clsx": "^2.1.1",
-		"daisyui": "^5.5.19",
 		"date-fns": "^4.1.0",
 		"drizzle-kit": "1.0.0-beta.21",
 		"drizzle-orm": "1.0.0-beta.21",

@@ -111,10 +111,10 @@
 
 <div
 	bind:this={windowContainer}
-	class="text-base-content bg-neutral fixed box-border flex flex-col {os.isMobile
+	class="fixed box-border flex flex-col bg-card text-foreground {os.isMobile
 		? ''
 		: 'border shadow-lg ' +
-			(os.focusedProcessId === processData.id ? 'border-neutral-content' : 'border-neutral')}"
+			(os.focusedProcessId === processData.id ? 'border-foreground/30' : 'border-border')}"
 	class:hidden={processData.isHidden || processData.isMinimized}
 	onpointerdown={(e) => {
 		e.stopPropagation();
@@ -128,8 +128,8 @@
 	<!--Navigation bar-->
 	<div
 		class="z-10 flex h-8 justify-between {os.focusedProcessId === processData.id
-			? 'bg-base-100'
-			: 'bg-base-300'}"
+			? 'bg-background'
+			: 'bg-muted'}"
 		onpointerdown={pointerDown}
 	>
 		<img alt="Icon" class="m-1 h-5.5 w-5.5" src={icon} />

@@ -18,6 +18,7 @@
 	import { focusProcess, launchApp } from '$lib/client/index.svelte';
 	import ThemeController from '$ui/os/ThemeController.svelte';
 	import { Spring } from 'svelte/motion';
+	import * as Avatar from '$shadcn/avatar';
 
 	const iconSize = 18;
 	// TODO: Different layouts for os.isMobile
@@ -78,7 +79,7 @@
 </script>
 
 <div
-	class="bg-base-100 z-[100000] flex h-10 w-full justify-between overflow-hidden"
+	class="z-[100000] flex h-10 w-full justify-between overflow-hidden bg-background"
 	oncontextmenu={(e) => showContextMenu(e, [])}
 	onpointerdown={() => (os.focusedProcessId = null)}
 	ondrop={(e) => {
@@ -91,30 +92,27 @@
 >
 	<div class="flex">
 		<DockField
-			innerClasses="group-hover:bg-base-300"
+			innerClasses="group-hover:bg-muted"
 			onclick={() => (os.isAppLauncherOpen = true)}
 			title="Start Menu"
 		>
-			<div
-				class="avatar placeholder aspect-square"
+			<Avatar.Root
 				onclick={handleClick}
 				role="none"
 				style="transform: scale({scale})"
 			>
-				<div class="bg-base-content text-base-200 w-8 rounded-full">
-					<span class="text-xs">{os.username}</span>
-				</div>
-			</div>
+				<Avatar.Fallback>{os.username?.slice(0, 2).toUpperCase()}</Avatar.Fallback>
+			</Avatar.Root>
 		</DockField>
 		{#each taskbar as item (item.appId)}
 			<DockField
 				title={item.appId}
 				innerClasses="aspect-square {item.hasWindows
-					? 'bg-base-content ' +
+					? 'bg-foreground ' +
 						(item.isFocused
 							? 'bg-opacity-40 group-hover:bg-opacity-50'
 							: 'bg-opacity-20 group-hover:bg-opacity-30')
-					: 'group-hover:bg-base-300'}"
+					: 'group-hover:bg-muted'}"
 				onpointerdown={(e) => item.hasWindows && taskbarAppPointerDown(item, e)}
 				onclick={(e) => taskbarAppClick(item, e)}
 			>
@@ -124,11 +122,11 @@
 	</div>
 	<div class="flex">
 		<!-- Theme Controller -->
-		<DockField innerClasses="group-hover:bg-base-300">
+		<DockField innerClasses="group-hover:bg-muted">
 			<ThemeController />
 		</DockField>
 		<!-- Volume Control -->
-		<DockField innerClasses="group-hover:bg-base-300">
+		<DockField innerClasses="group-hover:bg-muted">
 			{#if os.volume === 0}
 				<VolumeX size={iconSize} />
 			{:else if os.volume > 66}
@@ -140,7 +138,7 @@
 			{/if}
 		</DockField>
 		<!-- Battery -->
-		<DockField innerClasses="group-hover:bg-base-300" onclick={() => {}}>
+		<DockField innerClasses="group-hover:bg-muted" onclick={() => {}}>
 			{#if os.battery.isCharging}
 				<BatteryCharging size={iconSize} />
 			{:else if os.battery.level > 75}
@@ -154,13 +152,13 @@
 			{/if}
 		</DockField>
 		<!-- Clock -->
-		<DockField innerClasses="w-[72px] group-hover:bg-base-300">
+		<DockField innerClasses="w-[72px] group-hover:bg-muted">
 			<Clock />
 		</DockField>
 		<!-- Show Desktop -->
 		<button
 			aria-label="Show Desktop"
-			class="border-base-300 w-2 border-l"
+			class="w-2 border-l border-border"
 			onclick={() => os.processList.forEach((process) => (process.isMinimized = true))}
 		>
 		</button>

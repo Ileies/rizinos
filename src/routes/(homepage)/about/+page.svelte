@@ -14,14 +14,14 @@
 			<h2 class="mb-5 text-lg font-bold">Hi! I'm ....</h2>
 			<p class="mb-5 text-lg">
 				This is my background and the reason why I am qualified to solve problem X. <span
-					class="text-base-content/60"
+					class="text-foreground/60"
 				>
 					Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis optio sapiente
 				</span>
 			</p>
 			<p class="mb-5 text-lg">
 				I noticed problem X and that is why I build this product that helps solve it. <span
-					class="text-base-content/60"
+					class="text-foreground/60"
 				>
 					Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dicta, recusandae! Lorem ipsum
 					dolor sit amet, consectetur adipisicing elit.

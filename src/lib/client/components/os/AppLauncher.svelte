@@ -35,26 +35,26 @@
 	<Overlay onclose={() => (os.isAppLauncherOpen = !os.isAppLauncherOpen)}>
 		<div
 			transition:slide
-			class="menu fixed {os.isMobile
+			class="fixed flex flex-col {os.isMobile
 				? 'h-svh w-svh'
-				: 'bottom-10'} bg-base-200 w-52 cursor-pointer text-lg"
+				: 'bottom-10'} w-52 cursor-pointer bg-muted text-lg"
 		>
 			<button class="" onclick={() => launchApp('taskmgr')}>
 				<SquareActivity />
 				Task Manager
 			</button>
 			<button
-				class="hover:bg-base-300 flex h-10 w-full items-center gap-4 p-3"
+				class="flex h-10 w-full items-center gap-4 p-3 hover:bg-muted/80"
 				onclick={() => launchApp('settings')}
 			>
 				<Settings />
 				Settings
 			</button>
-			<button class="hover:bg-base-300 flex h-10 w-full items-center gap-4 p-3" onclick={() => {}}>
+			<button class="flex h-10 w-full items-center gap-4 p-3 hover:bg-muted/80" onclick={() => {}}>
 				<Users />
 				Change User
 			</button>
-			<button class="hover:bg-base-300 flex h-10 w-full items-center gap-4 p-3" onclick={logout}>
+			<button class="flex h-10 w-full items-center gap-4 p-3 hover:bg-muted/80" onclick={logout}>
 				<LogOut />
 				Logout
 			</button>
