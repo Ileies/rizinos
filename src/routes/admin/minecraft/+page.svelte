@@ -156,6 +156,26 @@
 		groupModalOpen = true;
 	}
 
+	// --- User view ---
+	let viewUserOpen = $state(false);
+	let viewingUser = $state<(typeof data.mcUsers)[0]['user'] | null>(null);
+
+	function openViewUser(user: (typeof data.mcUsers)[0]['user']) {
+		viewingUser = user;
+		viewUserOpen = true;
+	}
+
+	const ROLE_CHIP: Record<string, string> = {
+		admin: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+		moderator: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+		developer: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+		supporter: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+		betatester: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+		trusted: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+		user: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+		bot: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+	};
+
 	// --- Helpers ---
 	function fmtLoc(loc: string | null) {
 		if (!loc) return '-';
@@ -269,9 +289,22 @@
 					{#each data.mcUsers as mc (mc.uuid)}
 						<Table.Row class="hover:bg-muted/40 group">
 							<Table.Cell class="py-1.5 font-medium">{mc.name}</Table.Cell>
-							<Table.Cell class="py-1.5 text-xs text-muted-foreground">{mc.user.username}</Table.Cell>
+							<Table.Cell class="py-1.5 text-xs">
+								<button onclick={() => openViewUser(mc.user)} class="text-muted-foreground hover:text-foreground hover:underline">
+									{mc.user.username}
+								</button>
+							</Table.Cell>
 							<Table.Cell class="py-1.5 text-center text-sm">{mc.permissions.length}</Table.Cell>
-							<Table.Cell class="py-1.5 text-xs text-muted-foreground">{homeWorld(mc.homeLocation) ?? '-'}</Table.Cell>
+							<Table.Cell class="py-1.5 text-xs">
+								{@const hw = homeWorld(mc.homeLocation)}
+								{#if hw && data.worlds.some((w) => w.name === hw)}
+									<button onclick={() => { editingWorldName = hw; worldModalOpen = true; }} class="text-muted-foreground hover:text-foreground hover:underline">
+										{hw}
+									</button>
+								{:else}
+									<span class="text-muted-foreground">{hw ?? '-'}</span>
+								{/if}
+							</Table.Cell>
 							<Table.Cell class="py-1.5">
 								<div class="flex gap-1">
 									{#if mc.bannedUntil}
@@ -314,8 +347,15 @@
 					{#each data.warps as warp (warp.name)}
 						<Table.Row class="hover:bg-muted/40 group">
 							<Table.Cell class="py-1.5 font-medium">{warp.name}</Table.Cell>
-							<Table.Cell class="truncate py-1.5 font-mono text-xs text-muted-foreground" title={warp.location ?? ''}>
-								{fmtLoc(warp.location)}
+							<Table.Cell class="py-1.5" title={warp.location ?? ''}>
+								{@const ww = homeWorld(warp.location)}
+								{#if ww && data.worlds.some((w) => w.name === ww)}
+									<button onclick={() => { editingWorldName = ww; worldModalOpen = true; }} class="font-mono text-xs text-muted-foreground hover:text-foreground hover:underline">
+										{fmtLoc(warp.location)}
+									</button>
+								{:else}
+									<span class="font-mono text-xs text-muted-foreground">{fmtLoc(warp.location)}</span>
+								{/if}
 							</Table.Cell>
 							<Table.Cell class="overflow-hidden py-1.5">
 								<RestrictEditor value={warp.restrict ?? []} readonly users={data.users} />
@@ -349,7 +389,11 @@
 					{#each data.worlds as world (world.name)}
 						<Table.Row class="hover:bg-muted/40 group">
 							<Table.Cell class="py-1.5 font-medium">{world.name}</Table.Cell>
-							<Table.Cell class="py-1.5 text-sm text-muted-foreground">{world.groupName}</Table.Cell>
+							<Table.Cell class="py-1.5">
+								<button onclick={() => openGroupEdit(world.groupName)} class="text-sm text-muted-foreground hover:text-foreground hover:underline">
+									{world.groupName}
+								</button>
+							</Table.Cell>
 							<Table.Cell class="overflow-hidden py-1.5">
 								<RestrictEditor value={world.restrict ?? []} readonly users={data.users} />
 							</Table.Cell>
@@ -692,6 +736,28 @@
 		<Button.Root type="submit" size="sm">Create</Button.Root>
 	</form>
 </Modal>
+
+<!-- User View Modal -->
+{#if viewingUser}
+	<Modal bind:open={viewUserOpen} title={viewingUser.username}>
+		<div class="space-y-3">
+			<div class="flex flex-wrap gap-1">
+				{#each viewingUser.roles as role}
+					<span class="rounded px-1.5 py-0.5 text-xs font-medium {ROLE_CHIP[role] ?? 'bg-gray-100 text-gray-600'}">{role}</span>
+				{/each}
+			</div>
+			<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+				<span class="text-muted-foreground">Email</span><span>{viewingUser.email}</span>
+				<span class="text-muted-foreground">Credit</span><span class="tabular-nums">{viewingUser.credit}</span>
+				<span class="text-muted-foreground">Last online</span>
+				<span>{new Date(viewingUser.lastOnline).toLocaleDateString('en', { month: 'short', day: 'numeric', year: '2-digit' })}</span>
+			</div>
+			<div class="pt-1 text-xs text-muted-foreground">
+				ID: <span class="font-mono">{viewingUser.id}</span>
+			</div>
+		</div>
+	</Modal>
+{/if}
 
 <!-- Create Group Modal -->
 <Modal bind:open={createGroupOpen} title="New World Group">

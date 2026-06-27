@@ -13,9 +13,10 @@
 		value?: string[];
 		readonly?: boolean;
 		users?: UserRef[];
+		onUserClick?: (userId: string) => void;
 	}
 
-	let { name = 'restrict', value = [], readonly = false, users = [] }: Props = $props();
+	let { name = 'restrict', value = [], readonly = false, users = [], onUserClick }: Props = $props();
 
 	let items = $state([...value]);
 
@@ -102,12 +103,24 @@
 <div class="{readonly ? 'flex flex-nowrap overflow-hidden gap-1' : 'flex flex-wrap gap-1'}">
 	{#each items as r (r)}
 		{@const c = chip(r)}
-		<span class="flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium {chipClass(c.deny)}">
-			{#if c.isRole}<span class="opacity-60">@</span>{/if}{c.label}
-			{#if !readonly}
-				<button type="button" onclick={() => remove(r)} class="ml-0.5 opacity-50 hover:opacity-100">×</button>
-			{/if}
-		</span>
+		{@const userId = !c.isRole ? (c.deny ? r.slice(1) : r) : null}
+		{@const clickable = readonly && userId !== null && !!onUserClick}
+		{#if clickable}
+			<button
+				type="button"
+				onclick={() => onUserClick!(userId!)}
+				class="flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-75 {chipClass(c.deny)}"
+			>
+				{c.label}
+			</button>
+		{:else}
+			<span class="flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium {chipClass(c.deny)}">
+				{#if c.isRole}<span class="opacity-60">@</span>{/if}{c.label}
+				{#if !readonly}
+					<button type="button" onclick={() => remove(r)} class="ml-0.5 opacity-50 hover:opacity-100">×</button>
+				{/if}
+			</span>
+		{/if}
 	{/each}
 
 	{#if !readonly && !addOpen}
