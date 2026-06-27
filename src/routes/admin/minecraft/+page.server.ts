@@ -1,8 +1,8 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$db';
-import { mcWarps, mcWorlds, mcWorldGroups, mcUsers } from '$db/schema';
-import { eq } from 'drizzle-orm';
+import { mcWarps, mcWorlds, mcWorldGroups, mcUsers, mcInventories } from '$db/schema';
+import { eq, sql } from 'drizzle-orm';
 import { Role, type Restrict } from '$types';
 import { hasRole } from '$lib/server/models/User';
 
@@ -192,6 +192,17 @@ export const actions: Actions = {
 
 		if (!oldName || !name || !groupName) return fail(400, { message: 'All fields required' });
 
+		if (oldName !== name) {
+			await Promise.all([
+				db.update(mcWarps)
+					.set({ location: sql`replace(${mcWarps.location}, ${'world=' + oldName + ','}, ${'world=' + name + ','})` })
+					.where(sql`${mcWarps.location} like ${'world=' + oldName + ',%'}`),
+				db.update(mcUsers)
+					.set({ homeLocation: sql`replace(${mcUsers.homeLocation}, ${'world=' + oldName + ','}, ${'world=' + name + ','})` })
+					.where(sql`${mcUsers.homeLocation} like ${'world=' + oldName + ',%'}`)
+			]);
+		}
+
 		await db
 			.update(mcWorlds)
 			.set({ name, groupName, restrict })
@@ -210,6 +221,13 @@ export const actions: Actions = {
 			[]) as Restrict[];
 
 		if (!oldName || !name) return fail(400, { message: 'Name required' });
+
+		if (oldName !== name) {
+			await Promise.all([
+				db.update(mcWorlds).set({ groupName: name }).where(eq(mcWorlds.groupName, oldName)),
+				db.update(mcInventories).set({ worldGroup: name }).where(eq(mcInventories.worldGroup, oldName))
+			]);
+		}
 
 		await db
 			.update(mcWorldGroups)
