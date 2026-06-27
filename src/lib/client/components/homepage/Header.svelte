@@ -88,8 +88,8 @@
 <svelte:document onclick={closeAll} />
 
 <header
-	class="sticky top-0 z-50 w-full border-b bg-white transition-all duration-200 {isScrolled
-		? 'border-gray-200'
+	class="sticky top-0 z-50 w-full border-b bg-background transition-all duration-200 {isScrolled
+		? 'border-border'
 		: 'border-transparent'}"
 >
 	<div class="container mx-auto px-4">
@@ -97,7 +97,7 @@
 			<!-- Logo -->
 			<a class="flex items-center gap-2" href="/">
 				<img src="/favicon.png" alt={PUBLIC_APP_NAME} class="h-8 w-8" />
-				<span class="text-xl font-black tracking-tight text-gray-900">{PUBLIC_APP_NAME}</span>
+				<span class="text-xl font-black tracking-tight text-foreground">{PUBLIC_APP_NAME}</span>
 			</a>
 
 			<!-- Desktop Navigation -->
@@ -108,8 +108,8 @@
 							{#if item.dropdown}
 								<button
 									onclick={(e) => toggleDropdown(e, item.label)}
-									class="flex items-center space-x-1 py-2 text-gray-700 transition-colors duration-200 hover:text-gray-900"
-									class:text-blue-600={page.url.pathname.startsWith(item.href)}
+									class="flex items-center space-x-1 py-2 text-foreground/70 transition-colors duration-200 hover:text-foreground"
+									class:text-primary={page.url.pathname.startsWith(item.href)}
 								>
 									<span>{item.label}</span>
 									<ChevronDown
@@ -122,8 +122,8 @@
 							{:else}
 								<a
 									href={item.href}
-									class="flex items-center py-2 text-gray-700 transition-colors duration-200 hover:text-gray-900"
-									class:text-blue-600={page.url.pathname.startsWith(item.href)}
+									class="flex items-center py-2 text-foreground/70 transition-colors duration-200 hover:text-foreground"
+									class:text-primary={page.url.pathname.startsWith(item.href)}
 								>
 									{item.label}
 								</a>
@@ -133,16 +133,16 @@
 								<!-- svelte-ignore a11y_no_static_element_interactions -->
 								<div
 									onclick={stopPropagation}
-									class="absolute top-full left-1/2 mt-2 w-56 -translate-x-1/2 rounded-xl border border-gray-100 bg-white py-2 shadow-xl"
+									class="absolute top-full left-1/2 mt-2 w-56 -translate-x-1/2 rounded-xl border border-border bg-popover py-2 shadow-xl"
 								>
 									<div
-										class="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-gray-100 bg-white"
+										class="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-border bg-popover"
 									></div>
 									{#each item.dropdown as dropItem (dropItem.href)}
 										<a
 											href={dropItem.href}
 											onclick={closeAll}
-											class="block px-4 py-2 text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900"
+											class="block px-4 py-2 text-foreground/70 transition-colors duration-200 hover:bg-muted hover:text-foreground"
 										>
 											{dropItem.label}
 										</a>
@@ -154,7 +154,7 @@
 
 					<a
 						href={github}
-						class="text-gray-400 transition-colors hover:text-gray-600"
+						class="text-muted-foreground transition-colors hover:text-foreground"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
@@ -165,8 +165,8 @@
 					<div class="relative">
 						<button
 							onclick={toggleLanguageDropdown}
-							class="p-2 text-gray-500 transition-colors duration-200 hover:text-gray-900"
-							aria-label="Select language"
+							class="p-2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+							aria-label={m.select_language()}
 						>
 							<Globe size={18} />
 						</button>
@@ -175,12 +175,12 @@
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<div
 								onclick={stopPropagation}
-								class="absolute top-full right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-xl z-50"
+								class="absolute top-full right-0 mt-2 w-48 rounded-xl border border-border bg-popover py-2 shadow-xl z-50"
 							>
 								{#each languages as lang (lang.code)}
 									<button
 										onclick={() => selectLanguage(lang.code)}
-										class="w-full px-4 py-3 flex items-center space-x-3 text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900 text-left"
+										class="w-full px-4 py-3 flex items-center space-x-3 text-foreground/70 transition-colors duration-200 hover:bg-muted hover:text-foreground text-left"
 									>
 										<span class="text-lg">{lang.flag}</span>
 										<span>{lang.name}</span>
@@ -193,14 +193,14 @@
 					{#if loggedIn}
 						<a
 							href="/app"
-							class="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+							class="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
 						>
 							{m.open_your_os()}
 						</a>
 					{:else}
 						<a
 							href="/login"
-							class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+							class="rounded-lg border border-border px-5 py-2 text-sm font-semibold text-foreground/70 transition-colors hover:border-border hover:bg-muted"
 						>
 							{m.log_in()}
 						</a>
@@ -210,8 +210,8 @@
 				<!-- Mobile Menu Button -->
 				<button
 					onclick={() => (isMenuOpen = !isMenuOpen)}
-					class="p-2 text-gray-600 transition-colors duration-200 hover:text-gray-900"
-					aria-label="Toggle menu"
+					class="p-2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+					aria-label={m.toggle_menu()}
 				>
 					{#if isMenuOpen}
 						<X size={24} />
@@ -225,12 +225,12 @@
 		<!-- Mobile Navigation -->
 		{#if isMobile && isMenuOpen}
 			<div
-				class="absolute top-20 left-0 w-full border-t border-gray-200 bg-white px-4 py-4 shadow-lg"
+				class="absolute top-20 left-0 w-full border-t border-border bg-background px-4 py-4 shadow-lg"
 			>
 				{#each navItems as item (item.label)}
 					<div class="py-1">
 						<button
-							class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-gray-900"
+							class="flex w-full items-center justify-between py-2 text-foreground/70 hover:text-foreground"
 							onclick={(e) => toggleDropdown(e, item.label)}
 						>
 							<span>{item.label}</span>
@@ -245,11 +245,11 @@
 						</button>
 
 						{#if item.dropdown && activeDropdown === item.label}
-							<div class="mt-2 ml-4 space-y-2 border-l-2 border-gray-100 pl-4">
+							<div class="mt-2 ml-4 space-y-2 border-l-2 border-border pl-4">
 								{#each item.dropdown as dropItem (dropItem.href)}
 									<a
 										href={dropItem.href}
-										class="block py-2 text-gray-600 transition-colors duration-200 hover:text-gray-900"
+										class="block py-2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
 									>
 										{dropItem.label}
 									</a>
@@ -259,12 +259,12 @@
 					</div>
 				{/each}
 
-				<div class="my-4 h-px w-full bg-gray-100"></div>
+				<div class="my-4 h-px w-full bg-border"></div>
 
 				<!-- Mobile Language Switcher -->
 				<div class="py-1">
 					<button
-						class="flex w-full items-center justify-between py-2 text-gray-700 hover:text-gray-900"
+						class="flex w-full items-center justify-between py-2 text-foreground/70 hover:text-foreground"
 						onclick={toggleLanguageDropdown}
 					>
 						<span class="flex items-center space-x-2">
@@ -277,11 +277,11 @@
 						/>
 					</button>
 					{#if isLanguageDropdownOpen}
-						<div class="mt-2 ml-4 space-y-1 border-l-2 border-gray-100 pl-4">
+						<div class="mt-2 ml-4 space-y-1 border-l-2 border-border pl-4">
 							{#each languages as lang (lang.code)}
 								<button
 									onclick={() => selectLanguage(lang.code)}
-									class="flex w-full items-center space-x-3 py-2 text-gray-600 hover:text-gray-900 text-left"
+									class="flex w-full items-center space-x-3 py-2 text-muted-foreground hover:text-foreground text-left"
 								>
 									<span>{lang.flag}</span>
 									<span>{lang.name}</span>
@@ -291,30 +291,30 @@
 					{/if}
 				</div>
 
-				<div class="my-4 h-px w-full bg-gray-100"></div>
+				<div class="my-4 h-px w-full bg-border"></div>
 
 				<a
 					href={github}
-					class="flex items-center space-x-2 py-2 text-gray-700 hover:text-gray-900"
+					class="flex items-center space-x-2 py-2 text-foreground/70 hover:text-foreground"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
 					<SiGithub size={20} />
 					<span>GitHub</span>
-					<ExternalLink size={14} class="text-gray-400" />
+					<ExternalLink size={14} class="text-muted-foreground" />
 				</a>
 
 				{#if loggedIn}
 					<a
 						href="/app"
-						class="mt-4 block w-full rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+						class="mt-4 block w-full rounded-lg bg-primary px-6 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
 					>
 						{m.open_your_os()}
 					</a>
 				{:else}
 					<a
 						href="/login"
-						class="mt-4 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+						class="mt-4 block w-full rounded-lg border border-border px-6 py-3 text-center text-sm font-semibold text-foreground/70 transition-colors hover:bg-muted"
 					>
 						{m.log_in()}
 					</a>
