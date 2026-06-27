@@ -10,7 +10,6 @@ export const load = ({ locals }) => {
 export const actions = {
 	default: async ({ request, locals }) => {
 		const formData = await request.formData();
-		//return fail(400, { error: { message: 'All fields are required.' } });
 
 		const body = Object.fromEntries(formData);
 		try {
@@ -20,29 +19,26 @@ export const actions = {
 			console.log('Valid data:', data);
 		} catch (e) {
 			if (e instanceof z.ZodError) {
-				console.log(z.treeifyError(e));
-				// Return validation errors to the frontend
-				return fail(400, { errors: z.treeifyError(e) });
+				return fail(400, { errorId: 'signup_server_error' as const });
 			}
 
-			// Handle unexpected errors
-			return fail(500, { message: 'Unexpected server error' });
+			return fail(500, { errorId: 'signup_server_error' as const });
 		}
 
 		// TODO: Remove when in production
-		Logger.debug('registration', { ...formData, ip: locals.ip });
+		Logger.debug('registration', { ...body, ip: locals.ip });
 
 		/*
 		// Check if username already exists
 		const existingUser = await users.findOne({ where: { username } });
 		if (existingUser) {
-			return fail(400, { error: { message: 'Username already exists.' } });
+			return fail(400, { fieldErrors: { username: 'signup_username_taken' as const } });
 		}
 
 		// Check if email already exists
 		const existingEmailUser = await users.findOne({ where: { email } });
 		if (existingEmailUser) {
-			return fail(400, { error: { message: 'Email address already exists.' } });
+			return fail(400, { fieldErrors: { email: 'signup_email_taken' as const } });
 		}
 
 		const userData: typeof users.$inferInsert = {
@@ -58,7 +54,7 @@ export const actions = {
 
 		const systemUser = await User.getSystemUser();
 		if (!systemUser) {
-			return fail(500, { error: { message: 'An error occurred. Please try again later.' } });
+			return fail(500, { errorId: 'signup_server_error' as const });
 		}
 
 		const token = await systemUser.generateToken(TokenType.Verify, addDays(new Date(), 2), userData);
@@ -67,11 +63,10 @@ export const actions = {
 		const mailSent = await sendMail({
 			to: email, subject: 'Confirm your registration', text: verificationLink // TODO: Add HTML
 		});
-		//"That was not you? Please notify us: <a href=\"mailto:support@".domain."\">support@".domain."</a>")));
 
 		if (!mailSent) {
 			Logger.error('sendSignupMailFailed', { email, token: token.getToken() });
-			return fail(501, { error: { message: 'An error occurred. Please try again later.' } });
+			return fail(501, { errorId: 'signup_server_error' as const });
 		}*/
 
 		return { success: true };

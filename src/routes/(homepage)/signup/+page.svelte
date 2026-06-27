@@ -2,7 +2,6 @@
 	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
-	import { type FormData, maxAge, minAge } from '$lib/formValidation';
 	import { ArrowRight, ArrowLeft } from '@lucide/svelte';
 	import * as m from '$lib/messages';
 
@@ -11,8 +10,8 @@
 
 	let firstInput: HTMLInputElement;
 
-	const formData: FormData = $state({
-		gender: 'male',
+	const formData = $state({
+		gender: 'male' as 'male' | 'female',
 		birthdate: '',
 		firstName: '',
 		lastName: '',
@@ -21,10 +20,33 @@
 		email: ''
 	});
 
+	let confirmPassword = $state('');
+
+	const errors = $state({
+		firstName: '',
+		lastName: '',
+		birthdate: '',
+		email: '',
+		username: '',
+		password: '',
+		confirmPassword: ''
+	});
+
 	let { form }: { form: ActionData } = $props();
 
 	onMount(() => {
 		firstInput?.focus();
+	});
+
+	// Jump to the relevant step when the server returns field-specific errors
+	$effect(() => {
+		if (!form) return;
+		if ('fieldErrors' in form && form.fieldErrors) {
+			const fe = form.fieldErrors as Record<string, string>;
+			if (fe.username || fe.email) step = 3;
+			else if (fe.firstName || fe.lastName) step = 1;
+			else if (fe.birthdate) step = 2;
+		}
 	});
 
 	const stepTitle = $derived(
@@ -37,8 +59,133 @@
 					: m.signup_finish_title()
 	);
 
-	const inputClass =
-		'w-full rounded-lg border border-input bg-muted px-3.5 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground transition-colors focus:border-ring focus:bg-background focus:ring-2 focus:ring-ring/20';
+	const now = new Date();
+	const maxBirthdate = new Date(now.getFullYear() - 12, now.getMonth(), now.getDate())
+		.toISOString()
+		.split('T')[0];
+	const minBirthdate = new Date(now.getFullYear() - 80, now.getMonth(), now.getDate())
+		.toISOString()
+		.split('T')[0];
+	const todayStr = now.toISOString().split('T')[0];
+
+	const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ'.-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'.-]+)*$/;
+
+	function validateStep(s: number): boolean {
+		if (s === 1) {
+			errors.firstName = '';
+			errors.lastName = '';
+			let ok = true;
+			const first = formData.firstName.trim();
+			const last = formData.lastName.trim();
+			if (!first) {
+				errors.firstName = m.signup_first_name_required();
+				ok = false;
+			} else if (!nameRegex.test(first)) {
+				errors.firstName = m.signup_name_invalid();
+				ok = false;
+			}
+			if (!last) {
+				errors.lastName = m.signup_last_name_required();
+				ok = false;
+			} else if (!nameRegex.test(last)) {
+				errors.lastName = m.signup_name_invalid();
+				ok = false;
+			}
+			return ok;
+		}
+		if (s === 2) {
+			errors.birthdate = '';
+			if (!formData.birthdate) {
+				errors.birthdate = m.signup_birthdate_required();
+				return false;
+			}
+			const parsed = new Date(formData.birthdate);
+			if (isNaN(parsed.getTime())) {
+				errors.birthdate = m.signup_birthdate_invalid();
+				return false;
+			}
+			if (formData.birthdate > todayStr) {
+				errors.birthdate = m.signup_birthdate_future();
+				return false;
+			}
+			if (formData.birthdate > maxBirthdate) {
+				errors.birthdate = m.signup_age_requirement();
+				return false;
+			}
+			return true;
+		}
+		if (s === 3) {
+			errors.email = '';
+			errors.username = '';
+			let ok = true;
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+				errors.email = m.signup_email_invalid();
+				ok = false;
+			}
+			if (formData.username.length < 5) {
+				errors.username = m.signup_username_too_short();
+				ok = false;
+			} else if (formData.username.length > 20) {
+				errors.username = m.signup_username_too_long();
+				ok = false;
+			} else if (!/^[a-z][a-z0-9]*$/.test(formData.username)) {
+				errors.username = m.signup_username_format();
+				ok = false;
+			}
+			return ok;
+		}
+		if (s === 4) {
+			errors.password = '';
+			errors.confirmPassword = '';
+			let ok = true;
+			if (formData.password.length < 10) {
+				errors.password = m.signup_password_too_short();
+				ok = false;
+			} else if (!/[A-Z]/.test(formData.password)) {
+				errors.password = m.signup_password_uppercase();
+				ok = false;
+			} else if (!/[a-z]/.test(formData.password)) {
+				errors.password = m.signup_password_lowercase();
+				ok = false;
+			} else if (!/\d/.test(formData.password)) {
+				errors.password = m.signup_password_number();
+				ok = false;
+			} else if (!/[\W_]/.test(formData.password)) {
+				errors.password = m.signup_password_special();
+				ok = false;
+			}
+			if (formData.password !== confirmPassword) {
+				errors.confirmPassword = m.signup_passwords_mismatch();
+				ok = false;
+			}
+			return ok;
+		}
+		return true;
+	}
+
+	function tryNextStep() {
+		if (validateStep(step)) step++;
+	}
+
+	// Map server-returned error IDs to translated messages
+	const errorMessages: Record<string, () => string> = {
+		signup_server_error: m.signup_server_error,
+		signup_username_taken: m.signup_username_taken,
+		signup_email_taken: m.signup_email_taken
+	};
+
+	function resolveErrorId(id: string): string {
+		return (errorMessages[id] ?? m.signup_server_error)();
+	}
+
+	const inputBase =
+		'w-full rounded-lg border bg-muted px-3.5 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground transition-colors focus:bg-background focus:ring-2';
+
+	function ic(hasError: boolean) {
+		return hasError
+			? `${inputBase} border-destructive focus:border-destructive focus:ring-destructive/20`
+			: `${inputBase} border-input focus:border-ring focus:ring-ring/20`;
+	}
 </script>
 
 {#if form?.success}
@@ -76,11 +223,15 @@
 			</p>
 			<h2 class="mt-1 text-xl font-bold tracking-tight text-card-foreground">{stepTitle}</h2>
 
-			{#if form?.errors}
-				<div
-					class="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-				>
-					{JSON.stringify(form.errors)}
+			{#if form && 'errorId' in form && form.errorId}
+				<div class="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+					{resolveErrorId(form.errorId)}
+				</div>
+			{:else if form && 'fieldErrors' in form && form.fieldErrors}
+				<div class="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive space-y-1">
+					{#each Object.values(form.fieldErrors as Record<string, string>) as id}
+						<p>{resolveErrorId(id)}</p>
+					{/each}
 				</div>
 			{/if}
 
@@ -96,13 +247,16 @@
 								bind:this={firstInput}
 								bind:value={formData.firstName}
 								autocomplete="given-name"
-								class={inputClass}
+								class={ic(!!errors.firstName)}
 								id="firstName"
 								maxlength={50}
 								name="firstName"
 								placeholder={m.signup_first_name()}
 								type="text"
 							/>
+							{#if errors.firstName}
+								<p class="mt-1 text-xs text-destructive">{errors.firstName}</p>
+							{/if}
 						</div>
 						<div>
 							<label class="mb-1.5 block text-sm font-medium text-foreground" for="lastName">
@@ -111,13 +265,16 @@
 							<input
 								bind:value={formData.lastName}
 								autocomplete="family-name"
-								class={inputClass}
+								class={ic(!!errors.lastName)}
 								id="lastName"
 								maxlength={50}
 								name="lastName"
 								placeholder={m.signup_last_name()}
 								type="text"
 							/>
+							{#if errors.lastName}
+								<p class="mt-1 text-xs text-destructive">{errors.lastName}</p>
+							{/if}
 						</div>
 					</div>
 
@@ -130,13 +287,16 @@
 							<input
 								bind:value={formData.birthdate}
 								autocomplete="bday"
-								class={inputClass}
+								class={ic(!!errors.birthdate)}
 								id="birthdate"
-								max={minAge}
-								min={maxAge}
+								max={maxBirthdate}
+								min={minBirthdate}
 								name="birthdate"
 								type="date"
 							/>
+							{#if errors.birthdate}
+								<p class="mt-1 text-xs text-destructive">{errors.birthdate}</p>
+							{/if}
 						</div>
 						<div>
 							<p class="mb-2 text-sm font-medium text-foreground">{m.signup_gender_male()} / {m.signup_gender_female()}</p>
@@ -174,14 +334,16 @@
 							<input
 								bind:value={formData.email}
 								autocomplete="email"
-								class={inputClass}
+								class={ic(!!errors.email)}
 								id="email"
-								maxlength={32}
-								minlength={10}
+								maxlength={320}
 								name="email"
 								placeholder={m.signup_email_placeholder()}
 								type="email"
 							/>
+							{#if errors.email}
+								<p class="mt-1 text-xs text-destructive">{errors.email}</p>
+							{/if}
 						</div>
 						<div>
 							<label class="mb-1.5 block text-sm font-medium text-foreground" for="username">
@@ -189,14 +351,16 @@
 							</label>
 							<input
 								bind:value={formData.username}
-								class={inputClass}
+								class={ic(!!errors.username)}
 								id="username"
 								maxlength={20}
-								minlength={5}
 								name="username"
 								placeholder={m.signup_username_placeholder()}
 								type="text"
 							/>
+							{#if errors.username}
+								<p class="mt-1 text-xs text-destructive">{errors.username}</p>
+							{/if}
 						</div>
 					</div>
 
@@ -209,28 +373,33 @@
 							<input
 								bind:value={formData.password}
 								autocomplete="new-password"
-								class={inputClass}
+								class={ic(!!errors.password)}
 								id="password"
 								maxlength={71}
-								minlength={10}
 								name="password"
 								placeholder={m.signup_password_placeholder()}
 								type="password"
 							/>
+							{#if errors.password}
+								<p class="mt-1 text-xs text-destructive">{errors.password}</p>
+							{/if}
 						</div>
 						<div>
 							<label class="mb-1.5 block text-sm font-medium text-foreground" for="confirmPassword">
 								{m.signup_confirm_password()}
 							</label>
 							<input
+								bind:value={confirmPassword}
 								autocomplete="new-password"
-								class={inputClass}
+								class={ic(!!errors.confirmPassword)}
 								id="confirmPassword"
 								maxlength={71}
-								minlength={10}
 								placeholder={m.signup_confirm_password()}
 								type="password"
 							/>
+							{#if errors.confirmPassword}
+								<p class="mt-1 text-xs text-destructive">{errors.confirmPassword}</p>
+							{/if}
 						</div>
 					</div>
 				</div>
@@ -251,7 +420,7 @@
 					{#if step < TOTAL_STEPS}
 						<button
 							class="group flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-							onclick={() => step++}
+							onclick={tryNextStep}
 							type="button"
 						>
 							{m.signup_next()}
@@ -260,6 +429,7 @@
 					{:else}
 						<button
 							class="group flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+							onclick={(e) => { if (!validateStep(4)) e.preventDefault(); }}
 							type="submit"
 						>
 							{m.signup_create_account()}
