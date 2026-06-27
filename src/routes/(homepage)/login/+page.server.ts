@@ -10,13 +10,13 @@ import { eq } from 'drizzle-orm';
 import { createLogin } from '$lib/server/auth';
 import { cookieData } from '$lib/server';
 
-export const load = async ({ locals, request }) => {
-	if (locals.user) redirect(303, '/');
-	return { referrer: request.headers.toJSON() };
+export const load = async ({ locals, url }) => {
+	if (locals.user) redirect(303, url.searchParams.get('redirect') || '/app');
+	return {};
 };
 
 export const actions = {
-	default: async ({ request, cookies, locals, fetch }) => {
+	default: async ({ request, cookies, locals, fetch, url }) => {
 		const ip = locals.ip;
 
 		if (locals.user) {
@@ -91,6 +91,6 @@ export const actions = {
 		// TODO: When is the device token set?
 		// TODO: All API returns in the App should have a same schema.
 
-		redirect(303, request.referrer || '/');
+		redirect(303, url.searchParams.get('redirect') || '/app');
 	}
 };
