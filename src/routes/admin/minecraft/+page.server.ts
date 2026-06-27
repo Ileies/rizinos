@@ -20,12 +20,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 		db.query.users.findMany({ columns: { id: true, username: true } })
 	]);
 
+	const assignedUserIds = new Set(allMcUsers.map((u) => u.userId));
+	const unassignedUsers = allUsers.filter((u) => !assignedUserIds.has(u.id));
+
 	return {
 		warps: allWarps,
 		worlds: allWorlds,
 		groups: allGroups,
 		mcUsers: allMcUsers,
-		users: allUsers
+		users: allUsers,
+		unassignedUsers
 	};
 };
 
@@ -121,6 +125,24 @@ export const actions: Actions = {
 
 		await db.delete(mcWorldGroups).where(eq(mcWorldGroups.name, name));
 		return { success: true };
+	},
+
+	mcUserCreate: async ({ request, locals }) => {
+		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+
+		const data = await request.formData();
+		const userId = parseInt(data.get('userId') as string);
+		const name = (data.get('name') as string)?.trim();
+		const uuid = (data.get('uuid') as string)?.trim();
+
+		if (!userId || !name || !uuid) return fail(400, { message: 'All fields required' });
+
+		try {
+			await db.insert(mcUsers).values({ userId, name, uuid, permissions: [] });
+			return { success: true };
+		} catch (e) {
+			return fail(400, { message: 'Player already exists' });
+		}
 	},
 
 	mcUserDelete: async ({ request, locals }) => {

@@ -18,6 +18,7 @@
 	// --- Players ---
 	let editingPlayerUuid = $state<string | null>(null);
 	let playerModalOpen = $state(false);
+	let createPlayerOpen = $state(false);
 	let editingPlayer = $derived(data.mcUsers.find((u) => u.uuid === editingPlayerUuid) ?? null);
 	let permItems = $state<string[]>([]);
 
@@ -178,6 +179,11 @@
 
 		<!-- PLAYERS -->
 		{#if currentTab === 'players'}
+			<div class="mb-3">
+				<Button.Root onclick={() => (createPlayerOpen = true)} size="sm" class="gap-1.5">
+					<Plus size={14} /> New Player
+				</Button.Root>
+			</div>
 			<Table.Root>
 				<Table.Header>
 					<Table.Row>
@@ -464,6 +470,30 @@
 		</form>
 	</Modal>
 {/if}
+
+<!-- Create Player Modal -->
+<Modal bind:open={createPlayerOpen} title="New Player">
+	<form method="POST" action="?/mcUserCreate" use:enhance={closeOn((v) => (createPlayerOpen = v))} class="space-y-4">
+		<div>
+			<label for="cp-user" class="mb-1 block text-xs font-medium text-muted-foreground">Account</label>
+			<select id="cp-user" name="userId" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm" required>
+				<option value="">Select user</option>
+				{#each data.unassignedUsers as u}
+					<option value={u.id}>{u.username}</option>
+				{/each}
+			</select>
+		</div>
+		<div>
+			<label for="cp-name" class="mb-1 block text-xs font-medium text-muted-foreground">MC Username</label>
+			<Input.Root id="cp-name" name="name" placeholder="Steve" required />
+		</div>
+		<div>
+			<label for="cp-uuid" class="mb-1 block text-xs font-medium text-muted-foreground">UUID</label>
+			<Input.Root id="cp-uuid" name="uuid" placeholder="00000000-0000-0000-0000-000000000000" class="font-mono" required />
+		</div>
+		<Button.Root type="submit" size="sm">Create</Button.Root>
+	</form>
+</Modal>
 
 <!-- Create Warp Modal -->
 <Modal bind:open={createWarpOpen} title="New Warp" wide>
