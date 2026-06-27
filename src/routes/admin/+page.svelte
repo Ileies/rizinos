@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Role } from '$types';
-	import { Users, Settings, Pencil, Trash2 } from '@lucide/svelte';
+	import { Users, ScrollText, LayoutGrid, Pencil, Trash2 } from '@lucide/svelte';
 	import * as Table from '$shadcn/table';
 	import * as Button from '$shadcn/button';
 	import * as Input from '$shadcn/input';
 	import Modal from '$lib/components/Modal.svelte';
+	import RestrictEditor from '$lib/components/RestrictEditor.svelte';
 
 	let { data } = $props();
+
+	let currentTab = $state('users');
 
 	const ROLES = [Role.Admin, Role.Moderator, Role.BetaTester, Role.Developer, Role.Supporter, Role.Trusted, Role.User, Role.Bot];
 
@@ -16,10 +19,17 @@
 		moderator: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 		developer: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 		supporter: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-		beta: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+		betatester: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 		trusted: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 		user: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 		bot: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+	};
+
+	const LOG_CHIP: Record<string, string> = {
+		info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+		warning: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-500',
+		error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+		debug: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
 	};
 
 	const GENDER_ICON: Record<string, { symbol: string; cls: string }> = {
@@ -27,10 +37,16 @@
 		female: { symbol: '♀', cls: 'text-pink-500' }
 	};
 
+	const innerTabs = [
+		{ id: 'users', label: 'Users', icon: Users, count: () => data.users.length },
+		{ id: 'logs', label: 'Logs', icon: ScrollText, count: () => data.logs.length },
+		{ id: 'apps', label: 'Apps', icon: LayoutGrid, count: () => data.apps.length }
+	];
+
+	// --- Users ---
 	let editingUserId = $state<string | null>(null);
 	let modalOpen = $state(false);
 	let pendingRoles = $state<string[]>([]);
-
 	let editingUser = $derived(data.users.find((u) => u.id === editingUserId) ?? null);
 
 	function openEdit(id: string) {
@@ -53,24 +69,25 @@
 	}
 </script>
 
-<div class="min-h-screen bg-background">
-	<div class="border-b">
-		<div class="mx-auto max-w-7xl px-6 py-3">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-2">
-					<Users class="h-4 w-4 text-muted-foreground" />
-					<h1 class="font-semibold">Admin Dashboard</h1>
-					<span class="text-xs text-muted-foreground">({data.users.length})</span>
-				</div>
-				<Button.Root href="/admin/minecraft" variant="outline" size="sm" class="gap-1.5">
-					<Settings class="h-3.5 w-3.5" />
-					Minecraft
-				</Button.Root>
-			</div>
-		</div>
+<div class="mx-auto max-w-7xl px-6 py-4">
+	<div class="mb-4 flex gap-1 border-b">
+		{#each innerTabs as tab}
+			{@const Icon = tab.icon}
+			<button
+				class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors {currentTab === tab.id
+					? 'border-b-2 border-primary text-primary'
+					: 'text-muted-foreground hover:text-foreground'}"
+				onclick={() => (currentTab = tab.id)}
+			>
+				<Icon class="h-3.5 w-3.5" />
+				{tab.label}
+				<span class="text-xs {currentTab === tab.id ? 'text-primary/70' : 'text-muted-foreground/60'}">({tab.count()})</span>
+			</button>
+		{/each}
 	</div>
 
-	<div class="mx-auto max-w-7xl px-6 py-4">
+	<!-- USERS -->
+	{#if currentTab === 'users'}
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
@@ -122,7 +139,74 @@
 				{/each}
 			</Table.Body>
 		</Table.Root>
-	</div>
+	{/if}
+
+	<!-- LOGS -->
+	{#if currentTab === 'logs'}
+		<div class="overflow-auto rounded-md border">
+			<Table.Root>
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="w-20">Level</Table.Head>
+						<Table.Head>Message</Table.Head>
+						<Table.Head class="w-36">Timestamp</Table.Head>
+						<Table.Head class="w-48">Data</Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each data.logs as log (log.id)}
+						<Table.Row class="hover:bg-muted/40">
+							<Table.Cell class="py-1.5">
+								<span class="rounded px-1.5 py-0.5 text-xs font-medium {LOG_CHIP[log.type] ?? 'bg-gray-100 text-gray-600'}">{log.type}</span>
+							</Table.Cell>
+							<Table.Cell class="py-1.5 text-sm">{log.message}</Table.Cell>
+							<Table.Cell class="py-1.5 text-xs text-muted-foreground tabular-nums">
+								{new Date(log.createdAt).toLocaleString('en', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+							</Table.Cell>
+							<Table.Cell class="py-1.5">
+								{#if log.data}
+									<span class="block max-w-[180px] truncate font-mono text-xs text-muted-foreground" title={JSON.stringify(log.data)}>
+										{JSON.stringify(log.data)}
+									</span>
+								{:else}
+									<span class="text-xs text-muted-foreground/40">-</span>
+								{/if}
+							</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
+		{#if data.logs.length === 500}
+			<p class="mt-2 text-xs text-muted-foreground">Showing 500 most recent entries.</p>
+		{/if}
+	{/if}
+
+	<!-- APPS -->
+	{#if currentTab === 'apps'}
+		<Table.Root class="table-fixed w-full">
+			<Table.Header>
+				<Table.Row>
+					<Table.Head class="w-36">Name</Table.Head>
+					<Table.Head class="w-48">Title</Table.Head>
+					<Table.Head class="w-28">Author</Table.Head>
+					<Table.Head>Restrictions</Table.Head>
+				</Table.Row>
+			</Table.Header>
+			<Table.Body>
+				{#each data.apps as app (app.id)}
+					<Table.Row class="hover:bg-muted/40">
+						<Table.Cell class="py-1.5 font-mono text-sm">{app.name}</Table.Cell>
+						<Table.Cell class="py-1.5 font-medium">{app.title}</Table.Cell>
+						<Table.Cell class="py-1.5 text-sm text-muted-foreground">{app.user?.username ?? '-'}</Table.Cell>
+						<Table.Cell class="overflow-hidden py-1.5">
+							<RestrictEditor value={app.restrict ?? []} readonly users={data.users} />
+						</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
+	{/if}
 </div>
 
 {#if editingUser}

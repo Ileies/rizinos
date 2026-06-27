@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { ActionResult } from '@sveltejs/kit';
-	import { Plus, Settings, Pencil, Trash2, CheckCircle2, XCircle, Loader2 } from '@lucide/svelte';
+	import { Plus, Pencil, Trash2, CheckCircle2, XCircle, Loader2 } from '@lucide/svelte';
 	import * as Table from '$shadcn/table';
 	import * as Button from '$shadcn/button';
 	import * as Input from '$shadcn/input';
@@ -233,20 +233,7 @@
 	</div>
 {/snippet}
 
-<div class="min-h-screen bg-background">
-	<div class="border-b">
-		<div class="mx-auto max-w-7xl px-6 py-3">
-			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-2">
-					<Settings class="h-4 w-4 text-muted-foreground" />
-					<h1 class="font-semibold">Minecraft</h1>
-				</div>
-				<Button.Root href="/admin" variant="outline" size="sm">Back to Users</Button.Root>
-			</div>
-		</div>
-	</div>
-
-	<div class="mx-auto max-w-7xl px-6 py-4">
+<div class="mx-auto max-w-7xl px-6 py-4">
 		<div class="mb-4 flex gap-1 border-b">
 			{#each ['players', 'warps', 'worlds', 'groups'] as tab}
 				<button
@@ -422,7 +409,6 @@
 			</Table.Root>
 		{/if}
 	</div>
-</div>
 
 <!-- Player Edit Modal -->
 {#if editingPlayer}

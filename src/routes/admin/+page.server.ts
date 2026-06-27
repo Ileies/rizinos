@@ -11,12 +11,21 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	if (!hasRole(locals.user, Role.Admin)) redirect(302, '/app');
 
-	const allUsers = await db.query.users.findMany({
-		columns: { passwordHash: false, isOnline: false },
-		orderBy: (users, { asc }) => asc(users.username)
-	});
+	const [allUsers, allLogs, allApps] = await Promise.all([
+		db.query.users.findMany({
+			columns: { passwordHash: false, isOnline: false },
+			orderBy: (users, { asc }) => asc(users.username)
+		}),
+		db.query.logs.findMany({
+			orderBy: (logs, { desc }) => desc(logs.createdAt),
+			limit: 500
+		}),
+		db.query.apps.findMany({
+			with: { user: { columns: { username: true } } }
+		})
+	]);
 
-	return { users: allUsers };
+	return { users: allUsers, logs: allLogs, apps: allApps };
 };
 
 function adminGuard(locals: App.Locals) {
