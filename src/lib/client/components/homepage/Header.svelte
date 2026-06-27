@@ -95,8 +95,9 @@
 	<div class="container mx-auto px-4">
 		<nav class="flex h-20 items-center justify-between">
 			<!-- Logo -->
-			<a class="text-xl font-black tracking-tight text-gray-900" href="/">
-				{PUBLIC_APP_NAME}
+			<a class="flex items-center gap-2" href="/">
+				<img src="/favicon.png" alt={PUBLIC_APP_NAME} class="h-8 w-8" />
+				<span class="text-xl font-black tracking-tight text-gray-900">{PUBLIC_APP_NAME}</span>
 			</a>
 
 			<!-- Desktop Navigation -->

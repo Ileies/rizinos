@@ -66,11 +66,9 @@
 		<div class="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-6">
 			<!-- Brand Section -->
 			<div class="lg:col-span-2">
-				<a
-					class="text-2xl font-bold text-primary"
-					href="/"
-				>
-					{PUBLIC_APP_NAME}
+				<a class="flex items-center gap-2" href="/">
+					<img src="/favicon.png" alt={PUBLIC_APP_NAME} class="h-8 w-8" />
+					<span class="text-2xl font-bold text-primary">{PUBLIC_APP_NAME}</span>
 				</a>
 				<p class="text-base-content/70 mt-4 leading-relaxed">
 					{m.description()}
