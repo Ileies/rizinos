@@ -43,6 +43,8 @@
 		];
 	})());
 
+	let { loggedIn = false }: { loggedIn?: boolean } = $props();
+
 	let isMenuOpen = $state(false);
 	let isScrolled = $state(false);
 	let innerWidth = $state(0);
@@ -164,12 +166,21 @@
 						<SiGithub size={18} />
 					</a>
 
-					<a
-						href="/login"
-						class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
-					>
-						Log in
-					</a>
+					{#if loggedIn}
+						<a
+							href="/app"
+							class="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+						>
+							Open your OS
+						</a>
+					{:else}
+						<a
+							href="/login"
+							class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+						>
+							Log in
+						</a>
+					{/if}
 				</div>
 			{:else}
 				<!-- Mobile Menu Button -->
@@ -238,12 +249,21 @@
 					<ExternalLink size={14} class="text-gray-400" />
 				</a>
 
-				<a
-					href="/login"
-					class="mt-4 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-				>
-					Log in
-				</a>
+				{#if loggedIn}
+					<a
+						href="/app"
+						class="mt-4 block w-full rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+					>
+						Open your OS
+					</a>
+				{:else}
+					<a
+						href="/login"
+						class="mt-4 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+					>
+						Log in
+					</a>
+				{/if}
 			</div>
 		{/if}
 	</div>
