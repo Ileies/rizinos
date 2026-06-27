@@ -1,4 +1,7 @@
 .*
+!.gitignore
+!.prettierrc
+!.env.template
 
 !.gitignore
 !.prettierrc
@@ -13,5 +16,4 @@
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Paraglide
-src/lib/paraglide
+/src/lib/messages.ts
