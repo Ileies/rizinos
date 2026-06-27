@@ -23,12 +23,7 @@
 			});
 	};
 
-	addNotification('Failed to logout', 'Please try again later', NotificationType.ERROR, [
-		{
-			title: 'Retry',
-			action: logout
-		}
-	]);
+
 </script>
 
 {#if os.isAppLauncherOpen}
@@ -37,24 +32,24 @@
 			transition:slide
 			class="fixed flex flex-col {os.isMobile
 				? 'h-svh w-svh'
-				: 'bottom-10'} w-52 cursor-pointer bg-muted text-lg"
+				: 'bottom-10'} bg-muted w-52 cursor-pointer text-lg"
 		>
 			<button class="" onclick={() => launchApp('taskmgr')}>
 				<SquareActivity />
 				Task Manager
 			</button>
 			<button
-				class="flex h-10 w-full items-center gap-4 p-3 hover:bg-muted/80"
+				class="hover:bg-muted/80 flex h-10 w-full items-center gap-4 p-3"
 				onclick={() => launchApp('settings')}
 			>
 				<Settings />
 				Settings
 			</button>
-			<button class="flex h-10 w-full items-center gap-4 p-3 hover:bg-muted/80" onclick={() => {}}>
+			<button class="hover:bg-muted/80 flex h-10 w-full items-center gap-4 p-3" onclick={() => {}}>
 				<Users />
 				Change User
 			</button>
-			<button class="flex h-10 w-full items-center gap-4 p-3 hover:bg-muted/80" onclick={logout}>
+			<button class="hover:bg-muted/80 flex h-10 w-full items-center gap-4 p-3" onclick={logout}>
 				<LogOut />
 				Logout
 			</button>

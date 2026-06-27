@@ -17,8 +17,10 @@
 	import DockField from '$ui/os/DockField.svelte';
 	import { focusProcess, launchApp } from '$lib/client/index.svelte';
 	import ThemeController from '$ui/os/ThemeController.svelte';
+	import Overlay from '$ui/os/Overlay.svelte';
 	import { Spring } from 'svelte/motion';
 	import * as Avatar from '$shadcn/avatar';
+	import { format } from 'date-fns';
 
 	const iconSize = 18;
 	// TODO: Different layouts for os.isMobile
@@ -76,10 +78,19 @@
 		scale.set(0.75);
 		setTimeout(() => scale.set(1), 1000);
 	}
+
+	let isVolumeOpen = $state(false);
+	let isClockOpen = $state(false);
+
+	let now = $state(new Date());
+	$effect(() => {
+		const timer = setInterval(() => (now = new Date()), 1000);
+		return () => clearInterval(timer);
+	});
 </script>
 
 <div
-	class="z-[100000] flex h-10 w-full justify-between overflow-hidden bg-background"
+	class="bg-background z-[100000] flex h-10 w-full justify-between overflow-hidden"
 	oncontextmenu={(e) => showContextMenu(e, [])}
 	onpointerdown={() => (os.focusedProcessId = null)}
 	ondrop={(e) => {
@@ -96,11 +107,7 @@
 			onclick={() => (os.isAppLauncherOpen = true)}
 			title="Start Menu"
 		>
-			<Avatar.Root
-				onclick={handleClick}
-				role="none"
-				style="transform: scale({scale})"
-			>
+			<Avatar.Root onclick={handleClick} role="none" style="transform: scale({scale})">
 				<Avatar.Fallback>{os.username?.slice(0, 2).toUpperCase()}</Avatar.Fallback>
 			</Avatar.Root>
 		</DockField>
@@ -113,8 +120,8 @@
 							? 'bg-opacity-40 group-hover:bg-opacity-50'
 							: 'bg-opacity-20 group-hover:bg-opacity-30')
 					: 'group-hover:bg-muted'}"
-				onpointerdown={(e) => item.hasWindows && taskbarAppPointerDown(item, e)}
-				onclick={(e) => taskbarAppClick(item, e)}
+				onpointerdown={(e: PointerEvent) => item.hasWindows && taskbarAppPointerDown(item, e)}
+				onclick={(e: MouseEvent) => taskbarAppClick(item, e)}
 			>
 				<img alt={item.appId} draggable="false" src="assets/img/ico/{item.appId}.ico" />
 			</DockField>
@@ -126,8 +133,8 @@
 			<ThemeController />
 		</DockField>
 		<!-- Volume Control -->
-		<DockField innerClasses="group-hover:bg-muted">
-			{#if os.volume === 0}
+		<DockField innerClasses="group-hover:bg-muted" onclick={() => (isVolumeOpen = !isVolumeOpen)}>
+			{#if os.isMuted || os.volume === 0}
 				<VolumeX size={iconSize} />
 			{:else if os.volume > 66}
 				<Volume2 size={iconSize} />
@@ -138,7 +145,7 @@
 			{/if}
 		</DockField>
 		<!-- Battery -->
-		<DockField innerClasses="group-hover:bg-muted" onclick={() => {}}>
+		<DockField innerClasses="group-hover:bg-muted">
 			{#if os.battery.isCharging}
 				<BatteryCharging size={iconSize} />
 			{:else if os.battery.level > 75}
@@ -152,15 +159,56 @@
 			{/if}
 		</DockField>
 		<!-- Clock -->
-		<DockField innerClasses="w-[72px] group-hover:bg-muted">
+		<DockField innerClasses="w-[72px] group-hover:bg-muted" onclick={() => (isClockOpen = !isClockOpen)}>
 			<Clock />
 		</DockField>
 		<!-- Show Desktop -->
 		<button
 			aria-label="Show Desktop"
-			class="w-2 border-l border-border"
+			class="border-border w-2 border-l"
 			onclick={() => os.processList.forEach((process) => (process.isMinimized = true))}
 		>
 		</button>
 	</div>
 </div>
+
+{#if isVolumeOpen}
+	<Overlay onclose={() => (isVolumeOpen = false)}>
+		<div class="bg-card border-border fixed right-28 bottom-12 flex w-48 flex-col gap-3 rounded-lg border p-4 shadow-lg">
+			<div class="flex items-center justify-between text-sm font-medium">
+				<span>Volume</span>
+				<span>{os.isMuted ? 'Muted' : `${os.volume}%`}</span>
+			</div>
+			<input
+				type="range"
+				min="0"
+				max="100"
+				bind:value={os.volume}
+				onpointerdown={(e) => e.stopPropagation()}
+				class="w-full accent-primary"
+			/>
+			<button
+				class="hover:bg-muted flex items-center gap-2 rounded px-2 py-1 text-sm"
+				onclick={(e) => { e.stopPropagation(); os.isMuted = !os.isMuted; }}
+			>
+				{#if os.isMuted}
+					<Volume size={14} />
+					Unmute
+				{:else}
+					<VolumeX size={14} />
+					Mute
+				{/if}
+			</button>
+		</div>
+	</Overlay>
+{/if}
+
+{#if isClockOpen}
+	<Overlay onclose={() => (isClockOpen = false)}>
+		<div class="bg-card border-border fixed right-2 bottom-12 flex w-52 flex-col items-center gap-1 rounded-lg border p-4 shadow-lg">
+			<div class="text-3xl font-light tabular-nums">{format(now, 'HH:mm')}</div>
+			<div class="text-muted-foreground text-sm">{format(now, 'ss')}s</div>
+			<div class="mt-1 text-sm font-medium">{format(now, 'EEEE, d. MMMM yyyy')}</div>
+		</div>
+	</Overlay>
+{/if}

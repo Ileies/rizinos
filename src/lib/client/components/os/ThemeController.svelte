@@ -5,6 +5,11 @@
 
 	$effect(() => {
 		localStorage.setItem('theme', os.theme);
+		if (os.theme === Theme.Dark) {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
 	});
 </script>
 

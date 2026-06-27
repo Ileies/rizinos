@@ -55,7 +55,7 @@
 
 <div class="w-full flex-grow overflow-hidden">
 	{#each os.processList as processData (processData)}
-		<Window {processData} {sendMessage}></Window>
+		<Window {processData}></Window>
 	{/each}
 	<div
 		class="grid h-full w-full grid-cols-{os.desktop.cols} grid-rows-[{os.desktop
