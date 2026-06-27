@@ -4,7 +4,8 @@ import { db } from '$db';
 import { users } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { Role } from '$types';
-import { userAddRole, removeRole, hasRole } from '$lib/server/models/User';
+import type { UserID } from '$types';
+import { hasRole } from '$lib/server/models/User';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
@@ -15,144 +16,44 @@ export const load: PageServerLoad = async ({ locals }) => {
 		orderBy: (users, { asc }) => asc(users.username)
 	});
 
-	return {
-		users: allUsers
-	};
+	return { users: allUsers };
 };
 
+function adminGuard(locals: App.Locals) {
+	if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+}
+
 export const actions: Actions = {
-	userAddRole: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
-
-		const data = await request.formData();
-		const userId = data.get('userId') as string;
-		const role = data.get('role') as Role;
-
-		const user = await db.query.users.findFirst({
-			where: { id: userId as any },
-			columns: { passwordHash: false, isOnline: false }
-		});
-		if (!user) return fail(404, { message: 'User not found' });
-
-		await userAddRole(user, role);
-		return { success: true };
-	},
-
-	userRemoveRole: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
-
-		const data = await request.formData();
-		const userId = data.get('userId') as string;
-		const role = data.get('role') as Role;
-
-		const user = await db.query.users.findFirst({
-			where: { id: userId as any },
-			columns: { passwordHash: false, isOnline: false }
-		});
-		if (!user) return fail(404, { message: 'User not found' });
-
-		await removeRole(user, role);
-		return { success: true };
-	},
-
-	creditAdjust: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
-
-		const data = await request.formData();
-		const userId = data.get('userId') as string;
-		const amount = parseInt(data.get('amount') as string) || 0;
-
-		if (!userId) return fail(400, { message: 'User ID required' });
-
-		const user = await db.query.users.findFirst({
-			where: { id: userId as any },
-			columns: { passwordHash: false, isOnline: false }
-		});
-		if (!user) return fail(404, { message: 'User not found' });
-
-		const newCredit = Math.max(0, user.credit + amount);
-		await db
-			.update(users)
-			.set({ credit: newCredit })
-			.where(eq(users.id, userId as any));
-		return { success: true };
-	},
-
-	creditSet: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
-
-		const data = await request.formData();
-		const userId = data.get('userId') as string;
-		const credit = parseInt(data.get('credit') as string) || 0;
-
-		if (!userId) return fail(400, { message: 'User ID required' });
-
-		const newCredit = Math.max(0, credit);
-		await db
-			.update(users)
-			.set({ credit: newCredit })
-			.where(eq(users.id, userId as any));
-		return { success: true };
-	},
-
-	userUpdate: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
-
-		const data = await request.formData();
-		const userId = data.get('userId') as string;
-		const gender = data.get('gender') as string;
-
-		if (!userId) return fail(400, { message: 'User ID required' });
-
-		await db
-			.update(users)
-			.set({ gender: gender || null })
-			.where(eq(users.id, userId as any));
-		return { success: true };
-	},
-
-	userUpdateUsername: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+	userUpdateProfile: async ({ request, locals }) => {
+		const guard = adminGuard(locals);
+		if (guard) return guard;
 
 		const data = await request.formData();
 		const userId = data.get('userId') as string;
 		const username = data.get('username') as string;
-
-		if (!userId || !username) return fail(400, { message: 'User ID and username required' });
-
-		try {
-			await db
-				.update(users)
-				.set({ username })
-				.where(eq(users.id, userId as any));
-			return { success: true };
-		} catch (e) {
-			return fail(400, { message: 'Username already taken' });
-		}
-	},
-
-	userUpdateEmail: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
-
-		const data = await request.formData();
-		const userId = data.get('userId') as string;
 		const email = data.get('email') as string;
+		const gender = data.get('gender') as string;
+		const credit = parseInt(data.get('credit') as string) || 0;
 
-		if (!userId || !email) return fail(400, { message: 'User ID and email required' });
+		if (!userId || !username || !email) return fail(400, { message: 'Required fields missing' });
+
+		const genderValue: 'male' | 'female' | undefined =
+			gender === 'male' || gender === 'female' ? gender : undefined;
 
 		try {
 			await db
 				.update(users)
-				.set({ email })
-				.where(eq(users.id, userId as any));
+				.set({ username, email, gender: genderValue, credit: Math.max(0, credit) })
+				.where(eq(users.id, userId as UserID));
 			return { success: true };
-		} catch (e) {
-			return fail(400, { message: 'Email already in use' });
+		} catch {
+			return fail(400, { message: 'Username or email already taken' });
 		}
 	},
 
 	userUpdatePassword: async ({ request, locals }) => {
-		if (!locals.user || !hasRole(locals.user, Role.Admin)) return fail(403);
+		const guard = adminGuard(locals);
+		if (guard) return guard;
 
 		const data = await request.formData();
 		const userId = data.get('userId') as string;
@@ -161,11 +62,35 @@ export const actions: Actions = {
 		if (!userId || !newPassword) return fail(400, { message: 'User ID and password required' });
 
 		const passwordHash = await Bun.password.hash(newPassword);
+		await db.update(users).set({ passwordHash }).where(eq(users.id, userId as UserID));
+		return { success: true };
+	},
 
-		await db
-			.update(users)
-			.set({ passwordHash })
-			.where(eq(users.id, userId as any));
+	userSetRoles: async ({ request, locals }) => {
+		const guard = adminGuard(locals);
+		if (guard) return guard;
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+		const rolesStr = data.get('roles') as string;
+
+		if (!userId) return fail(400, { message: 'User ID required' });
+
+		const roles = (rolesStr ? rolesStr.split(',').filter(Boolean) : []) as Role[];
+		await db.update(users).set({ roles }).where(eq(users.id, userId as UserID));
+		return { success: true };
+	},
+
+	userDelete: async ({ request, locals }) => {
+		const guard = adminGuard(locals);
+		if (guard) return guard;
+
+		const data = await request.formData();
+		const userId = data.get('userId') as string;
+
+		if (!userId) return fail(400, { message: 'User ID required' });
+
+		await db.delete(users).where(eq(users.id, userId as UserID));
 		return { success: true };
 	}
 };

@@ -1,463 +1,528 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Trash2, Plus, ChevronDown, Settings, Pickaxe, Wand2, Compass, Eye } from '@lucide/svelte';
-	import * as Card from '$shadcn/card';
+	import type { ActionResult } from '@sveltejs/kit';
+	import { Plus, Settings, Pencil, Trash2 } from '@lucide/svelte';
+	import * as Table from '$shadcn/table';
 	import * as Button from '$shadcn/button';
-	import { Badge } from '$shadcn/badge';
 	import * as Input from '$shadcn/input';
-	import InlineEdit from '$lib/components/InlineEdit.svelte';
-	import LocationInput from '$lib/components/LocationInput.svelte';
+	import Modal from '$lib/components/Modal.svelte';
+	import RestrictEditor from '$lib/components/RestrictEditor.svelte';
+	import LocationEditor from '$lib/components/LocationEditor.svelte';
+	import { Pickaxe, Wand2, Compass, Eye } from '@lucide/svelte';
 
 	let { data } = $props();
 
 	let currentTab = $state('players');
-	let expandedPlayers = $state<Record<string, boolean>>({});
-	let showWarpForm = $state(false);
-	let showWorldForm = $state(false);
-	let showGroupForm = $state(false);
-	let openGameModeDropdown = $state<string | null>(null);
-	let editingPermissions = $state<string | null>(null);
-	let permissionsInput = $state<Record<string, { text: string; items: string[] }>>({});
+	let worldNames = $derived(data.worlds.map((w) => w.name));
 
-	const gameModeIcons = {
-		0: { icon: Pickaxe, label: 'Survival', name: 'Survival' },
-		1: { icon: Wand2, label: 'Creative', name: 'Creative' },
-		2: { icon: Compass, label: 'Adventure', name: 'Adventure' },
-		3: { icon: Eye, label: 'Spectator', name: 'Spectator' }
-	} as const;
+	// --- Players ---
+	let editingPlayerUuid = $state<string | null>(null);
+	let playerModalOpen = $state(false);
+	let editingPlayer = $derived(data.mcUsers.find((u) => u.uuid === editingPlayerUuid) ?? null);
+	let permItems = $state<string[]>([]);
 
-	function togglePlayer(uuid: string) {
-		expandedPlayers[uuid] = !expandedPlayers[uuid];
+	function openPlayerEdit(uuid: string) {
+		const player = data.mcUsers.find((u) => u.uuid === uuid);
+		permItems = [...(player?.permissions ?? [])];
+		editingPlayerUuid = uuid;
+		playerModalOpen = true;
 	}
 
-	function startEditingPermissions(uuid: string, permissions: string[]) {
-		editingPermissions = uuid;
-		permissionsInput[uuid] = { text: '', items: [...permissions] };
-	}
+	$effect(() => { if (!playerModalOpen) editingPlayerUuid = null; });
 
-	function handlePermissionInput(uuid: string, event: KeyboardEvent) {
-		const input = event.target as HTMLInputElement;
-		const char = input.value[input.value.length - 1];
-
-		if (char === ',' || char === ' ') {
-			event.preventDefault();
+	function handlePermKey(e: KeyboardEvent) {
+		const input = e.target as HTMLInputElement;
+		const last = input.value[input.value.length - 1];
+		if (last === ',' || last === ' ') {
+			e.preventDefault();
 			const text = input.value.slice(0, -1).trim();
-			if (text && permissionsInput[uuid]) {
-				if (!permissionsInput[uuid].items.includes(text)) {
-					permissionsInput[uuid].items.push(text);
-				}
-				input.value = '';
-			}
+			if (text && !permItems.includes(text)) permItems.push(text);
+			input.value = '';
 		}
 	}
 
-	function removePermission(uuid: string, perm: string) {
-		if (permissionsInput[uuid]) {
-			permissionsInput[uuid].items = permissionsInput[uuid].items.filter(p => p !== perm);
-		}
+	function removePerm(p: string) {
+		permItems = permItems.filter((x) => x !== p);
 	}
 
-	function cancelEditingPermissions() {
-		editingPermissions = null;
-		permissionsInput = {};
+	// --- Warps ---
+	let editingWarpName = $state<string | null>(null);
+	let warpModalOpen = $state(false);
+	let createWarpOpen = $state(false);
+	let editingWarp = $derived(data.warps.find((w) => w.name === editingWarpName) ?? null);
+
+	$effect(() => { if (!warpModalOpen) editingWarpName = null; });
+
+	// --- Worlds ---
+	let editingWorldName = $state<string | null>(null);
+	let worldModalOpen = $state(false);
+	let createWorldOpen = $state(false);
+	let editingWorld = $derived(data.worlds.find((w) => w.name === editingWorldName) ?? null);
+
+	$effect(() => { if (!worldModalOpen) editingWorldName = null; });
+
+	// --- Groups ---
+	let editingGroupName = $state<string | null>(null);
+	let groupModalOpen = $state(false);
+	let createGroupOpen = $state(false);
+	let editingGroup = $derived(data.groups.find((g) => g.name === editingGroupName) ?? null);
+	let editGroupGameMode = $state(0);
+	let createGroupGameMode = $state(0);
+
+	$effect(() => { if (!groupModalOpen) editingGroupName = null; });
+
+	function openGroupEdit(name: string) {
+		const group = data.groups.find((g) => g.name === name);
+		editGroupGameMode = group?.gameMode ?? 0;
+		editingGroupName = name;
+		groupModalOpen = true;
 	}
+
+	// --- Helpers ---
+	function fmtLoc(loc: string | null) {
+		if (!loc) return '-';
+		const get = (key: string) => {
+			const m = loc.match(new RegExp(`(?:^|,)${key}=([^,]+)`));
+			return m ? m[1] : null;
+		};
+		const world = get('world') ?? '';
+		const x = Math.round(parseFloat(get('x') ?? '0') || 0);
+		const y = Math.round(parseFloat(get('y') ?? '0') || 0);
+		const z = Math.round(parseFloat(get('z') ?? '0') || 0);
+		return world ? `${world} (${x}, ${y}, ${z})` : `${x}, ${y}, ${z}`;
+	}
+
+	function closeOn(open: (v: boolean) => void) {
+		return () =>
+			async ({ result, update }: { result: ActionResult; update: () => Promise<void> }) => {
+				if (result.type === 'success') open(false);
+				await update();
+			};
+	}
+
+	const GM_ICON = { 0: Pickaxe, 1: Wand2, 2: Compass, 3: Eye } as const;
+	const GM_LABEL = { 0: 'Survival', 1: 'Creative', 2: 'Adventure', 3: 'Spectator' } as const;
+	const GM_KEYS = [0, 1, 2, 3] as const;
 </script>
+
+{#snippet rowActions(onEdit: () => void, deleteAction: string, deleteFields: Record<string, string>)}
+	<div class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+		<button
+			onclick={onEdit}
+			class="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+			title="Edit"
+		>
+			<Pencil size={13} />
+		</button>
+		<form method="POST" action={deleteAction} use:enhance>
+			{#each Object.entries(deleteFields) as [k, v]}
+				<input type="hidden" name={k} value={v} />
+			{/each}
+			<button
+				type="submit"
+				class="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+				title="Delete"
+			>
+				<Trash2 size={13} />
+			</button>
+		</form>
+	</div>
+{/snippet}
+
+{#snippet gameModePicker(current: number, set: (v: number) => void, inputName: string)}
+	<input type="hidden" name={inputName} value={current} />
+	<div class="flex overflow-hidden rounded-md border">
+		{#each GM_KEYS as val}
+			{@const Icon = GM_ICON[val]}
+			<button
+				type="button"
+				onclick={() => set(val)}
+				class="flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 text-xs transition-colors {current === val
+					? 'bg-primary text-primary-foreground'
+					: 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
+				title={GM_LABEL[val]}
+			>
+				<Icon size={12} />
+				{GM_LABEL[val]}
+			</button>
+		{/each}
+	</div>
+{/snippet}
 
 <div class="min-h-screen bg-background">
 	<div class="border-b">
-		<div class="mx-auto max-w-7xl px-6 py-6">
+		<div class="mx-auto max-w-7xl px-6 py-3">
 			<div class="flex items-center justify-between">
-				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-primary p-2">
-						<Settings class="h-6 w-6 text-primary-foreground" />
-					</div>
-					<div>
-						<h1 class="text-3xl font-bold tracking-tight">Minecraft Management</h1>
-						<p class="text-sm text-muted-foreground mt-1">Manage players, warps, worlds and world groups</p>
-					</div>
+				<div class="flex items-center gap-2">
+					<Settings class="h-4 w-4 text-muted-foreground" />
+					<h1 class="font-semibold">Minecraft</h1>
 				</div>
-				<Button.Root href="/admin">Back to Users</Button.Root>
+				<Button.Root href="/admin" variant="outline" size="sm">Back to Users</Button.Root>
 			</div>
 		</div>
 	</div>
 
-	<div class="mx-auto max-w-7xl px-6 py-8">
-		<div class="border-b mb-8">
-			<div class="flex gap-6">
-				{#each ['players', 'warps', 'worlds', 'groups'] as tab}
-					<button
-						class="px-4 py-3 text-sm font-medium transition-colors {currentTab === tab
-							? 'border-b-2 border-primary text-primary'
-							: 'text-muted-foreground hover:text-foreground'}"
-						onclick={() => (currentTab = tab)}
-					>
-						{tab.charAt(0).toUpperCase() + tab.slice(1)}
-					</button>
-				{/each}
-			</div>
+	<div class="mx-auto max-w-7xl px-6 py-4">
+		<div class="mb-4 flex gap-1 border-b">
+			{#each ['players', 'warps', 'worlds', 'groups'] as tab}
+				<button
+					class="px-4 py-2 text-sm font-medium transition-colors {currentTab === tab
+						? 'border-b-2 border-primary text-primary'
+						: 'text-muted-foreground hover:text-foreground'}"
+					onclick={() => (currentTab = tab)}
+				>
+					{tab.charAt(0).toUpperCase() + tab.slice(1)}
+				</button>
+			{/each}
 		</div>
 
+		<!-- PLAYERS -->
 		{#if currentTab === 'players'}
-			<div class="space-y-4">
-				<div class="flex items-center gap-2 text-sm text-muted-foreground">
-					<span>{data.mcUsers.length} Minecraft players linked to accounts</span>
-				</div>
-
-				<div class="space-y-3">
-					{#each data.mcUsers as mcUser (mcUser.uuid)}
-						<Card.Root class="overflow-hidden transition-all hover:shadow-md">
-							<div class="flex flex-col">
-								<button
-									class="flex w-full items-center justify-between px-6 py-4 text-left transition-colors"
-									onclick={() => togglePlayer(mcUser.uuid)}
-								>
-									<div class="flex-1">
-										<div class="flex items-center gap-3 mb-2">
-											<h3 class="font-semibold text-base">{mcUser.name}</h3>
-										</div>
-										<p class="text-sm text-muted-foreground">Linked to: {mcUser.user.username}</p>
-									</div>
-									<ChevronDown
-										size={20}
-										class="transition-transform {expandedPlayers[mcUser.uuid] ? 'rotate-180' : ''}"
-									/>
-								</button>
-
-								{#if expandedPlayers[mcUser.uuid]}
-									<div class="border-t px-6 py-4 bg-muted/30">
-										<div class="space-y-4">
-											<div>
-												<p class="text-xs font-medium text-muted-foreground uppercase">UUID</p>
-												<p class="text-xs font-mono mt-1 break-all">{mcUser.uuid}</p>
-											</div>
-
-											<LocationInput
-												location={mcUser.homeLocation}
-												label="Home Location"
-												action="?/mcUserUpdate"
-												hiddenFields={{ uuid: mcUser.uuid, welcomeMessage: mcUser.welcomeMessage || '' }}
-											/>
-
-											<div>
-												<div class="flex items-center justify-between mb-2">
-													<p class="text-xs font-medium text-muted-foreground uppercase">Permissions ({mcUser.permissions.length})</p>
-													{#if editingPermissions !== mcUser.uuid}
-														<button
-															type="button"
-															class="text-xs text-primary hover:underline"
-															onclick={() => startEditingPermissions(mcUser.uuid, mcUser.permissions)}
-														>
-															Edit
-														</button>
-													{/if}
-												</div>
-												{#if editingPermissions === mcUser.uuid}
-													<form method="POST" action="?/mcUserUpdatePermissions" use:enhance class="space-y-2">
-														<input type="hidden" name="uuid" value={mcUser.uuid} />
-														<input type="hidden" name="permissions" value={permissionsInput[mcUser.uuid]?.items.join(',') || ''} />
-
-														<div class="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/30">
-															{#each permissionsInput[mcUser.uuid]?.items || [] as perm (perm)}
-																<div class="flex items-center gap-1 bg-primary text-primary-foreground px-2 py-1 rounded text-sm">
-																	<span>{perm}</span>
-																	<button
-																		type="button"
-																		class="hover:opacity-75 ml-1"
-																		onclick={() => removePermission(mcUser.uuid, perm)}
-																	>
-																		×
-																	</button>
-																</div>
-															{/each}
-															<input
-																type="text"
-																placeholder="Type and press space or comma to add"
-																class="flex-1 min-w-32 px-2 py-1 border rounded bg-background text-sm"
-																onkeydown={(e) => handlePermissionInput(mcUser.uuid, e)}
-															/>
-														</div>
-
-														<div class="flex gap-2">
-															<Button.Root type="submit" size="sm">Save</Button.Root>
-															<Button.Root type="button" variant="ghost" size="sm" onclick={cancelEditingPermissions}>
-																Cancel
-															</Button.Root>
-														</div>
-													</form>
-												{:else}
-													<div class="flex flex-wrap gap-1">
-														{#each mcUser.permissions as perm}
-															<Badge variant="secondary">{perm}</Badge>
-														{/each}
-													</div>
-												{/if}
-											</div>
-
-											{#if mcUser.bannedUntil}
-												<div>
-													<p class="text-xs font-medium text-destructive uppercase">Banned Until</p>
-													<p class="text-sm mt-1 text-destructive">
-														{new Date(mcUser.bannedUntil).toLocaleDateString()}
-														{#if mcUser.bannedReason}
-															- {mcUser.bannedReason}
-														{/if}
-													</p>
-												</div>
-											{/if}
-
-											{#if mcUser.mutedUntil}
-												<div>
-													<p class="text-xs font-medium text-yellow-600 dark:text-yellow-500 uppercase">Muted Until</p>
-													<p class="text-sm mt-1 text-yellow-600 dark:text-yellow-500">
-														{new Date(mcUser.mutedUntil).toLocaleDateString()}
-													</p>
-												</div>
-											{/if}
-
-											<div class="border-t pt-4">
-												<form method="POST" action="?/mcUserDelete" use:enhance>
-													<input type="hidden" name="uuid" value={mcUser.uuid} />
-													<Button.Root type="submit" variant="destructive" class="w-full">
-														<Trash2 size={16} />
-														Delete Account Link
-													</Button.Root>
-												</form>
-											</div>
-										</div>
-									</div>
-								{/if}
-							</div>
-						</Card.Root>
+			<Table.Root>
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="w-36">MC Name</Table.Head>
+						<Table.Head class="w-32">Account</Table.Head>
+						<Table.Head class="w-20 text-center">Perms</Table.Head>
+						<Table.Head class="w-32">Sanctions</Table.Head>
+						<Table.Head class="w-16"></Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each data.mcUsers as mc (mc.uuid)}
+						<Table.Row class="hover:bg-muted/40 group">
+							<Table.Cell class="py-1.5 font-medium">{mc.name}</Table.Cell>
+							<Table.Cell class="py-1.5 text-xs text-muted-foreground">{mc.user.username}</Table.Cell>
+							<Table.Cell class="py-1.5 text-center text-sm">{mc.permissions.length}</Table.Cell>
+							<Table.Cell class="py-1.5">
+								<div class="flex gap-1">
+									{#if mc.bannedUntil}
+										<span class="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">banned</span>
+									{/if}
+									{#if mc.mutedUntil}
+										<span class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-500">muted</span>
+									{/if}
+									{#if !mc.bannedUntil && !mc.mutedUntil}
+										<span class="text-xs text-muted-foreground">-</span>
+									{/if}
+								</div>
+							</Table.Cell>
+							<Table.Cell class="py-1.5">
+								{@render rowActions(() => openPlayerEdit(mc.uuid), '?/mcUserDelete', { uuid: mc.uuid })}
+							</Table.Cell>
+						</Table.Row>
 					{/each}
-				</div>
-			</div>
+				</Table.Body>
+			</Table.Root>
 		{/if}
 
+		<!-- WARPS -->
 		{#if currentTab === 'warps'}
-			<div class="space-y-4">
-				{#if !showWarpForm}
-					<Button.Root onclick={() => (showWarpForm = true)} class="flex items-center gap-2">
-						<Plus size={18} />
-						Create Warp
-					</Button.Root>
-				{:else}
-					<Card.Root>
-						<div class="p-6">
-							<h3 class="font-semibold text-lg mb-4">Create New Warp</h3>
-							<form method="POST" action="?/warpCreate" use:enhance class="space-y-3">
-								<Input.Root name="name" placeholder="Warp name" required />
-								<Input.Root name="location" placeholder="Location (e.g., x:100 y:64 z:200)" required />
-								<Input.Root name="restrict" placeholder="Restrictions (comma-separated, optional)" />
-								<div class="flex gap-2 pt-2">
-									<Button.Root type="submit">Create</Button.Root>
-									<Button.Root type="button" variant="ghost" onclick={() => (showWarpForm = false)}>
-										Cancel
-									</Button.Root>
-								</div>
-							</form>
-						</div>
-					</Card.Root>
-				{/if}
-
-				<div class="space-y-3">
+			<div class="mb-3">
+				<Button.Root onclick={() => (createWarpOpen = true)} size="sm" class="gap-1.5">
+					<Plus size={14} /> New Warp
+				</Button.Root>
+			</div>
+			<Table.Root class="table-fixed w-full">
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="w-32">Name</Table.Head>
+						<Table.Head class="w-52">Location</Table.Head>
+						<Table.Head>Restrictions</Table.Head>
+						<Table.Head class="w-16"></Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
 					{#each data.warps as warp (warp.name)}
-						<Card.Root class="overflow-hidden transition-all hover:shadow-md">
-							<div class="p-6 space-y-4">
-								<div class="flex items-start justify-between mb-4">
-									<div>
-										<h3 class="font-semibold">{warp.name}</h3>
-									</div>
-									<form method="POST" action="?/warpDelete" use:enhance>
-										<input type="hidden" name="name" value={warp.name} />
-										<Button.Root type="submit" variant="ghost" size="sm" class="text-destructive hover:text-destructive hover:bg-destructive/10">
-											<Trash2 size={16} />
-										</Button.Root>
-									</form>
-								</div>
-
-								<InlineEdit
-									value={warp.name}
-									label="Name"
-									action="?/warpUpdate"
-									hiddenFields={{ oldName: warp.name, location: warp.location, restrict: warp.restrict?.join(', ') || '' }}
-									type="text"
-								/>
-
-								<LocationInput
-									location={warp.location}
-									action="?/warpUpdate"
-									hiddenFields={{ oldName: warp.name, name: warp.name, restrict: warp.restrict?.join(', ') || '' }}
-								/>
-
-								<InlineEdit
-									value={warp.restrict?.join(', ') || ''}
-									label="Restrictions"
-									action="?/warpUpdate"
-									hiddenFields={{ oldName: warp.name, name: warp.name, location: warp.location }}
-									type="text"
-								/>
-							</div>
-						</Card.Root>
+						<Table.Row class="hover:bg-muted/40 group">
+							<Table.Cell class="py-1.5 font-medium">{warp.name}</Table.Cell>
+							<Table.Cell class="truncate py-1.5 font-mono text-xs text-muted-foreground" title={warp.location ?? ''}>
+								{fmtLoc(warp.location)}
+							</Table.Cell>
+							<Table.Cell class="overflow-hidden py-1.5">
+								<RestrictEditor value={warp.restrict ?? []} readonly users={data.users} />
+							</Table.Cell>
+							<Table.Cell class="py-1.5">
+								{@render rowActions(() => { editingWarpName = warp.name; warpModalOpen = true; }, '?/warpDelete', { name: warp.name })}
+							</Table.Cell>
+						</Table.Row>
 					{/each}
-				</div>
-			</div>
+				</Table.Body>
+			</Table.Root>
 		{/if}
 
+		<!-- WORLDS -->
 		{#if currentTab === 'worlds'}
-			<div class="space-y-4">
-				{#if !showWorldForm}
-					<Button.Root onclick={() => (showWorldForm = true)} class="flex items-center gap-2">
-						<Plus size={18} />
-						Create World
-					</Button.Root>
-				{:else}
-					<Card.Root>
-						<div class="p-6">
-							<h3 class="font-semibold text-lg mb-4">Create New World</h3>
-							<form method="POST" action="?/worldCreate" use:enhance class="space-y-3">
-								<Input.Root name="name" placeholder="World name" required />
-								<select name="groupName" class="w-full px-3 py-2 border rounded-md bg-background" required>
-									<option value="">Select a world group</option>
-									{#each data.groups as group}
-										<option value={group.name}>{group.name}</option>
-									{/each}
-								</select>
-								<Input.Root name="restrict" placeholder="Restrictions (comma-separated, optional)" />
-								<div class="flex gap-2 pt-2">
-									<Button.Root type="submit">Create</Button.Root>
-									<Button.Root type="button" variant="ghost" onclick={() => (showWorldForm = false)}>
-										Cancel
-									</Button.Root>
-								</div>
-							</form>
-						</div>
-					</Card.Root>
-				{/if}
-
-				<div class="space-y-3">
-					{#each data.worlds as world (world.name)}
-						<Card.Root class="overflow-hidden transition-all hover:shadow-md">
-							<div class="p-6 space-y-4">
-								<div class="flex items-start justify-between mb-4">
-									<div>
-										<h3 class="font-semibold">{world.name}</h3>
-									</div>
-									<form method="POST" action="?/worldDelete" use:enhance>
-										<input type="hidden" name="name" value={world.name} />
-										<Button.Root type="submit" variant="ghost" size="sm" class="text-destructive hover:text-destructive hover:bg-destructive/10">
-											<Trash2 size={16} />
-										</Button.Root>
-									</form>
-								</div>
-
-								<InlineEdit
-									value={world.name}
-									label="Name"
-									action="?/worldUpdate"
-									hiddenFields={{ oldName: world.name, groupName: world.groupName, restrict: world.restrict?.join(', ') || '' }}
-								/>
-
-								<InlineEdit
-									value={world.groupName}
-									label="World Group"
-									action="?/worldUpdate"
-									hiddenFields={{ oldName: world.name, name: world.name, restrict: world.restrict?.join(', ') || '' }}
-									type="select"
-									selectOptions={data.groups.map(g => ({ value: g.name, label: g.name }))}
-								/>
-
-								<InlineEdit
-									value={world.restrict?.join(', ') || ''}
-									label="Restrictions"
-									action="?/worldUpdate"
-									hiddenFields={{ oldName: world.name, name: world.name, groupName: world.groupName }}
-								/>
-							</div>
-						</Card.Root>
-					{/each}
-				</div>
+			<div class="mb-3">
+				<Button.Root onclick={() => (createWorldOpen = true)} size="sm" class="gap-1.5">
+					<Plus size={14} /> New World
+				</Button.Root>
 			</div>
+			<Table.Root class="table-fixed w-full">
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="w-32">Name</Table.Head>
+						<Table.Head class="w-36">Group</Table.Head>
+						<Table.Head>Restrictions</Table.Head>
+						<Table.Head class="w-16"></Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each data.worlds as world (world.name)}
+						<Table.Row class="hover:bg-muted/40 group">
+							<Table.Cell class="py-1.5 font-medium">{world.name}</Table.Cell>
+							<Table.Cell class="py-1.5 text-sm text-muted-foreground">{world.groupName}</Table.Cell>
+							<Table.Cell class="overflow-hidden py-1.5">
+								<RestrictEditor value={world.restrict ?? []} readonly users={data.users} />
+							</Table.Cell>
+							<Table.Cell class="py-1.5">
+								{@render rowActions(
+									() => { editingWorldName = world.name; worldModalOpen = true; },
+									'?/worldDelete',
+									{ name: world.name }
+								)}
+							</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
 		{/if}
 
+		<!-- GROUPS -->
 		{#if currentTab === 'groups'}
-			<div class="space-y-4">
-				{#if !showGroupForm}
-					<Button.Root onclick={() => (showGroupForm = true)} class="flex items-center gap-2">
-						<Plus size={18} />
-						Create Group
-					</Button.Root>
-				{:else}
-					<Card.Root>
-						<div class="p-6">
-							<h3 class="font-semibold text-lg mb-4">Create New World Group</h3>
-							<form method="POST" action="?/groupCreate" use:enhance class="space-y-3">
-								<Input.Root name="name" placeholder="Group name" required />
-								<select name="gameMode" class="w-full px-3 py-2 border rounded-md bg-background">
-									<option value="0">Survival (0)</option>
-									<option value="1">Creative (1)</option>
-									<option value="2">Adventure (2)</option>
-									<option value="3">Spectator (3)</option>
-								</select>
-								<Input.Root name="restrict" placeholder="Restrictions (comma-separated, optional)" />
-								<div class="flex gap-2 pt-2">
-									<Button.Root type="submit">Create</Button.Root>
-									<Button.Root type="button" variant="ghost" onclick={() => (showGroupForm = false)}>
-										Cancel
-									</Button.Root>
-								</div>
-							</form>
-						</div>
-					</Card.Root>
-				{/if}
-
-				<div class="space-y-3">
-					{#each data.groups as group (group.name)}
-						<Card.Root class="overflow-hidden transition-all hover:shadow-md">
-							<div class="p-6 space-y-4">
-								<div class="flex items-start justify-between mb-4">
-									<div>
-										<h3 class="font-semibold">{group.name}</h3>
-									</div>
-									<form method="POST" action="?/groupDelete" use:enhance>
-										<input type="hidden" name="name" value={group.name} />
-										<Button.Root type="submit" variant="ghost" size="sm" class="text-destructive hover:text-destructive hover:bg-destructive/10">
-											<Trash2 size={16} />
-										</Button.Root>
-									</form>
-								</div>
-
-								<InlineEdit
-									value={group.name}
-									label="Name"
-									action="?/groupUpdate"
-									hiddenFields={{ oldName: group.name, gameMode: group.gameMode.toString(), restrict: group.restrict?.join(', ') || '' }}
-								/>
-
-								<InlineEdit
-									value={group.gameMode}
-									label="Game Mode"
-									action="?/groupUpdate"
-									hiddenFields={{ oldName: group.name, name: group.name, restrict: group.restrict?.join(', ') || '' }}
-									type="select"
-									selectOptions={[
-										{ value: '0', label: 'Survival (0)' },
-										{ value: '1', label: 'Creative (1)' },
-										{ value: '2', label: 'Adventure (2)' },
-										{ value: '3', label: 'Spectator (3)' }
-									]}
-								/>
-
-								<InlineEdit
-									value={group.restrict?.join(', ') || ''}
-									label="Restrictions"
-									action="?/groupUpdate"
-									hiddenFields={{ oldName: group.name, name: group.name, gameMode: group.gameMode.toString() }}
-								/>
-							</div>
-						</Card.Root>
-					{/each}
-				</div>
+			<div class="mb-3">
+				<Button.Root onclick={() => (createGroupOpen = true)} size="sm" class="gap-1.5">
+					<Plus size={14} /> New Group
+				</Button.Root>
 			</div>
+			<Table.Root class="table-fixed w-full">
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="w-32">Name</Table.Head>
+						<Table.Head class="w-32">Mode</Table.Head>
+						<Table.Head>Restrictions</Table.Head>
+						<Table.Head class="w-16"></Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each data.groups as group (group.name)}
+						{@const GmIcon = GM_ICON[group.gameMode as keyof typeof GM_ICON] ?? Pickaxe}
+						<Table.Row class="hover:bg-muted/40 group">
+							<Table.Cell class="py-1.5 font-medium">{group.name}</Table.Cell>
+							<Table.Cell class="py-1.5">
+								<span class="flex items-center gap-1.5 text-sm text-muted-foreground">
+									<GmIcon size={13} />
+									{GM_LABEL[group.gameMode as keyof typeof GM_LABEL] ?? group.gameMode}
+								</span>
+							</Table.Cell>
+							<Table.Cell class="overflow-hidden py-1.5">
+								<RestrictEditor value={group.restrict ?? []} readonly users={data.users} />
+							</Table.Cell>
+							<Table.Cell class="py-1.5">
+								{@render rowActions(
+									() => openGroupEdit(group.name),
+									'?/groupDelete',
+									{ name: group.name }
+								)}
+							</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
 		{/if}
 	</div>
 </div>
+
+<!-- Player Edit Modal -->
+{#if editingPlayer}
+	<Modal bind:open={playerModalOpen} title="Edit Player: {editingPlayer.name}" wide>
+		<div class="space-y-5">
+			<p class="text-xs text-muted-foreground">UUID: <span class="font-mono">{editingPlayer.uuid}</span></p>
+
+			<form method="POST" action="?/mcUserUpdate" use:enhance class="space-y-3">
+				<input type="hidden" name="uuid" value={editingPlayer.uuid} />
+				<div>
+					<label for="plr-welcome" class="mb-1 block text-xs font-medium text-muted-foreground">Welcome Message</label>
+					<Input.Root id="plr-welcome" name="welcomeMessage" value={editingPlayer.welcomeMessage ?? ''} placeholder="None" />
+				</div>
+				<div>
+					<p class="mb-1 text-xs font-medium text-muted-foreground">Home Location</p>
+					<LocationEditor name="homeLocation" value={editingPlayer.homeLocation} worlds={worldNames} />
+				</div>
+				<Button.Root type="submit" size="sm">Save</Button.Root>
+			</form>
+
+			<div class="border-t pt-4">
+				<form method="POST" action="?/mcUserUpdatePermissions" use:enhance class="space-y-2">
+					<input type="hidden" name="uuid" value={editingPlayer.uuid} />
+					<input type="hidden" name="permissions" value={permItems.join(',')} />
+					<p class="text-xs font-medium text-muted-foreground">Permissions ({permItems.length})</p>
+					<div class="flex min-h-10 flex-wrap gap-1.5 rounded-md border p-2">
+						{#each permItems as perm (perm)}
+							<span class="flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+								{perm}
+								<button type="button" onclick={() => removePerm(perm)} class="opacity-70 hover:opacity-100">×</button>
+							</span>
+						{/each}
+						<input
+							type="text"
+							placeholder="Type and press space or comma…"
+							class="min-w-32 flex-1 bg-transparent text-xs outline-none"
+							onkeydown={handlePermKey}
+						/>
+					</div>
+					<Button.Root type="submit" size="sm" variant="outline">Save Permissions</Button.Root>
+				</form>
+			</div>
+
+			{#if editingPlayer.bannedUntil}
+				<div class="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs dark:border-red-800 dark:bg-red-950/20">
+					<span class="font-medium text-red-700 dark:text-red-400">Banned until:</span>
+					<span class="ml-1 text-red-600">{new Date(editingPlayer.bannedUntil).toLocaleString()}</span>
+					{#if editingPlayer.bannedReason}
+						<span class="ml-1 text-red-500">- {editingPlayer.bannedReason}</span>
+					{/if}
+				</div>
+			{/if}
+
+			{#if editingPlayer.mutedUntil}
+				<div class="rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs dark:border-yellow-800 dark:bg-yellow-950/20">
+					<span class="font-medium text-yellow-700 dark:text-yellow-400">Muted until:</span>
+					<span class="ml-1 text-yellow-600">{new Date(editingPlayer.mutedUntil).toLocaleString()}</span>
+				</div>
+			{/if}
+		</div>
+	</Modal>
+{/if}
+
+<!-- Warp Edit Modal -->
+{#if editingWarp}
+	<Modal bind:open={warpModalOpen} title="Edit Warp: {editingWarp.name}" wide>
+		<form method="POST" action="?/warpUpdate" use:enhance={closeOn((v) => (warpModalOpen = v))} class="space-y-4">
+			<input type="hidden" name="oldName" value={editingWarp.name} />
+			<div>
+				<label for="warp-name" class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+				<Input.Root id="warp-name" name="name" value={editingWarp.name} required />
+			</div>
+			<div>
+				<p class="mb-1 text-xs font-medium text-muted-foreground">Location</p>
+				<LocationEditor name="location" value={editingWarp.location} worlds={worldNames} />
+			</div>
+			<div>
+				<p class="mb-1 text-xs font-medium text-muted-foreground">Restrictions</p>
+				<RestrictEditor name="restrict" value={editingWarp.restrict ?? []} users={data.users} />
+			</div>
+			<Button.Root type="submit" size="sm">Save</Button.Root>
+		</form>
+	</Modal>
+{/if}
+
+<!-- World Edit Modal -->
+{#if editingWorld}
+	<Modal bind:open={worldModalOpen} title="Edit World: {editingWorld.name}">
+		<form method="POST" action="?/worldUpdate" use:enhance={closeOn((v) => (worldModalOpen = v))} class="space-y-4">
+			<input type="hidden" name="oldName" value={editingWorld.name} />
+			<div>
+				<label for="world-name" class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+				<Input.Root id="world-name" name="name" value={editingWorld.name} required />
+			</div>
+			<div>
+				<label for="world-group" class="mb-1 block text-xs font-medium text-muted-foreground">World Group</label>
+				<select id="world-group" name="groupName" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm" required>
+					{#each data.groups as g}
+						<option value={g.name} selected={g.name === editingWorld.groupName}>{g.name}</option>
+					{/each}
+				</select>
+			</div>
+			<div>
+				<p class="mb-1 text-xs font-medium text-muted-foreground">Restrictions</p>
+				<RestrictEditor name="restrict" value={editingWorld.restrict ?? []} users={data.users} />
+			</div>
+			<Button.Root type="submit" size="sm">Save</Button.Root>
+		</form>
+	</Modal>
+{/if}
+
+<!-- Group Edit Modal -->
+{#if editingGroup}
+	<Modal bind:open={groupModalOpen} title="Edit Group: {editingGroup.name}">
+		<form method="POST" action="?/groupUpdate" use:enhance={closeOn((v) => (groupModalOpen = v))} class="space-y-4">
+			<input type="hidden" name="oldName" value={editingGroup.name} />
+			<div>
+				<label for="group-name" class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+				<Input.Root id="group-name" name="name" value={editingGroup.name} required />
+			</div>
+			<div>
+				<p class="mb-1 text-xs font-medium text-muted-foreground">Game Mode</p>
+				{@render gameModePicker(editGroupGameMode, (v) => (editGroupGameMode = v), 'gameMode')}
+			</div>
+			<div>
+				<p class="mb-1 text-xs font-medium text-muted-foreground">Restrictions</p>
+				<RestrictEditor name="restrict" value={editingGroup.restrict ?? []} users={data.users} />
+			</div>
+			<Button.Root type="submit" size="sm">Save</Button.Root>
+		</form>
+	</Modal>
+{/if}
+
+<!-- Create Warp Modal -->
+<Modal bind:open={createWarpOpen} title="New Warp" wide>
+	<form method="POST" action="?/warpCreate" use:enhance={closeOn((v) => (createWarpOpen = v))} class="space-y-4">
+		<div>
+			<label for="cw-name" class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+			<Input.Root id="cw-name" name="name" placeholder="spawn" required />
+		</div>
+		<div>
+			<p class="mb-1 text-xs font-medium text-muted-foreground">Location</p>
+			<LocationEditor name="location" worlds={worldNames} />
+		</div>
+		<div>
+			<p class="mb-1 text-xs font-medium text-muted-foreground">Restrictions</p>
+			<RestrictEditor name="restrict" users={data.users} />
+		</div>
+		<Button.Root type="submit" size="sm">Create</Button.Root>
+	</form>
+</Modal>
+
+<!-- Create World Modal -->
+<Modal bind:open={createWorldOpen} title="New World">
+	<form method="POST" action="?/worldCreate" use:enhance={closeOn((v) => (createWorldOpen = v))} class="space-y-4">
+		<div>
+			<label for="cwld-name" class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+			<Input.Root id="cwld-name" name="name" placeholder="world" required />
+		</div>
+		<div>
+			<label for="cwld-group" class="mb-1 block text-xs font-medium text-muted-foreground">World Group</label>
+			<select id="cwld-group" name="groupName" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm" required>
+				<option value="">Select group</option>
+				{#each data.groups as g}
+					<option value={g.name}>{g.name}</option>
+				{/each}
+			</select>
+		</div>
+		<div>
+			<p class="mb-1 text-xs font-medium text-muted-foreground">Restrictions</p>
+			<RestrictEditor name="restrict" users={data.users} />
+		</div>
+		<Button.Root type="submit" size="sm">Create</Button.Root>
+	</form>
+</Modal>
+
+<!-- Create Group Modal -->
+<Modal bind:open={createGroupOpen} title="New World Group">
+	<form method="POST" action="?/groupCreate" use:enhance={closeOn((v) => (createGroupOpen = v))} class="space-y-4">
+		<div>
+			<label for="cg-name" class="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+			<Input.Root id="cg-name" name="name" placeholder="survival" required />
+		</div>
+		<div>
+			<p class="mb-1 text-xs font-medium text-muted-foreground">Game Mode</p>
+			{@render gameModePicker(createGroupGameMode, (v) => (createGroupGameMode = v), 'gameMode')}
+		</div>
+		<div>
+			<p class="mb-1 text-xs font-medium text-muted-foreground">Restrictions</p>
+			<RestrictEditor name="restrict" users={data.users} />
+		</div>
+		<Button.Root type="submit" size="sm">Create</Button.Root>
+	</form>
+</Modal>

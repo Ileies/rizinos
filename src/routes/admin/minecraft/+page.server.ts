@@ -10,20 +10,22 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	if (!hasRole(locals.user, Role.Admin)) redirect(302, '/app');
 
-	const [allWarps, allWorlds, allGroups, allMcUsers] = await Promise.all([
+	const [allWarps, allWorlds, allGroups, allMcUsers, allUsers] = await Promise.all([
 		db.query.mcWarps.findMany(),
 		db.query.mcWorlds.findMany(),
 		db.query.mcWorldGroups.findMany(),
 		db.query.mcUsers.findMany({
 			with: { user: { columns: { passwordHash: false, isOnline: false } } }
-		})
+		}),
+		db.query.users.findMany({ columns: { id: true, username: true } })
 	]);
 
 	return {
 		warps: allWarps,
 		worlds: allWorlds,
 		groups: allGroups,
-		mcUsers: allMcUsers
+		mcUsers: allMcUsers,
+		users: allUsers
 	};
 };
 
