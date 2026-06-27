@@ -2,6 +2,7 @@
 	import { ArrowRight, Eye, EyeOff, ExternalLink } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
+	import * as m from '$lib/messages';
 
 	let { loggedIn = false }: { loggedIn?: boolean } = $props();
 
@@ -16,6 +17,7 @@
 	let password = $state('');
 	let showPassword = $state(false);
 	let submitting = $state(false);
+	let usernameError = $state('');
 	let birthdateError = $state('');
 	let emailError = $state('');
 	let passwordError = $state('');
@@ -51,7 +53,24 @@
 	});
 
 	function nextFromUsername() {
-		if (!username.trim()) return;
+		usernameError = '';
+		const trimmed = username.trim();
+		if (!trimmed) {
+			usernameError = m.signup_username_required();
+			return;
+		}
+		if (trimmed.length < 3) {
+			usernameError = m.signup_username_too_short();
+			return;
+		}
+		if (trimmed.length > 20) {
+			usernameError = m.signup_username_too_long();
+			return;
+		}
+		if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+			usernameError = m.signup_username_invalid_chars();
+			return;
+		}
 		if (!agreedToTos) {
 			tosError = true;
 			return;
@@ -62,12 +81,21 @@
 	function nextFromBirthdate() {
 		birthdateError = '';
 		if (!birthdate) {
-			birthdateError = 'Please enter your date of birth.';
+			birthdateError = m.signup_birthdate_required();
 			return;
 		}
-		const ageMs = Date.now() - new Date(birthdate).getTime();
+		const parsed = new Date(birthdate);
+		if (isNaN(parsed.getTime())) {
+			birthdateError = m.signup_birthdate_invalid();
+			return;
+		}
+		if (parsed.getTime() > Date.now()) {
+			birthdateError = m.signup_birthdate_future();
+			return;
+		}
+		const ageMs = Date.now() - parsed.getTime();
 		if (ageMs < 13 * 365.25 * 24 * 60 * 60 * 1000) {
-			birthdateError = 'You must be at least 13 years old.';
+			birthdateError = m.signup_age_requirement();
 			return;
 		}
 		step = 'finish';
@@ -78,11 +106,11 @@
 		passwordError = '';
 		let ok = true;
 		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-			emailError = 'Enter a valid email address.';
+			emailError = m.signup_email_invalid();
 			ok = false;
 		}
 		if (password.length < 8) {
-			passwordError = 'Must be at least 8 characters.';
+			passwordError = m.signup_password_too_short();
 			ok = false;
 		}
 		if (!ok) return;
@@ -110,7 +138,7 @@
 				href="/app"
 				class="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
 			>
-				Open your OS
+				{m.signup_open_your_os()}
 				<ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
 			</a>
 		{:else}
@@ -118,7 +146,7 @@
 				onclick={() => (step = 'username')}
 				class="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
 			>
-				Open RizinOS in your browser
+				{m.signup_open_rizinos()}
 				<ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
 			</button>
 		{/if}
@@ -127,20 +155,25 @@
 			<div class="flex gap-2">
 				<input
 					type="text"
-					placeholder="choose a username"
+					placeholder={m.signup_username_placeholder()}
 					bind:value={username}
 					onkeydown={(e) => e.key === 'Enter' && nextFromUsername()}
 					autofocus
-					class="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+					class="min-w-0 flex-1 rounded-lg border px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none {usernameError
+						? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100'
+						: 'border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100'}"
 				/>
 				<button
 					onclick={nextFromUsername}
 					class="flex-shrink-0 rounded-lg bg-blue-600 px-4 py-3 text-white transition-colors hover:bg-blue-700"
-					aria-label="Continue"
+					aria-label={m.signup_continue()}
 				>
 					<ArrowRight class="h-4 w-4" />
 				</button>
 			</div>
+			{#if usernameError}
+				<p class="mt-1.5 text-xs text-red-500">{usernameError}</p>
+			{/if}
 			<label class="mt-3 flex cursor-pointer items-start gap-2.5">
 				<input
 					type="checkbox"
@@ -153,16 +186,16 @@
 				/>
 				<span class="text-xs leading-snug {tosError ? 'text-red-500' : 'text-gray-500'}">
 					I have read and agree to RizinOS'
-					<a href="/terms" class="underline hover:text-gray-800">Terms of Service</a>
+					<a href="/terms" class="underline hover:text-gray-800">{m.terms_of_service()}</a>
 					and
-					<a href="/privacy" class="underline hover:text-gray-800">Privacy Policy</a>.
+					<a href="/privacy" class="underline hover:text-gray-800">{m.privacy_policy()}</a>.
 				</span>
 			</label>
 		</div>
 	{/if}
 
 	<p class="mt-4 text-xs text-gray-400">
-		Free forever - No credit card required - GDPR compliant
+		{m.signup_free_note()}
 	</p>
 </div>
 
@@ -222,9 +255,9 @@
 				<div class="p-8">
 					{#if step === 'birthdate'}
 						<h2 class="text-2xl font-black tracking-tight text-gray-900">
-							Welcome, {username}!
+							{m.signup_welcome({ username })}
 						</h2>
-						<p class="mt-1.5 text-sm text-gray-500">When were you born?</p>
+						<p class="mt-1.5 text-sm text-gray-500">{m.signup_birthdate_prompt()}</p>
 						<input
 							type="date"
 							bind:value={birthdate}
@@ -237,19 +270,19 @@
 							onclick={nextFromBirthdate}
 							class="mt-5 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
 						>
-							Continue
+							{m.signup_continue()}
 						</button>
 
 					{:else if step === 'finish'}
-						<h2 class="text-2xl font-black tracking-tight text-gray-900">Finish signing up</h2>
+						<h2 class="text-2xl font-black tracking-tight text-gray-900">{m.signup_finish_title()}</h2>
 						<p class="mt-1.5 text-sm text-gray-500">
-							Claim your account by entering an email and password.
+							{m.signup_finish_desc()}
 						</p>
 						<div class="mt-5 space-y-3">
 							<div>
 								<input
 									type="email"
-									placeholder="Email"
+									placeholder={m.signup_email_placeholder()}
 									bind:value={email}
 									class="w-full rounded-lg border px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none {emailError
 										? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100'
@@ -263,7 +296,7 @@
 								<div class="relative">
 									<input
 										type={showPassword ? 'text' : 'password'}
-										placeholder="Password"
+										placeholder={m.signup_password_placeholder()}
 										bind:value={password}
 										class="w-full rounded-lg border px-4 py-3 pr-10 text-sm text-gray-900 placeholder:text-gray-400 outline-none {passwordError
 											? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100'
@@ -273,7 +306,7 @@
 										type="button"
 										onclick={() => (showPassword = !showPassword)}
 										class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-										aria-label={showPassword ? 'Hide password' : 'Show password'}
+										aria-label={showPassword ? m.signup_hide_password() : m.signup_show_password()}
 									>
 										{#if showPassword}
 											<EyeOff class="h-4 w-4" />
@@ -292,14 +325,14 @@
 							disabled={submitting}
 							class="mt-5 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
 						>
-							{submitting ? 'Creating account...' : 'Create account'}
+							{submitting ? m.signup_creating() : m.signup_create_account()}
 						</button>
 
 					{:else if step === 'confirm'}
 						<div class="text-center">
 							<p class="mb-3 text-4xl">🎉</p>
-							<h2 class="text-2xl font-black tracking-tight text-gray-900">Thanks!</h2>
-							<p class="mt-3 text-sm text-gray-500">We've sent a confirmation link to:</p>
+							<h2 class="text-2xl font-black tracking-tight text-gray-900">{m.signup_thanks_title()}</h2>
+							<p class="mt-3 text-sm text-gray-500">{m.signup_confirm_sent()}</p>
 							<p class="mt-1 text-sm font-semibold text-gray-900">{email}</p>
 							{#if emailProvider}
 								<a
@@ -313,7 +346,7 @@
 								</a>
 							{/if}
 							<p class="mt-4 text-xs text-gray-400">
-								Check your spam folder if you don't see it.
+								{m.signup_check_spam()}
 							</p>
 						</div>
 					{/if}

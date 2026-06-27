@@ -195,14 +195,14 @@
 							href="/app"
 							class="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
 						>
-							Open your OS
+							{m.open_your_os()}
 						</a>
 					{:else}
 						<a
 							href="/login"
 							class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
 						>
-							Log in
+							{m.log_in()}
 						</a>
 					{/if}
 				</div>
@@ -269,7 +269,7 @@
 					>
 						<span class="flex items-center space-x-2">
 							<Globe size={16} />
-							<span>Language</span>
+							<span>{m.language()}</span>
 						</span>
 						<ChevronDown
 							size={16}
@@ -309,14 +309,14 @@
 						href="/app"
 						class="mt-4 block w-full rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
 					>
-						Open your OS
+						{m.open_your_os()}
 					</a>
 				{:else}
 					<a
 						href="/login"
 						class="mt-4 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
 					>
-						Log in
+						{m.log_in()}
 					</a>
 				{/if}
 			</div>

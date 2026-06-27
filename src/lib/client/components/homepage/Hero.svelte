@@ -14,47 +14,22 @@
 		Wifi
 	} from '@lucide/svelte';
 	import SignupFlow from '$ui/homepage/SignupFlow.svelte';
+	import * as m from '$lib/messages';
+	import { locale as localeStore } from '$lib/messages';
 
 	let { loggedIn = false }: { loggedIn?: boolean } = $props();
 
-	const features = [
-		{
-			icon: Cpu,
-			title: 'Rust WASM Engine',
-			description:
-				'Core OS modules written in Rust, compiled to WebAssembly. Near-native performance, entirely in the browser.'
-		},
-		{
-			icon: Layers,
-			title: 'NixOS-like Architecture',
-			description:
-				'Declarative, version-controlled system configuration. Roll back any change at any time.'
-		},
-		{
-			icon: Shield,
-			title: 'Client-Side Encryption',
-			description:
-				'All storage is encrypted before it leaves your device. The server never sees your plaintext.'
-		},
-		{
-			icon: Zap,
-			title: 'Instant Start',
-			description:
-				'No POST. No drivers. No loading. Open a tab and your OS is there, exactly as you left it.'
-		},
-		{
-			icon: Download,
-			title: 'Background App',
-			description:
-				'Optional native companion for file sync, peripheral access, and push notifications from your device.'
-		},
-		{
-			icon: Users,
-			title: 'Real-Time Collaboration',
-			description:
-				'Shared sessions on files and apps, built at the OS level. Not bolted on per-app.'
-		}
-	];
+	let features = $derived((() => {
+		$localeStore;
+		return [
+			{ icon: Cpu, title: m.feature_rust_wasm_title(), description: m.feature_rust_wasm_desc() },
+			{ icon: Layers, title: m.feature_nixos_title(), description: m.feature_nixos_desc() },
+			{ icon: Shield, title: m.feature_encryption_title(), description: m.feature_encryption_desc() },
+			{ icon: Zap, title: m.feature_instant_title(), description: m.feature_instant_desc() },
+			{ icon: Download, title: m.feature_bgapp_title(), description: m.feature_bgapp_desc() },
+			{ icon: Users, title: m.feature_collab_title(), description: m.feature_collab_desc() }
+		];
+	})());
 
 	const apps = [
 		{ name: 'Files', label: 'F' },
@@ -71,14 +46,26 @@
 		{ name: 'Store', label: 'St' }
 	];
 
-	const syncFeatures = [
-		'Bidirectional file sync between device and cloud VFS',
-		'Native drag-and-drop uploads from your desktop',
-		'Continuous versioned backups with configurable retention',
-		'Push notifications even when the browser tab is closed',
-		'Peripheral bridging: cameras, microphones, USB, serial',
-		'Offline mode with automatic sync on reconnect'
-	];
+	let syncFeatures = $derived((() => {
+		$localeStore;
+		return [
+			m.sync_bidirectional(),
+			m.sync_native_dnd(),
+			m.sync_backups(),
+			m.sync_push_notif(),
+			m.sync_peripherals(),
+			m.sync_offline()
+		];
+	})());
+
+	let zeroErrorsItems = $derived((() => {
+		$localeStore;
+		return [
+			{ title: m.hardware_independent_title(), desc: m.hardware_independent_desc() },
+			{ title: m.declarative_config_title(), desc: m.declarative_config_desc() },
+			{ title: m.atomic_updates_title(), desc: m.atomic_updates_desc() }
+		];
+	})());
 
 	const layers = [
 		{ label: 'Applications', sub: 'Files · Terminal · Browser · Notes · Chat · Mail · Calendar...' },
@@ -96,15 +83,13 @@
 	<section class="border-b border-gray-200 bg-white px-6 py-24 lg:py-36">
 		<div class="mx-auto max-w-4xl text-center">
 				<h1 class="text-5xl font-black leading-[1.08] tracking-tight text-gray-900 lg:text-7xl">
-				The operating system<br />
-				that runs in your browser
+				{m.hero_title()}
 			</h1>
 
 			<p class="mt-4 font-mono text-xs text-gray-400">public beta · v11.0.0</p>
 
 			<p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-500">
-				Built on Rust WASM modules and a NixOS-inspired architecture. No hardware. No drivers. No
-				OS errors. By design. Adapts to your device: feels at home on phones, tablets, and desktops alike.
+				{m.hero_subtitle()}
 			</p>
 
 			<div class="mt-10">
@@ -235,33 +220,18 @@
 			<div class="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
 				<div>
 					<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
-						The core promise
+						{m.core_promise_label()}
 					</p>
 					<h2 class="text-4xl font-black leading-tight tracking-tight text-gray-900 lg:text-5xl">
-						The first OS that<br />cannot fail.
+						{m.zero_errors_title()}
 					</h2>
 					<p class="mt-5 text-lg leading-relaxed text-gray-500">
-						Traditional operating systems fail because they depend on hardware, drivers, and mutable
-						state. RizinOS eliminates all three. Running in the browser means no hardware
-						abstractions to break, no drivers to conflict, and no system state to corrupt.
+						{m.zero_errors_desc()}
 					</p>
 				</div>
 
 				<div class="grid grid-cols-1 gap-4">
-					{#each [
-						{
-							title: 'Hardware-independent',
-							desc: 'No device drivers. No hardware conflicts. The browser is the hardware layer, and browsers are extremely good at that job.'
-						},
-						{
-							title: 'Declarative configuration',
-							desc: 'Every system setting is version-controlled and reproducible. No configuration drift between environments, ever.'
-						},
-						{
-							title: 'Atomic updates',
-							desc: 'System updates apply atomically or not at all. Failed updates roll back automatically. You can undo any change, any time.'
-						}
-					] as item}
+					{#each zeroErrorsItems as item}
 						<div class="rounded-xl border border-gray-200 bg-white p-6">
 							<h3 class="mb-2 font-semibold text-gray-900">{item.title}</h3>
 							<p class="text-sm leading-relaxed text-gray-500">{item.desc}</p>
@@ -279,10 +249,10 @@
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-16 max-w-xl">
 				<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
-					Capabilities
+					{m.capabilities_label()}
 				</p>
 				<h2 class="text-4xl font-black tracking-tight text-gray-900">
-					Built for the next era of computing.
+					{m.features_era_title()}
 				</h2>
 			</div>
 
@@ -313,15 +283,13 @@
 			<div class="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
 				<div>
 					<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
-						Background App
+						{m.bg_app_label()}
 					</p>
 					<h2 class="text-4xl font-black leading-tight tracking-tight text-gray-900">
-						Extends into your device.
+						{m.bg_app_title()}
 					</h2>
 					<p class="mt-5 text-lg leading-relaxed text-gray-500">
-						Install the optional Background App to bridge RizinOS with your device. File sync,
-						peripheral access, and native notifications, without giving up the browser-first
-						architecture.
+						{m.bg_app_desc()}
 					</p>
 					<div class="mt-8 space-y-3">
 						{#each syncFeatures as item}
@@ -336,7 +304,7 @@
 							<button
 								class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400"
 							>
-								Download for {platform}
+								{m.download_for({ platform })}
 							</button>
 						{/each}
 					</div>
@@ -370,7 +338,7 @@
 							<div class="flex items-center gap-3">
 								<Wifi class="h-5 w-5 text-gray-500" />
 								<div>
-									<div class="text-sm font-semibold text-gray-900">Background App</div>
+									<div class="text-sm font-semibold text-gray-900">{m.bg_app_label()}</div>
 									<div class="text-xs text-gray-400">Running on your device</div>
 								</div>
 								<div class="ml-auto h-2 w-2 rounded-full bg-green-400"></div>
@@ -399,14 +367,13 @@
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-16 max-w-xl">
 				<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
-					Applications
+					{m.applications_label()}
 				</p>
 				<h2 class="text-4xl font-black tracking-tight text-gray-900">
-					A full suite. Built in.
+					{m.apps_title()}
 				</h2>
 				<p class="mt-4 text-gray-500">
-					Every app shares a unified permission model, file protocol, and design system. They are OS
-					citizens, not plugins.
+					{m.apps_desc()}
 				</p>
 			</div>
 
@@ -426,7 +393,7 @@
 			</div>
 
 			<p class="mt-6 text-sm text-gray-400">
-				+ Minecraft integration, AI assistant, Stripe payments, video calling in the roadmap
+				{m.apps_roadmap()}
 			</p>
 		</div>
 	</section>
@@ -439,15 +406,13 @@
 			<div class="grid grid-cols-1 items-start gap-16 lg:grid-cols-2">
 				<div>
 					<p class="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
-						Architecture
+						{m.arch_label()}
 					</p>
 					<h2 class="text-4xl font-black leading-tight tracking-tight text-gray-900">
-						Clean layers,<br />no shortcuts.
+						{m.arch_title()}
 					</h2>
 					<p class="mt-5 text-lg leading-relaxed text-gray-500">
-						Rust modules compile to WASM and run as the kernel layer. SvelteKit drives the system
-						shell. Each app is an isolated WASM process with its own memory space and typed IPC to
-						the OS. Nothing is shared implicitly.
+						{m.arch_desc()}
 					</p>
 
 					<!-- Developer snippet -->
@@ -520,7 +485,7 @@
 						</div>
 					{/each}
 					<p class="mt-3 text-xs text-gray-400">
-						All layers communicate through typed IPC interfaces
+						{m.arch_ipc_note()}
 					</p>
 				</div>
 			</div>
@@ -533,22 +498,22 @@
 	<section class="bg-white px-6 py-28">
 		<div class="mx-auto max-w-2xl text-center">
 			<h2 class="text-4xl font-black tracking-tight text-gray-900 lg:text-5xl">
-				Your OS is waiting.<br />Open a tab.
+				{m.cta_title()}
 			</h2>
 			<p class="mt-5 text-lg text-gray-500">
-				No downloads. No setup. Works on any device, any screen size, any browser.
+				{m.cta_desc()}
 			</p>
 			<div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
 				<a
 					href="/signup"
 					class="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-4 font-semibold text-white transition-colors hover:bg-blue-700"
 				>
-					Create your account
+					{m.cta_button()}
 					<ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
 				</a>
 			</div>
 			<p class="mt-4 text-sm text-gray-400">
-				Free tier forever - No credit card - 10 GB cloud storage included
+				{m.cta_note()}
 			</p>
 		</div>
 	</section>
