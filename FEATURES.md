@@ -2,35 +2,37 @@
 
 A full, web-native operating system. Hardware-independent by design. Built with Rust WASM modules and a NixOS-inspired architecture.
 
+**Status tags:** `[done]` = implemented and working, `[partial]` = schema/skeleton exists, `[planned]` = not started
+
 ---
 
-## Adaptive UI
+## Adaptive UI `[partial]`
 
 RizinOS detects the device type and screen size at runtime and renders a UI that feels native to that context. There is no separate mobile app — the same codebase adapts automatically.
 
 - **Phone** - Android-inspired layout: bottom navigation, full-screen apps, swipe gestures, notification drawer, no visible window chrome
 - **Tablet** - Split-view capable, side dock, adaptive panels
-- **Desktop** - Windows-inspired layout: windowed apps, taskbar, desktop icons, right-click context menus, keyboard shortcuts
+- **Desktop** `[partial]` - Windowed apps, taskbar, desktop icons, right-click context menus, keyboard shortcuts
 - **Touch detection** - Input method (touch vs. pointer) adjusts tap targets, gesture recognition, and interaction patterns
-- **Responsive windows** - App windows respect viewport constraints; on small screens apps run full-screen automatically
+- **Responsive windows** `[partial]` - App windows respect viewport constraints; on small screens apps run full-screen automatically
 - **Consistent core** - Same filesystem, same apps, same account — only the shell chrome adapts
 
 ---
 
 ## Core OS
 
-- **Window manager** - Drag, resize, minimize, maximize, snap-to-edge, multi-window focus management
+- **Window manager** `[partial]` - Drag, resize, minimize, maximize, snap-to-edge, multi-window focus management
 - **Process model** - Isolated WASM process per app, typed IPC messaging between processes
-- **Virtual file system** - Hierarchical VFS with POSIX-like paths, cloud-backed by default
+- **Virtual file system** `[partial]` - Hierarchical VFS with POSIX-like paths, DB-backed (`file_meta` table)
 - **Declarative configuration** - NixOS-inspired system config: version-controlled, reproducible, rollback-able
 - **Immutable updates** - Atomic system updates; any update can be reverted instantly
 - **Session restore** - Full OS state persisted across tab reloads and browser restarts
 - **Multi-user support** - Isolated user environments sharing no state, per-user permissions
 - **Theme engine** - System-wide light/dark/custom themes, per-app color overrides
-- **i18n** - Full interface translation (English, German, Russian, Chinese; extensible)
-- **Notification center** - Priority-based, groupable, snooze-able notifications
-- **Context menus** - Rich right-click menus throughout, fully extensible by apps
-- **System sounds** - Spatial audio events, mutable, per-app sound profiles
+- **i18n** `[done]` - Full interface translation (German, English, Chinese, Russian); per-topic JSON files compiled at build time; locale cookie; 4 locales: de, en, cn, ru
+- **Notification center** `[partial]` - Priority-based notifications (client state exists)
+- **Context menus** `[partial]` - Right-click menus (client menu system exists)
+- **System sounds** `[partial]` - Sound state management exists
 
 ---
 
@@ -142,9 +144,11 @@ RizinOS detects the device type and screen size at runtime and renders a UI that
 
 ## Authentication & Accounts
 
-- **Email magic link** - Passwordless email login
-- **Google OAuth** - Sign in with Google
-- **Device trust** - Recognized devices skip re-auth; unknown devices require verification
+- **Password login** `[done]` - Email + password auth with hashed passwords
+- **Email magic link** `[planned]` - Passwordless email login
+- **Google OAuth** `[done]` - Sign in with Google (Arctic library)
+- **Email verification** `[done]` - Confirm-email flow after signup
+- **Device trust** `[done]` - Recognized devices (deviceToken cookie) skip re-auth
 - **Session management** - View and revoke active sessions per-device
 - **2FA** - TOTP-based two-factor authentication (planned)
 
@@ -163,27 +167,39 @@ RizinOS detects the device type and screen size at runtime and renders a UI that
 
 ## Infrastructure & Platform
 
-- **WebSocket server** - Persistent real-time connection for live OS events and sync
+- **WebSocket server** `[done]` - Custom Bun WebSocket server at `/ws` for live OS events
 - **Horizontal scaling** - Stateless app servers behind load balancer; session state in DB
-- **PostgreSQL** - Primary data store via Drizzle ORM
+- **PostgreSQL** `[done]` - Primary data store via Drizzle ORM
 - **Object storage** - S3-compatible storage for user files
-- **Admin dashboard** - User management, server health, Minecraft integration controls
+- **Admin dashboard** `[done]` - User management (roles, edit, delete), Minecraft integration controls
 - **Analytics** - Privacy-respecting usage analytics (PostHog self-hosted)
 
 ---
 
 ## Integrations
 
-- **Minecraft** - Full Minecraft server management: start/stop, worlds, inventories, warps, permissions, credit system
-- **Minechat** - Bridged chat between Minecraft in-game and Discord channels
-- **Discord** - Bot integration for notifications and chat bridging
+- **Minecraft** `[done]` - Server management: start/stop, worlds/world groups, inventories, warps, permissions, credit system, ban/mute, home locations, Mojang API validation for player creation
+- **Minechat** `[partial]` - Schema + API endpoints for Discord-Minecraft bridge; full logic incomplete
+- **Discord** `[partial]` - Schema for Discord users; bot integration not fully wired
 - **Stripe** - Subscription billing and in-OS micropayments (planned)
 - **OpenAI** - AI assistant integrated at OS level (planned)
 
 ---
 
+## Homepage & Marketing `[done]`
+
+- Internationalized homepage (Hero, header, footer) in de/en/cn/ru
+- Inline signup flow on hero section
+- Login page with Google OAuth + password auth
+- About, legal, privacy, terms pages
+- Redirect to `/app` after login; `?redirect=` param support
+
+---
+
 ## Status Legend
 
-Features without a status tag are planned but not yet started.
-- Items implemented or partially implemented are in the codebase already.
+- `[done]` - Implemented and working in the current codebase
+- `[partial]` - Schema, skeleton, or state management exists; not fully functional
+- `[planned]` - Designed but not yet started
+- No tag = planned but not yet started
 - Roadmap is subject to change as the project evolves.
