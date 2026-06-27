@@ -84,7 +84,7 @@
 </script>
 
 <div
-	class="bg-accent flex h-svh w-svh cursor-default flex-col overflow-hidden bg-cover bg-center bg-no-repeat select-none"
+	class="bg-accent flex h-svh w-svw cursor-default flex-col overflow-hidden bg-cover bg-center bg-no-repeat select-none"
 	style:background-image={os.wallpaperUrl
 		? `url("/storage/${os.wallpaperUrl}?t=${Date.now()}")`
 		: 'none'}
