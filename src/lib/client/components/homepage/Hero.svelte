@@ -22,7 +22,7 @@
 			icon: Cpu,
 			title: 'Rust WASM Engine',
 			description:
-				'Core OS modules written in Rust, compiled to WebAssembly. Near-native performance — entirely in the browser.'
+				'Core OS modules written in Rust, compiled to WebAssembly. Near-native performance, entirely in the browser.'
 		},
 		{
 			icon: Layers,
@@ -95,21 +95,16 @@
 	     =================================================== -->
 	<section class="border-b border-gray-200 bg-white px-6 py-24 lg:py-36">
 		<div class="mx-auto max-w-4xl text-center">
-			<div
-				class="mb-6 inline-flex items-center gap-2 rounded border border-gray-200 px-2.5 py-1 font-mono text-xs text-gray-500"
-			>
-				<span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-				public beta · v11.0.0
-			</div>
-
-			<h1 class="text-5xl font-black leading-[1.08] tracking-tight text-gray-900 lg:text-7xl">
+				<h1 class="text-5xl font-black leading-[1.08] tracking-tight text-gray-900 lg:text-7xl">
 				The operating system<br />
 				that runs in your browser
 			</h1>
 
+			<p class="mt-4 font-mono text-xs text-gray-400">public beta · v11.0.0</p>
+
 			<p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-gray-500">
 				Built on Rust WASM modules and a NixOS-inspired architecture. No hardware. No drivers. No
-				OS errors — by design. Adapts to your device: feels at home on phones, tablets, and desktops alike.
+				OS errors. By design. Adapts to your device: feels at home on phones, tablets, and desktops alike.
 			</p>
 
 			<div class="mt-10">
@@ -256,7 +251,7 @@
 					{#each [
 						{
 							title: 'Hardware-independent',
-							desc: 'No device drivers. No hardware conflicts. The browser is the hardware layer — and browsers are extremely good at that job.'
+							desc: 'No device drivers. No hardware conflicts. The browser is the hardware layer, and browsers are extremely good at that job.'
 						},
 						{
 							title: 'Declarative configuration',
@@ -325,7 +320,7 @@
 					</h2>
 					<p class="mt-5 text-lg leading-relaxed text-gray-500">
 						Install the optional Background App to bridge RizinOS with your device. File sync,
-						peripheral access, and native notifications — without giving up the browser-first
+						peripheral access, and native notifications, without giving up the browser-first
 						architecture.
 					</p>
 					<div class="mt-8 space-y-3">
