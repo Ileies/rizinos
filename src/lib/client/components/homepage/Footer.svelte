@@ -4,7 +4,7 @@
 	import type { LinkList } from '$types/seo';
 	import * as m from '$lib/messages';
 	import { locale as localeStore } from '$lib/messages';
-	import { discord, github, twitter } from '$lib/config';
+	import { discord, github, x } from '$lib/config';
 
 	let legal: LinkList = $derived((() => {
 		$localeStore;
@@ -96,7 +96,7 @@
 
 					<a
 						class="text-base-content/50 hover:text-base-content transition-colors duration-200"
-						href={twitter}
+						href={x}
 					>
 						<SiX size={24} />
 					</a>
