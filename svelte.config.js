@@ -6,14 +6,14 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter(),
-		csrf: {
-			checkOrigin: false // TODO: Fix this - disabling origin check is a security risk. Investigate why origin validation was failing and re-enable after fixing.
-		},
+		// Distinct asset dir so the os's client assets don't collide with the
+		// static frontend's default `/_app/` when both are served from the same origin.
+		appDir: '_os',
 		alias: {
 			$db: './src/lib/server/db',
 			$types: './src/types',
 			$ui: './src/lib/client/components',
-			$shadcn: './src/lib/components/ui'
+			$shadcn: './src/lib/components'
 		}
 	}
 };
