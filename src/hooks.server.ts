@@ -7,22 +7,10 @@ import { authenticate } from '$lib/server/auth';
 import { sequence } from '@sveltejs/kit/hooks';
 import { getToken } from '$lib/server/models/token';
 import { TokenType } from '$types';
-import { locales, cookieName } from '$lib/messages';
-
 const ignoredUrls = ['/api/mc/getCredit'];
 
 // Reset online status for all users on server startup
 await db.update(users).set({ isOnline: false }).where(eq(users.isOnline, true));
-
-const handleLocale: Handle = ({ event, resolve }) => {
-	const localeCookie = event.cookies.get(cookieName) ?? '';
-	const locale = (locales as readonly string[]).includes(localeCookie) ? localeCookie : (locales[0] as string);
-	event.locals.locale = locale;
-
-	return resolve(event, {
-		transformPageChunk: ({ html }) => html.replace('%paraglide.lang%', locale)
-	});
-};
 
 const checks: Handle = async ({ event, resolve }) => {
 	// Get client IP, preferring forwarded IP from proxy if available
@@ -75,4 +63,4 @@ const api: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(checks, api, handleLocale);
+export const handle: Handle = sequence(checks, api);

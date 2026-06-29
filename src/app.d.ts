@@ -11,12 +11,7 @@ declare global {
 			user: UserData | null;
 			device: Device | null;
 			apiSession: ApiSession | null;
-			locale: string;
 		}
-
-		// interface PageData {}
-		// interface PageState {}
-		// interface Platform {}
 	}
 
 	interface ApiSession {
