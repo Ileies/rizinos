@@ -10,6 +10,8 @@ export const GET: RequestHandler = async ({ params }) => {
 	//const absolutePath = path.resolve('/mnt/data/rizinos', params.path);
 	const absolutePath = path.resolve('./', params.path);
 
+	console.log('storage download: ', absolutePath);
+
 	// Überprüfe, ob die Datei existiert
 	if (!(await Bun.file(absolutePath).exists())) {
 		error(404, 'Datei nicht gefunden.');

@@ -10,7 +10,7 @@
 		<div>
 			<p class="mt-4 text-center text-lg text-gray-500">
 				{#if page.status === 404}
-					The page you are looking for does not exist.
+					Page not found.
 				{:else}
 					An error occurred.<br />
 					<span class="mt-4 text-sm text-gray-600">
@@ -19,7 +19,10 @@
 				{/if}
 			</p>
 			<p class="mt-10 text-center">
-				<a class="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50" href="/">Go back home</a>
+				<a
+					class="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+					href="/">Go back home</a
+				>
 			</p>
 		</div>
 	</main>

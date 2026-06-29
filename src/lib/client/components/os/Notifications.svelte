@@ -27,7 +27,11 @@
 </script>
 
 {#if os.notifications.length > 0}
-	<div class="fixed right-0 z-[2147483634] flex flex-col gap-2 p-4 {os.isMobile ? 'top-0 w-full' : 'bottom-10 w-72'}">
+	<div
+		class="fixed right-0 z-[2147483634] flex flex-col gap-2 p-4 {os.isMobile
+			? 'top-0 w-full'
+			: 'bottom-10 w-72'}"
+	>
 		{#if os.notifications.length > 4}
 			<div>
 				{os.notifications.length - 4} ...

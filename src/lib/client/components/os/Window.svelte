@@ -111,7 +111,7 @@
 
 <div
 	bind:this={windowContainer}
-	class="fixed box-border flex flex-col bg-card text-foreground {os.isMobile
+	class="bg-card text-foreground fixed box-border flex flex-col {os.isMobile
 		? ''
 		: 'border shadow-lg ' +
 			(os.focusedProcessId === processData.id ? 'border-foreground/30' : 'border-border')}"

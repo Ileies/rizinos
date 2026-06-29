@@ -1,8 +1,13 @@
 import { z } from 'zod';
-import { subYears } from 'date-fns';
 
-export const minAge = subYears(new Date(), 12).getTime();
-export const maxAge = subYears(new Date(), 80).getTime();
+const yearsAgo = (years: number): number => {
+	const date = new Date();
+	date.setFullYear(date.getFullYear() - years);
+	return date.getTime();
+};
+
+export const minAge = yearsAgo(12);
+export const maxAge = yearsAgo(80);
 
 // Zod schema for signup form validation
 export const formSchema = z.object({
