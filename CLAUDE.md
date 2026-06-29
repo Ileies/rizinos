@@ -1,6 +1,19 @@
 # RizinOS - Developer Guide
 
-A web-native operating system built with SvelteKit + Bun + Drizzle ORM + PostgreSQL.
+The **dynamic backend** of RizinOS. SvelteKit + Bun + Drizzle ORM + PostgreSQL.
+
+## Sibling project: `rizinos-web` (static frontend)
+
+[`../rizinos-web`](../rizinos-web) is the static SPA served from a CDN/static host. It owns the marketing site, login/signup forms, and admin dashboard. It calls this backend's `/api/*` endpoints over a shared origin (reverse proxy).
+
+In **production**, nginx routes on one origin:
+
+- `/app`, `/api/*`, `/storage/*`, `/ws` - this server (Bun, port 3001)
+- Everything else - `rizinos-web` (static build at `/var/www/rizinos-web`)
+
+In **dev**, `rizinos-web` runs on port 3003 and proxies `/api` + `/ws` to this server (port 3002).
+
+See [`../rizinos-web/CLAUDE.md`](../rizinos-web/CLAUDE.md) and [`../rizinos-web/README.md`](../rizinos-web/README.md) for frontend conventions, i18n details, admin API usage, and deployment.
 
 ## Dev Commands
 
@@ -50,7 +63,9 @@ messages/              # i18n source files (per-topic JSON, auto-compiled)
 
 ## i18n System
 
-Messages live in `messages/*.json` (per-topic files: `common.json`, `home.json`, `login.json`, `signup.json`). Each key maps to an array of `[de, en, cn, ru]` translations.
+Messages live in `messages/*.json` (per-topic files: `common.json`, `home.json`, `login.json`, `signup.json`, `confirm.json`, `error.json`). Each key maps to an array of `[de, en, cn, ru]` translations.
+
+`common.json` is reserved for general keys reused across multiple pages (e.g. nav labels, the global Header/Footer). Page- or feature-specific strings belong in their own topic file, not in `common.json`.
 
 A Vite plugin (`src/lib/i18n-plugin.ts`) compiles these into `src/lib/messages.ts` (auto-generated, gitignored) at dev/build time. Default locale is `de`. Import translation functions directly:
 
@@ -61,6 +76,7 @@ import { title, description } from '$lib/messages';
 ## Database Schema
 
 Schema is split by domain in `src/lib/server/db/`:
+
 - `schemaUsers.ts` - users, tokens, devices, transactions
 - `schemaMinecraft.ts` - mcUsers, mcWarps, mcWorlds, mcWorldGroups, mcInventories, mcWorth
 - `schemaMinechat.ts` - minechatUsers, minechatServers, minechatHooks
@@ -84,3 +100,5 @@ bun run deploy       # runs scripts/deploy.ts
 ```
 
 PM2 config at `pm2.config.cjs`. Server runs on `PORT` env var (default 3000).
+
+**Production nginx config** lives in the NixOS flake at `/etc/nixos/hosts/pronix/default.nix` (host `pronix`, the production server). The `rizinos.com` virtualHost routes the static frontend (`rizinos-web`) at the origin root and proxies `/app`, `/api`, `/storage`, `/_os` (backend client assets, `kit.appDir = '_os'`), `/ws` to this backend (Bun on `:3001`). Asset requests with a file extension must resolve to a real file or return 404 (no SPA-shell fallback). Apply changes on the server with `sudo nixos-rebuild switch --flake /etc/nixos#pronix` (not the local `prenix` host).

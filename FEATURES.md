@@ -65,65 +65,78 @@ RizinOS detects the device type and screen size at runtime and renders a UI that
 ## Built-in Applications
 
 ### Files
+
 - Full file manager with tree navigation, grid/list views
 - Cut, copy, paste, drag-and-drop between windows
 - Bulk rename, tagging, color labels
 - Preview pane for images, text, PDFs, audio
 
 ### Terminal
+
 - POSIX shell (bash-compatible) running in WASM
 - Tab completion, history, split panes
 - SSH client for remote servers
 - Custom shell plugins
 
 ### Browser
+
 - Sandboxed in-OS web browser
 - Tab management, bookmarks, history
 - Ad/tracker blocking built in
 
 ### Notes
+
 - Rich-text editor with markdown support
 - Notebooks, tags, full-text search
 - Automatic versioning and conflict resolution
 - Offline-first, synced
 
 ### Mail
+
 - Multi-account IMAP/SMTP client
 - Threaded conversations, labels, filters
 - GPG signing/encryption support
 
 ### Calendar
+
 - Multi-calendar (CalDAV sync)
 - Event invites, reminders, recurring events
 
 ### Chat (iChat)
+
 - Real-time messaging between RizinOS users
 - Group channels, direct messages
 - File sharing, reactions, threads
 - Bridged to Discord via Minechat
 
 ### Video Calls
+
 - WebRTC P2P video and audio calling
 - Group calls, screen sharing, virtual backgrounds
 
 ### Photos
+
 - Gallery with albums, search by date/tag
 - Non-destructive edits (crop, brightness, filters)
 
 ### Music
+
 - Audio player supporting common formats via WASM decoder
 - Playlists, queue management, media key integration
 
 ### Diary
+
 - Private encrypted journal with daily entries
 - Search, tagging, mood tracking
 
 ### App Store
+
 - Installable third-party apps as WASM modules
 - Sandboxed permissions model per app
 - Auto-updates, ratings, developer portal
 
 ### Settings
+
 - System preferences: display, sound, accounts, privacy
 - App permissions manager
 - Storage analytics
