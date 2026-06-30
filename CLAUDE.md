@@ -4,12 +4,13 @@ The **dynamic backend** of RizinOS. SvelteKit + Bun + Drizzle ORM + PostgreSQL.
 
 ## Sibling project: `rizinos-web` (static frontend)
 
-[`../rizinos-web`](../rizinos-web) is the static SPA served from a CDN/static host. It owns the marketing site, login/signup forms, and admin dashboard. It calls this backend's `/api/*` endpoints over a shared origin (reverse proxy).
+[`../rizinos-web`](../rizinos-web) is the static SPA served from a CDN/static host. It owns the marketing site, login/signup forms, and admin dashboard. It calls this backend's `/api/*` endpoints via `api.rizinos.com`.
 
-In **production**, nginx routes on one origin:
+In **production**, nginx uses separate subdomains:
 
-- `/app`, `/api/*`, `/storage/*`, `/ws` - this server (Bun, port 3001)
-- Everything else - `rizinos-web` (static build at `/var/www/rizinos-web`)
+- `app.rizinos.com` - this server (Bun, port 3001): OS desktop shell + `/api/*`, `/storage/*`, `/ws`, `/_os`
+- `rizinos.com` - `rizinos-web` (static build at `/var/www/rizinos-web`): marketing site, login, signup
+- `api.rizinos.com` - proxies to this server (port 3001), path `/auth/login` maps to backend `/api/auth/login` (no `/api` prefix needed in frontend calls)
 
 In **dev**, `rizinos-web` runs on port 3003 and proxies `/api` + `/ws` to this server (port 3002).
 
@@ -102,4 +103,4 @@ bun run deploy       # runs scripts/deploy.ts
 
 PM2 config at `pm2.config.cjs`. Server runs on `PORT` env var (default 3000).
 
-**Production nginx config** lives in the NixOS flake at `/etc/nixos/hosts/pronix/default.nix` (host `pronix`, the production server). The `rizinos.com` virtualHost routes the static frontend (`rizinos-web`) at the origin root and proxies `/app`, `/api`, `/storage`, `/_os` (backend client assets, `kit.appDir = '_os'`), `/ws` to this backend (Bun on `:3001`). Asset requests with a file extension must resolve to a real file or return 404 (no SPA-shell fallback). Apply changes on the server with `sudo nixos-rebuild switch --flake /etc/nixos#pronix` (not the local `prenix` host).
+**Production nginx config** lives in the NixOS flake at `/etc/nixos/hosts/pronix/default.nix` (host `pronix`, the production server). `app.rizinos.com` proxies entirely to this backend (Bun on `:3001`), including `/ws` (WebSocket). `rizinos.com` serves the static frontend (`rizinos-web`). `api.rizinos.com` also proxies to this backend. Apply changes on the server with `sudo nixos-rebuild switch --flake /etc/nixos#pronix` (not the local `prenix` host).
