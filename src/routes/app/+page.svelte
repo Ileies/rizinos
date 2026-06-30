@@ -24,7 +24,7 @@
 		if ('getBattery' in navigator) {
 			navigator.getBattery().then((battery) => {
 				battery.addEventListener('levelchange', () => {
-					os.battery.level = battery.level;
+					os.battery.level = battery.level * 100;
 				});
 				battery.addEventListener('chargingchange', () => {
 					os.battery.isCharging = battery.charging;
@@ -36,7 +36,7 @@
 					os.battery.dischargingTime = battery.dischargingTime;
 				});
 				os.battery = {
-					level: battery.level,
+					level: battery.level * 100,
 					isCharging: battery.charging,
 					chargingTime: battery.chargingTime,
 					dischargingTime: battery.dischargingTime
