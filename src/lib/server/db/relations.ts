@@ -25,7 +25,8 @@ export const relations = defineRelations(schema, (r) => ({
 		}),
 		deviceBySessionToken: r.one.devices({
 			from: r.tokens.token,
-			to: r.devices.sessionToken
+			to: r.devices.sessionToken,
+			optional: true
 		})
 	},
 	devices: {
@@ -35,7 +36,8 @@ export const relations = defineRelations(schema, (r) => ({
 		}),
 		sessionTokenRelation: r.one.tokens({
 			from: r.devices.sessionToken,
-			to: r.tokens.token
+			to: r.tokens.token,
+			optional: true
 		})
 	},
 	transactions: {

@@ -17,6 +17,7 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"db:push": "bun node_modules/drizzle-kit/bin.cjs push",
+		"db:push:prod": "DATABASE_URL=postgres://postgres@192.168.10.85/rizinos_test bun node_modules/drizzle-kit/bin.cjs push",
 		"db:migrate": "bun node_modules/drizzle-kit/bin.cjs migrate",
 		"db:studio": "bun node_modules/drizzle-kit/bin.cjs studio --verbose"
 	},

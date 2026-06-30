@@ -40,9 +40,8 @@ export const devices = pgTable('devices', {
 		.primaryKey()
 		.references(() => tokens.token, { onDelete: 'cascade' }),
 	sessionToken: text('session_token')
-		.notNull()
 		.unique()
-		.references(() => tokens.token, { onDelete: 'no action' }),
+		.references(() => tokens.token, { onDelete: 'set null' }),
 	userAgent: text('user_agent').notNull(),
 	ip: text('ip').notNull(),
 	countryCode: text('cc').notNull(),

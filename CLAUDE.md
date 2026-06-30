@@ -21,7 +21,8 @@ See [`../rizinos-web/CLAUDE.md`](../rizinos-web/CLAUDE.md) and [`../rizinos-web/
 bun run dev          # SvelteKit + WebSocket server (concurrent)
 bun run build        # vite build + bun server bundle
 bun run check        # svelte-check type check
-bun run db:push      # push Drizzle schema to DB
+bun run db:push      # push Drizzle schema to local DB (localhost/rizinos_test)
+bun run db:push:prod # push Drizzle schema to production DB (192.168.10.85/rizinos_test)
 bun run db:studio    # open Drizzle Studio
 ```
 
