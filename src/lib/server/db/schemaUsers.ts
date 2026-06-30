@@ -23,7 +23,7 @@ export const users = pgTable('users', {
 });
 
 export const tokens = pgTable('tokens', {
-	token: text('token').notNull().unique(),
+	token: text('token').primaryKey(),
 	userId: text('user_id')
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' })
@@ -37,8 +37,7 @@ export const tokens = pgTable('tokens', {
 
 export const devices = pgTable('devices', {
 	deviceToken: text('device_token')
-		.notNull()
-		.unique()
+		.primaryKey()
 		.references(() => tokens.token, { onDelete: 'cascade' }),
 	sessionToken: text('session_token')
 		.notNull()

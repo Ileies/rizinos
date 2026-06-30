@@ -12,6 +12,7 @@ export async function GET(event: RequestEvent) {
 		return json(false);
 	}
 	await revokeToken(token.token);
+	event.cookies.delete('loginToken', { path: '/' });
 	return json(true);
 }
 
