@@ -63,35 +63,32 @@
 </script>
 
 {#if show}
-	<div class="fixed top-2 right-2 z-[2147483635] w-72">
-		<Alert.Root class="shadow-lg">
-			<Download class="h-4 w-4" />
-			<Alert.Title class="flex items-center justify-between">
-				<span>RizinOS installieren</span>
-				<button
-					onclick={dismiss}
-					class="text-muted-foreground hover:text-foreground -mr-1 transition-colors"
-					aria-label="Schließen"
-				>
-					<X class="h-3.5 w-3.5" />
-				</button>
-			</Alert.Title>
-			<Alert.Description class="mt-1">
-				Als App installieren für die beste Erfahrung.
-			</Alert.Description>
-			<div class="mt-2">
-				<button
-					onclick={install}
-					disabled={installing}
-					class="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 rounded-md px-3 py-1 text-xs font-medium transition-colors"
-				>
-					{#if installing}
-						Installieren...
-					{:else}
-						Installieren
-					{/if}
-				</button>
+	<div class="fixed top-2 right-2 z-[2147483635] w-64 rounded-lg border bg-card text-card-foreground shadow-lg">
+		<div class="p-3">
+			<div class="flex items-start gap-3">
+				<img src="/favicon.png" alt="RizinOS" class="size-12 shrink-0 rounded-xl" />
+				<div class="min-w-0 flex-1">
+					<div class="flex items-center justify-between gap-2">
+						<p class="text-sm font-medium leading-none">RizinOS installieren</p>
+						<button
+							onclick={dismiss}
+							class="text-muted-foreground hover:text-foreground -mr-0.5 shrink-0 transition-colors"
+							aria-label="Schließen"
+						>
+							<X class="h-3.5 w-3.5" />
+						</button>
+					</div>
+					<p class="text-muted-foreground mt-1 text-xs">Als App installieren für die beste Erfahrung.</p>
+				</div>
 			</div>
-		</Alert.Root>
+			<button
+				onclick={install}
+				disabled={installing}
+				class="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+			>
+				<Download class="size-3.5" />
+				{installing ? 'Installieren...' : 'Installieren'}
+			</button>
+		</div>
 	</div>
 {/if}
