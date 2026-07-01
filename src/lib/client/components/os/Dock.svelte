@@ -21,6 +21,7 @@
 	import { Spring } from 'svelte/motion';
 	import * as Avatar from '$shadcn/avatar';
 	import { format } from 'date-fns';
+	import { SvelteDate } from 'svelte/reactivity';
 
 	const iconSize = 18;
 	// TODO: Different layouts for os.isMobile
@@ -82,9 +83,9 @@
 	let isVolumeOpen = $state(false);
 	let isClockOpen = $state(false);
 
-	let now = $state(new Date());
+	const now = new SvelteDate();
 	$effect(() => {
-		const timer = setInterval(() => (now = new Date()), 1000);
+		const timer = setInterval(() => now.setTime(Date.now()), 1000);
 		return () => clearInterval(timer);
 	});
 </script>

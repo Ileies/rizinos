@@ -1,24 +1,16 @@
 <script lang="ts">
 	import { format } from 'date-fns';
+	import { SvelteDate } from 'svelte/reactivity';
 
-	let time: string = $state('12:00 AM');
-	let date: string = $state('1/1/2001');
+	const now = new SvelteDate();
 
-	// Update time every second
 	$effect(() => {
-		let timer = setInterval(() => {
-			time = format(new Date(), 'h:mm a');
-			date = format(new Date(), 'M/d/y');
-		}, 1000);
-
-		// Cleanup on destroy
-		return () => {
-			clearInterval(timer);
-		};
+		const timer = setInterval(() => now.setTime(Date.now()), 1000);
+		return () => clearInterval(timer);
 	});
 </script>
 
 <div class="flex flex-col items-end text-xs">
-	<div>{time}</div>
-	<div>{date}</div>
+	<div>{format(now, 'h:mm a')}</div>
+	<div>{format(now, 'M/d/y')}</div>
 </div>
