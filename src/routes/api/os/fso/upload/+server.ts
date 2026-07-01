@@ -1,25 +1,73 @@
-import { join } from 'path';
-import { json } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { db } from '$db';
+import { blobs, files } from '$db/schema';
+import { eq, sql } from 'drizzle-orm';
+import { ensureBlob, hashBuffer, listingPath, toVFSEntry } from '$lib/server/files';
+import { FileType } from '$types';
 import { invalidMethod } from '$lib/server';
-import { STORAGE_DIRECTORY } from '$env/static/private';
-import { dev } from '$app/environment';
 
 export const GET = invalidMethod;
 
-export const POST = async ({ request }) => {
+export const POST: RequestHandler = async ({ locals, request }) => {
+	if (!locals.user) error(401, 'Nicht angemeldet.');
+
 	const data = await request.formData();
-	const files = data.getAll('files');
+	const hash = data.get('hash') as string;
+	const name = data.get('name') as string;
+	const dirId = (data.get('dirId') as string) || null;
+	const file = data.get('file') as File | null;
 
-	if (files.length === 0) {
-		return json({ error: 'No files uploaded' }, { status: 400 });
+	if (!hash || !name) error(400, 'hash und name sind erforderlich.');
+
+	// Resolve parent directory path
+	let parentPath = '/';
+	if (dirId) {
+		const parent = await db
+			.select()
+			.from(files)
+			.where(sql`${files.id} = ${dirId} AND ${files.ownerId} = ${locals.user.id}`)
+			.limit(1);
+		if (!parent[0]) error(404, 'Zielverzeichnis nicht gefunden.');
+		if (parent[0].type !== FileType.Directory) error(400, 'Ziel ist kein Verzeichnis.');
+		parentPath = listingPath(parent[0]);
 	}
 
-	for (const file of files) {
-		if (file instanceof File) {
-			await Bun.write(join(dev ? './uploads' : STORAGE_DIRECTORY, file.name), file); // TODO: Save to the right directory
-		} else {
-			return json({ error: 'Invalid file format' }, { status: 500 });
-		}
+	if (file) {
+		// Full upload: verify hash, write blob if new
+		const actualHash = await hashBuffer(await file.arrayBuffer());
+		if (actualHash !== hash) error(400, 'Hash stimmt nicht mit Dateiinhalt überein.');
+		await ensureBlob(hash, file);
+	} else {
+		// Dedup fast-path: blob must already exist
+		const existing = await db
+			.select({ hash: blobs.hash })
+			.from(blobs)
+			.where(eq(blobs.hash, hash))
+			.limit(1);
+		if (!existing[0]) error(400, 'Blob nicht gefunden. Datei muss zuerst hochgeladen werden.');
 	}
-	return json({ message: 'Files uploaded successfully' });
+
+	const blobRow = await db
+		.select()
+		.from(blobs)
+		.where(eq(blobs.hash, hash))
+		.limit(1)
+		.then((r) => r[0]);
+
+	const [created] = await db
+		.insert(files)
+		.values({
+			name,
+			path: parentPath,
+			type: FileType.File,
+			ownerId: locals.user.id,
+			groupId: 'users',
+			blobHash: hash,
+			size: blobRow.size,
+			mimeType: blobRow.mimeType
+		})
+		.returning();
+
+	return json(toVFSEntry(created), { status: 201 });
 };

@@ -1,55 +1,76 @@
-import { json, type RequestEvent } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { db } from '$db';
+import { files } from '$db/schema';
+import { eq, sql } from 'drizzle-orm';
+import { listingPath, toVFSEntry } from '$lib/server/files';
+import { FileType } from '$types';
 import { invalidMethod } from '$lib/server';
 
 export const GET = invalidMethod;
 
-export async function POST(event: RequestEvent) {
-	const { from, to } = await event.request.json();
+export const POST: RequestHandler = async ({ locals, request }) => {
+	if (!locals.user) error(401, 'Nicht angemeldet.');
 
-	/*// TODO: Retrieve storage path
-	const userPath = '';
-	const pathFrom = userPath + from;
-	const pathTo = userPath + to;
+	const { id, targetDirId, newName } = (await request.json()) as {
+		id: string;
+		targetDirId?: string | null;
+		newName?: string;
+	};
+	if (!id) error(400, 'id fehlt.');
 
+	const source = await db
+		.select()
+		.from(files)
+		.where(sql`${files.id} = ${id} AND ${files.ownerId} = ${locals.user.id}`)
+		.limit(1)
+		.then((r) => r[0]);
+	if (!source) error(404, 'Datei nicht gefunden.');
 
+	// Determine new parent path
+	let newParentPath = source.path;
+	if (targetDirId !== undefined) {
+		if (!targetDirId) {
+			newParentPath = '/';
+		} else {
+			const targetDir = await db
+				.select()
+				.from(files)
+				.where(sql`${files.id} = ${targetDirId} AND ${files.ownerId} = ${locals.user.id}`)
+				.limit(1)
+				.then((r) => r[0]);
+			if (!targetDir) error(404, 'Zielverzeichnis nicht gefunden.');
+			if (targetDir.type !== FileType.Directory) error(400, 'Ziel ist kein Verzeichnis.');
 
-
-
-	// Determine user storage path
-	let path;
-	let file;
-
-	do {
-		path = userPath + url;
-		file = Bun.file(path);
-		if (!await file.exists()) {
-			return json({ error: 'File not found' });
+			// Prevent moving a directory into itself or its own subtree
+			const sourceListing = listingPath(source);
+			if (targetDir.path.startsWith(sourceListing) || targetDir.id === source.id) {
+				error(400, 'Ein Verzeichnis kann nicht in sich selbst verschoben werden.');
+			}
+			newParentPath = listingPath(targetDir);
 		}
-		// Check if url is file or directory
-		// Delete url
-		// Set url to parent
-	} while (file);
-
-	// Check if url exists While url is link, set url to target
-
-	// Check if token has permission to delete url
-
-	// Check if url is file or directory
-
-	//
-
-
-	const input = Bun.file(pathFrom);
-	if (!await input.exists()) {
-		return json({ error: 'File not found' });
-	}
-	const output = Bun.file(pathTo);
-	if (await output.exists()) {
-		return json({ error: 'File already exists' });
 	}
 
-	await Bun.write(output, input);
+	// If directory is being moved, update all descendants' paths
+	if (source.type === FileType.Directory && newParentPath !== source.path) {
+		const oldListing = listingPath(source);
+		const newListing = newParentPath + source.id + '/';
+		await db.execute(
+			sql`UPDATE file_meta
+				SET path = ${newListing} || substring(path, ${oldListing.length + 1})
+				WHERE path LIKE ${oldListing + '%'} AND owner_id = ${locals.user.id}`
+		);
+	}
 
-*/
-	return json(1);
-}
+	const [updated] = await db
+		.update(files)
+		.set({
+			path: newParentPath,
+			name: newName?.trim() ?? source.name,
+			updatedAt: new Date()
+		})
+		.where(eq(files.id, id))
+		.returning();
+
+	return json(toVFSEntry(updated));
+};

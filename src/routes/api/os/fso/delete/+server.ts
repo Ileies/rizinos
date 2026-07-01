@@ -1,46 +1,62 @@
-import { json, type RequestEvent } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { db } from '$db';
+import { files } from '$db/schema';
+import { eq, sql } from 'drizzle-orm';
+import { deleteBlobIfUnreferenced, listingPath } from '$lib/server/files';
+import { FileType } from '$types';
 import { invalidMethod } from '$lib/server';
 
 export const GET = invalidMethod;
 
-export async function POST(event: RequestEvent) {
-	/*const { url } = await event.request.json();
+export const POST: RequestHandler = async ({ locals, request }) => {
+	if (!locals.user) error(401, 'Nicht angemeldet.');
 
-	// Determine user storage path
-	const userPath = '';
-	let path;
-	let file;
+	const { id } = (await request.json()) as { id: string };
+	if (!id) error(400, 'id fehlt.');
 
-	do {
-		path = userPath + url;
-		file = Bun.file(path);
-		if (!await file.exists()) {
-			return json({ error: 'File not found' });
+	const target = await db
+		.select()
+		.from(files)
+		.where(sql`${files.id} = ${id} AND ${files.ownerId} = ${locals.user.id}`)
+		.limit(1)
+		.then((r) => r[0]);
+	if (!target) error(404, 'Datei nicht gefunden.');
+
+	const blobHashesToCheck: string[] = [];
+
+	if (target.type === FileType.Directory) {
+		// Collect all descendants
+		const childListingPath = listingPath(target);
+		const descendants = await db
+			.select()
+			.from(files)
+			.where(
+				sql`${files.path} LIKE ${childListingPath + '%'} AND ${files.ownerId} = ${locals.user.id}`
+			);
+
+		for (const d of descendants) {
+			if (d.blobHash) blobHashesToCheck.push(d.blobHash);
 		}
-		// Check if url is file or directory
-		// Delete url
-		// Set url to parent
-	} while (file);
 
-	// Check if url exists While url is link, set url to target
+		// Delete all descendants
+		await db
+			.delete(files)
+			.where(
+				sql`${files.path} LIKE ${childListingPath + '%'} AND ${files.ownerId} = ${locals.user.id}`
+			);
+	}
 
-	// Check if token has permission to delete url
+	if (target.blobHash) blobHashesToCheck.push(target.blobHash);
 
-	// Check if url is file or directory
+	// Delete the target itself
+	await db.delete(files).where(eq(files.id, id));
 
+	// Clean up unreferenced blobs
+	const uniqueHashes = [...new Set(blobHashesToCheck)];
+	for (const hash of uniqueHashes) {
+		await deleteBlobIfUnreferenced(hash);
+	}
 
-
-
-
-	const path = "/path/to/file.txt";
-
-	const file = Bun.file(path);
-
-	(await fs.lstat(path)).isDirectory()
-
-
-	await fs.rm('dist', { recursive: true, force: true })
-	await fs.unlink(path);*/
-
-	return json(1);
-}
+	return json({ ok: true });
+};
