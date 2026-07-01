@@ -8,7 +8,7 @@
 
 	const logout = () => {
 		if (!confirm('Do you really want to logout?')) return;
-		fetch('/api/os/logout')
+		fetch('/api/auth/logout')
 			.then(async (res) => {
 				if ((await res.json()) === true) location.reload();
 				else throw new Error();
