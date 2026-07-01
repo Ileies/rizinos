@@ -7,10 +7,22 @@ import { authenticate } from '$lib/server/auth';
 import { sequence } from '@sveltejs/kit/hooks';
 import { getToken } from '$lib/server/models/token';
 import { TokenType } from '$types';
+import { dev } from '$app/environment';
+import { mkdir } from 'fs/promises';
 const ignoredUrls = ['/api/mc/getCredit'];
+
+const CORS_ORIGIN = 'https://rizinos.com';
+const CORS_HEADERS = {
+	'Access-Control-Allow-Origin': CORS_ORIGIN,
+	'Access-Control-Allow-Credentials': 'true',
+	'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+	'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+};
 
 // Reset online status for all users on server startup
 await db.update(users).set({ isOnline: false }).where(eq(users.isOnline, true));
+
+if (dev) await mkdir('./uploads', { recursive: true });
 
 const checks: Handle = async ({ event, resolve }) => {
 	// Get client IP, preferring forwarded IP from proxy if available
@@ -45,7 +57,7 @@ const checks: Handle = async ({ event, resolve }) => {
 
 const api: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith('/api/mc/')) {
-		if (event.url.host !== 'localhost')
+		if (event.url.hostname !== 'localhost')
 			return json({ message: 'Not authenticated' }, { status: 401 });
 	}
 
@@ -63,4 +75,13 @@ const api: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(checks, api);
+const cors: Handle = async ({ event, resolve }) => {
+	if (event.request.method === 'OPTIONS') {
+		return new Response(null, { status: 204, headers: CORS_HEADERS });
+	}
+	const response = await resolve(event);
+	Object.entries(CORS_HEADERS).forEach(([k, v]) => response.headers.set(k, v));
+	return response;
+};
+
+export const handle: Handle = sequence(cors, checks, api);

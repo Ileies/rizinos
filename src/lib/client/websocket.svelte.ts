@@ -1,6 +1,4 @@
-import { PUBLIC_ORIGIN } from '$env/static/public';
 import os from '$lib/os.svelte';
-import { dev } from '$app/environment';
 import type { WebsocketMessage } from '$types';
 
 export const wsMessage: { value: WebsocketMessage | null } = $state({ value: null });
@@ -17,7 +15,7 @@ function connect() {
 		return;
 	}
 
-	ws = new WebSocket(`ws://${dev ? 'localhost' : PUBLIC_ORIGIN}:9998/ws`);
+	ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
 
 	ws.addEventListener('open', () => {
 		os.isOnline = true;

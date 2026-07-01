@@ -35,5 +35,5 @@ export async function sendMail(mailOptions: Mail.Options): Promise<string | null
 }
 
 export function cookieData(expires: Date | undefined = addYears(new Date(), 1)) {
-	return { path: '/', expires, domain: dev ? 'localhost' : PUBLIC_ORIGIN };
+	return { path: '/', expires, domain: dev ? 'localhost' : `.${PUBLIC_ORIGIN}` };
 }
