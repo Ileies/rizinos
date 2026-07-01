@@ -69,6 +69,7 @@
 		"zod": "^4.4.3"
 	},
 	"dependencies": {
-		"@lucide/svelte": "^1.21.0"
+		"@lucide/svelte": "^1.21.0",
+		"@noble/hashes": "^2.2.0"
 	}
 }
