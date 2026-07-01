@@ -1,48 +1,37 @@
 <script lang="ts">
 	import { type FileSystemObject, FileType } from '$types/files';
 	import { showContextMenu } from '$lib/client/menu';
-	import { promptUploadFiles } from '$lib/client/index.svelte';
 	import { uploadFiles } from '$lib/client/index.svelte.js';
 
 	let { fso }: { fso: FileSystemObject } = $props();
 
-	function getSymlinkTarget(fso: FileSystemObject): FileSystemObject {}
+	function resolvedType(): FileType {
+		if (fso.entry.type === FileType.Symlink) {
+			return fso.entry.resolved?.type ?? FileType.File;
+		}
+		return fso.entry.type;
+	}
 
 	async function dropHandler(event: DragEvent) {
-		if (
-			fso.type === FileType.Directory ||
-			(fso.type === FileType.Symlink && getSymlinkTarget(fso).type === FileType.Directory)
-		) {
-			event.preventDefault();
-			event.stopPropagation();
-			if (!event.dataTransfer) return;
+		if (resolvedType() !== FileType.Directory) return;
+		event.preventDefault();
+		event.stopPropagation();
+		if (!event.dataTransfer) return;
 
-			if (event.dataTransfer.files.length) {
-				uploadFiles(event.dataTransfer.files, fso.url);
-			} else {
-				// TODO: if (isExecutable) run app with param
-				fetch('/api/os/move', {
+		if (event.dataTransfer.files.length) {
+			// External file drop: upload into this directory
+			await uploadFiles(event.dataTransfer.files, fso.entry.id);
+		} else {
+			// Internal drag: move VFS entry into this directory
+			const sourceId = event.dataTransfer.getData('vfs-id');
+			if (sourceId) {
+				fetch('/api/os/fso/move', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ from: event.dataTransfer?.getData('file'), to: fso.url })
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id: sourceId, targetDirId: fso.entry.id })
 				});
 			}
 		}
-
-		const items = event.dataTransfer?.items;
-		if (!items) return;
-
-		let allFiles: FileEntry[] = [];
-		for (const item of items) {
-			const entry = item.webkitGetAsEntry();
-			if (entry) {
-				const entryFiles = await traverseDirectory(entry);
-				allFiles = [...allFiles, ...entryFiles];
-			}
-		}
-		await promptUploadFiles(allFiles);
 	}
 </script>
 
@@ -51,11 +40,11 @@
 		? 'border-gray-600 bg-gray-800 hover:bg-gray-800'
 		: 'border-transparent hover:bg-gray-600'}"
 	draggable="true"
-	oncontextmenu={(e) => showContextMenu(e, fso)}
+	oncontextmenu={(e) => showContextMenu(e, [] /* TODO: Kontext-Menü für Dateien */)}
 	ondblclick={() => {
-		run(`start "${fso.url}"`);
+		// TODO: launchApp with file entry
 	}}
-	ondragstart={(e) => e.dataTransfer?.setData('file', fso.url)}
+	ondragstart={(e) => e.dataTransfer?.setData('vfs-id', fso.entry.id)}
 	ondrop={dropHandler}
 	onkeydown={() => {}}
 	onpointerdown={(e) => {
@@ -67,8 +56,11 @@
 >
 	<div class="auto m-0 w-22.5">
 		<img alt="Icon" class="h-22.5 w-22.5" draggable="false" src="/api/icon?icon={fso.icon}" />
+		{#if fso.entry.type === FileType.Symlink}
+			<div class="absolute bottom-0 left-0 text-xs">↗</div>
+		{/if}
 	</div>
 	<div class="auto m-0 cursor-default text-center text-xs break-words text-white">
-		{fso.url.split('/').at(-1)}
+		{fso.entry.name}
 	</div>
 </div>

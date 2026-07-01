@@ -1,5 +1,7 @@
 import os from '$lib/os.svelte';
-import { type Action, NotificationType, type Process } from '$types';
+import { type Action, NotificationType, type Process, type VFSEntry } from '$types';
+import { blake3 } from '@noble/hashes/blake3.js';
+import { bytesToHex } from '@noble/hashes/utils.js';
 
 export function getSelectionText(): string {
 	const activeEl = document.activeElement as HTMLInputElement | HTMLTextAreaElement | null;
@@ -15,80 +17,74 @@ export function getSelectionText(): string {
 	return window.getSelection()?.toString() ?? '';
 }
 
-export function downloadFile(filePath: string): void {
+export function downloadFile(fileId: string, name?: string): void {
 	const link = document.createElement('a');
-	const basename = filePath.split(/\//).pop();
-	if (!basename) return;
-	link.download = basename;
-	link.href = `/storage/${encodeURIComponent(filePath)}`;
+	if (name) link.download = name;
+	link.href = `/storage/${fileId}?download`;
 	link.click();
 }
 
-export async function uploadFiles(
-	files: FileList,
-	path: string,
-	onprogress: (progress: number) => void = () => {}
-): Promise<string> {
-	// TODO: Specify default path
-	return new Promise<string>((resolve, reject) => {
-		const formData = new FormData();
-		formData.append('path', path);
-		Array.from(files).forEach((file) => formData.append('files', file));
-		const xhr = new XMLHttpRequest();
-		xhr.upload.onprogress = (event) => {
-			if (event.lengthComputable) {
-				onprogress(Math.round((event.loaded / event.total) * 100));
-			}
-		};
-		xhr.onload = () => {
-			onprogress(0);
-			resolve(
-				xhr.status === 200 ? 'Files uploaded successfully!' : `Upload failed: ${xhr.statusText}`
-			);
-		};
-		xhr.onerror = () => {
-			onprogress(0);
-			reject('An error occurred during the upload.');
-		};
-		xhr.open('POST', '/api/os/upload', true);
-		xhr.send(formData);
-		// TODO: Remove all api calls, everywhere, and handle everything in the websocket
-		// TODO: show that upload was started
-	});
+async function hashFile(file: File): Promise<string> {
+	return bytesToHex(blake3(new Uint8Array(await file.arrayBuffer())));
 }
 
-export async function promptUploadFiles(
-	path: string,
-	onprogress: (progress: number) => void = () => {}
-): Promise<string> {
-	return new Promise<string>((resolve, reject) => {
+// Uploads files into a VFS directory. Returns created VFSEntry objects.
+// Blobs that already exist on the server are not re-transferred.
+export async function uploadFiles(fileList: FileList, dirId: string | null = null): Promise<VFSEntry[]> {
+	const fileArray = Array.from(fileList);
+
+	// Hash all files client-side
+	const hashes = await Promise.all(fileArray.map(hashFile));
+
+	// Check which blobs already exist (dedup fast-path)
+	const { existing } = await fetch('/api/os/fso/check', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ hashes })
+	}).then((r) => r.json()) as { existing: string[] };
+	const existingSet = new Set(existing);
+
+	const results: VFSEntry[] = [];
+	for (let i = 0; i < fileArray.length; i++) {
+		const file = fileArray[i];
+		const hash = hashes[i];
+		const fd = new FormData();
+		fd.append('hash', hash);
+		fd.append('name', file.name);
+		if (dirId) fd.append('dirId', dirId);
+		if (!existingSet.has(hash)) fd.append('file', file);
+
+		const res = await fetch('/api/os/fso/upload', { method: 'POST', body: fd });
+		if (!res.ok) throw new Error(`Upload fehlgeschlagen: ${file.name}`);
+		results.push(await res.json());
+	}
+	return results;
+}
+
+export async function promptUploadFiles(dirId: string | null = null): Promise<VFSEntry[]> {
+	return new Promise((resolve, reject) => {
 		const input = document.createElement('input');
 		input.type = 'file';
 		input.multiple = true;
 		input.onchange = () => {
-			if (!input.files) {
-				return reject('No files selected');
-			}
-			uploadFiles(input.files, path, onprogress).then(resolve).catch(reject);
+			if (!input.files) return reject('Keine Dateien ausgewählt.');
+			uploadFiles(input.files, dirId).then(resolve).catch(reject);
 		};
 		input.click();
 	});
 }
 
 export async function promptUploadFolder(
-	path: string,
-	onprogress: (progress: number) => void = () => {}
-): Promise<string> {
-	return new Promise<string>((resolve, reject) => {
+	dirId: string | null = null
+): Promise<VFSEntry[]> {
+	return new Promise((resolve, reject) => {
 		const input = document.createElement('input');
 		input.type = 'file';
 		input.multiple = true;
 		input.webkitdirectory = true;
 		input.onchange = () => {
-			if (!input.files) {
-				return reject('No files selected');
-			}
-			uploadFiles(input.files, path, onprogress).then(resolve).catch(reject);
+			if (!input.files) return reject('Keine Dateien ausgewählt.');
+			uploadFiles(input.files, dirId).then(resolve).catch(reject);
 		};
 		input.click();
 	});
