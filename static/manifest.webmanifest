@@ -1,27 +1,25 @@
 {
-	"id": "/",
 	"name": "RizinOS",
 	"short_name": "RizinOS",
-	"description": "RizinOS - Das persönliche Web-Betriebssystem",
-	"lang": "de",
-	"start_url": "/app",
-	"scope": "/",
+	"description": "A full desktop environment that runs entirely in your browser. No installation, no drivers, no hardware requirements.",
+	"start_url": "/",
 	"display": "standalone",
-	"display_override": ["window-controls-overlay", "standalone"],
 	"background_color": "#ffffff",
 	"theme_color": "#648F32",
+	"lang": "de",
+	"dir": "ltr",
+	"orientation": "any",
+	"categories": ["productivity", "utilities"],
 	"icons": [
 		{
 			"src": "/icon-192.png",
 			"sizes": "192x192",
-			"type": "image/png",
-			"purpose": "any"
+			"type": "image/png"
 		},
 		{
 			"src": "/icon-512.png",
 			"sizes": "512x512",
-			"type": "image/png",
-			"purpose": "any"
+			"type": "image/png"
 		},
 		{
 			"src": "/icon-maskable-192.png",
