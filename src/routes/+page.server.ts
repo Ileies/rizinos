@@ -1,8 +1,10 @@
 import { redirect } from '@sveltejs/kit';
+import { dev } from '$app/environment';
+import { PUBLIC_ORIGIN } from '$env/static/public';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
-	if (!locals.user) redirect(302, '/login');
+	if (!locals.user) redirect(302, dev ? '/login' : `https://${PUBLIC_ORIGIN}/login`);
 
 	// TODO: List background services to be auto-started
 	// TODO: Maybe at some point let users configure what they want to synchronize (processes, desktop, etc.)

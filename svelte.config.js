@@ -6,9 +6,6 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter(),
-		// Distinct asset dir so the os's client assets don't collide with the
-		// static frontend's default `/_app/` when both are served from the same origin.
-		appDir: '_os',
 		alias: {
 			$db: './src/lib/server/db',
 			$types: './src/types',
