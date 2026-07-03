@@ -1,7 +1,7 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
 import { getToken, revokeToken } from '$lib/server/models/token';
 import { TokenType } from '$types';
-import { invalidMethod } from '$lib/server';
+import { cookieData, invalidMethod } from '$lib/server';
 
 export async function GET(event: RequestEvent) {
 	const token = await getToken(event.cookies.get('loginToken') ?? '');
@@ -12,7 +12,7 @@ export async function GET(event: RequestEvent) {
 		return json(false);
 	}
 	await revokeToken(token.token);
-	event.cookies.delete('loginToken', { path: '/' });
+	event.cookies.set('loginToken', '', cookieData(new Date(0)));
 	return json(true);
 }
 
