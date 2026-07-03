@@ -1,9 +1,10 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { invalidMethod, sendMail } from '$lib/server';
+import { invalidMethod } from '$lib/server';
+import { sendEmail } from '$lib/server/email';
 import { getUserByEmail, generateToken } from '$lib/server/models/User';
 import { TokenType } from '$types';
 import { addHours } from 'date-fns';
-import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$env/static/public';
+import { PUBLIC_ORIGIN } from '$env/static/public';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const { email } = (await request.json()) as { email?: string };
@@ -12,7 +13,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ error: 'Email is required.' }, { status: 400 });
 	}
 
-	// Always return success to prevent email enumeration
+	// Immer Erfolg zurückgeben, um E-Mail-Enumeration zu verhindern
 	const user = await getUserByEmail(email);
 	if (!user) {
 		return json({ success: true });
@@ -22,15 +23,25 @@ export const POST: RequestHandler = async ({ request }) => {
 	const token = await generateToken(user.id, TokenType.Reset, expires);
 	const resetUrl = `https://${PUBLIC_ORIGIN}/reset-password?token=${encodeURIComponent(token.token)}`;
 
-	await sendMail({
+	await sendEmail({
 		to: email,
-		subject: `${PUBLIC_APP_NAME} - Password Reset`,
-		html: `
-			<p>You requested a password reset for your ${PUBLIC_APP_NAME} account.</p>
-			<p><a href="${resetUrl}">Reset your password</a></p>
-			<p>This link expires in 1 hour. If you did not request this, you can ignore this email.</p>
-		`,
-		text: `You requested a password reset for your ${PUBLIC_APP_NAME} account.\n\nReset your password: ${resetUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.`
+		subject: 'Passwort zurücksetzen',
+		category: 'transactional',
+		preheader: 'Hier ist dein Link zum Zurücksetzen deines Passworts.',
+		greeting: user.username ? `Hallo ${user.username},` : 'Hallo,',
+		blocks: [
+			{
+				type: 'text',
+				content:
+					'Wir haben eine Anfrage erhalten, das Passwort für deinen Account zurückzusetzen. Klicke auf den Button, um ein neues Passwort zu vergeben.'
+			},
+			{
+				type: 'alert',
+				level: 'warning',
+				content: 'Dieser Link ist nur 1 Stunde gültig. Hast du diese Anfrage nicht gestellt, kannst du diese E-Mail ignorieren.'
+			}
+		],
+		cta: { label: 'Passwort zurücksetzen', url: resetUrl }
 	});
 
 	return json({ success: true });
