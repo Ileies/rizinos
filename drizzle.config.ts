@@ -1,10 +1,12 @@
 import { defineConfig } from 'drizzle-kit';
 
+const prod = process.env.NODE_ENV === 'production';
+
 export default defineConfig({
 	schema: './src/lib/server/db/schema.ts',
 	dialect: 'postgresql',
 	dbCredentials: {
-		url: process.env.DATABASE_URL ?? 'postgres://postgres@localhost/rizinos_test'
+		url: `postgres://postgres@localhost/rizinos${prod ? '' : '_test'}`
 	},
 	verbose: true,
 	strict: true

@@ -22,8 +22,9 @@ See [`../rizinos-web/CLAUDE.md`](../rizinos-web/CLAUDE.md) and [`../rizinos-web/
 bun run dev          # SvelteKit + WebSocket server (concurrent)
 bun run build        # vite build + bun server bundle
 bun run check        # svelte-check type check
-bun run db:push      # push Drizzle schema to local DB (localhost/rizinos_test)
-bun run db:push:prod # push Drizzle schema to production DB (192.168.10.85/rizinos_test)
+bun run db:tunnel    # open SSH tunnel to server DB on localhost:5432 (via ssh ros)
+bun run db:push      # push Drizzle schema to rizinos_test (requires db:tunnel)
+bun run db:push:prod # push Drizzle schema to rizinos (requires db:tunnel)
 bun run db:studio    # open Drizzle Studio
 ```
 
@@ -85,6 +86,10 @@ Schema is split by domain in `src/lib/server/db/`:
 - `schemaFiles.ts` - file_meta (VFS)
 - `schemaDiscord.ts` - dcUsers
 - `schemaApps.ts`, `schemaLog.ts`
+
+## E-Mail
+
+Alle ausgehenden Mails über `sendEmail()` aus `$lib/server/email.ts` verschicken. Siehe [`docs/email.md`](docs/email.md) für Kategorien, Absenderadressen, Blöcke und Beispiele.
 
 ## Key Conventions
 
