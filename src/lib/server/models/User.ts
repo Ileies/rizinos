@@ -43,17 +43,18 @@ export async function getUserById(id: UserID): Promise<UserData | undefined> {
 
 // TODO: Maybe data has to be something else than undefined
 export async function generateToken(
-	userId: UserID,
+	userId: UserID | null,
 	type: TokenType,
 	expires: Date = addMonths(new Date(), 1),
 	data: unknown = undefined
 ): Promise<Token> {
 	const timestamp = Math.floor((Date.now() - epoch) / 1000);
-	const base64UserId = Buffer.from(userId).toString('base64url');
+	const seed = userId ?? crypto.randomBytes(16).toString('base64url');
+	const base64Seed = Buffer.from(seed).toString('base64url');
 	const base64Timestamp = Buffer.from(timestamp.toString()).toString('base64url');
 	const hmac = new Bun.CryptoHasher('sha256', process.env.SECRET ?? '');
-	hmac.update(`${base64UserId}.${base64Timestamp}.${crypto.randomBytes(12)}`); // TODO: I'm probably destroying HMAC's purpose with these random bytes since they're not part of the payload
-	const token = `${base64UserId}.${base64Timestamp}.${hmac.digest('base64url')}`;
+	hmac.update(`${base64Seed}.${base64Timestamp}.${crypto.randomBytes(12)}`);
+	const token = `${base64Seed}.${base64Timestamp}.${hmac.digest('base64url')}`;
 	const tokenData: typeof tokens.$inferSelect = { token, userId, type, expires, data };
 	await db.insert(tokens).values(tokenData);
 	return tokenData;
