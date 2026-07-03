@@ -6,46 +6,21 @@ const yearsAgo = (years: number): number => {
 	return date.getTime();
 };
 
-export const minAge = yearsAgo(12);
-export const maxAge = yearsAgo(80);
+export const minAge = yearsAgo(13);
+export const maxAge = yearsAgo(120);
 
-// Zod schema for signup form validation
 export const formSchema = z.object({
-	gender: z.enum(['male', 'female']),
-	birthdate: z.iso.date('Must be in YYYY-MM-DD format').refine((date) => {
-		const dateTime = new Date(date).getTime();
-		return !(dateTime < minAge || dateTime > maxAge);
-	}, 'You must be between 12 and 80 years old'),
-	firstName: z
-		.string()
-		.trim()
-		.min(1, 'First name is required')
-		.max(50, 'First name must be 50 characters or less')
-		.regex(/^[A-Za-zÀ-ÖØ-öø-ÿ'.-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'.-]+)*$/, 'Invalid First name format'),
-	lastName: z
-		.string()
-		.trim()
-		.min(1, 'Last name is required')
-		.max(50, 'Last name must be 50 characters or less')
-		.regex(/^[A-Za-zÀ-ÖØ-öø-ÿ'.-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'.-]+)*$/, 'Invalid Last name format'),
 	username: z
 		.string()
-		.min(5, 'Username must be at least 5 characters')
+		.min(3, 'Username must be at least 3 characters')
 		.max(20, 'Username must be 20 characters or less')
-		.regex(
-			/^[a-z][a-z0-9]*$/,
-			'Username must start with a letter and contain only lowercase letters and numbers'
-		),
-	password: z
-		.string()
-		.min(10, 'Password must be at least 10 characters')
-		.max(71, 'Password must be 71 characters or less')
-		.regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-		.regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-		.regex(/\d/, 'Password must contain at least one number')
-		.regex(/[\W_]/, 'Password must contain at least one special character'),
-	email: z.email('Invalid email address')
+		.regex(/^[a-zA-Z0-9_-]+$/, 'Username may only contain letters, numbers, underscores and dashes'),
+	birthdate: z.iso.date('Must be in YYYY-MM-DD format').refine((date) => {
+		const dateTime = new Date(date).getTime();
+		return !(dateTime < maxAge || dateTime > minAge);
+	}, 'You must be at least 13 years old'),
+	email: z.email('Invalid email address'),
+	password: z.string().min(8, 'Password must be at least 8 characters')
 });
 
-// Export the type for better TypeScript support
 export type FormData = z.infer<typeof formSchema>;
