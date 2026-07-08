@@ -25,23 +25,23 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	await sendEmail({
 		to: email,
-		subject: 'Passwort zurücksetzen',
+		subject: 'Reset your password',
 		category: 'transactional',
-		preheader: 'Hier ist dein Link zum Zurücksetzen deines Passworts.',
-		greeting: user.username ? `Hallo ${user.username},` : 'Hallo,',
+		preheader: 'Here is your link to reset your password.',
+		greeting: `Hi ${user.firstName || user.username},`,
 		blocks: [
 			{
 				type: 'text',
 				content:
-					'Wir haben eine Anfrage erhalten, das Passwort für deinen Account zurückzusetzen. Klicke auf den Button, um ein neues Passwort zu vergeben.'
+					'We received a request to reset the password for your account. Click the button below to set a new password.'
 			},
 			{
 				type: 'alert',
 				level: 'warning',
-				content: 'Dieser Link ist nur 1 Stunde gültig. Hast du diese Anfrage nicht gestellt, kannst du diese E-Mail ignorieren.'
+				content: "This link is only valid for 1 hour. If you didn't request this, you can safely ignore this email."
 			}
 		],
-		cta: { label: 'Passwort zurücksetzen', url: resetUrl }
+		cta: { label: 'Reset password', url: resetUrl }
 	});
 
 	return json({ success: true });
