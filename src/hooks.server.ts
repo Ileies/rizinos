@@ -9,6 +9,11 @@ import { getToken } from '$lib/server/models/token';
 import { TokenType } from '$types';
 import { dev } from '$app/environment';
 import { mkdir } from 'fs/promises';
+// Postgres 'timestamp' columns are timezone-naive; Bun's SQL driver writes them in UTC
+// but reads them back interpreted in the process's local timezone. Forcing UTC here
+// keeps read/write round-trips consistent regardless of the host's system timezone.
+process.env.TZ = 'UTC';
+
 const ignoredUrls = ['/api/mc/getCredit'];
 
 const CORS_ORIGIN = 'https://rizinos.com';
