@@ -1,16 +1,11 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { generateToken, login } from '$lib/server/models/User';
-import { TokenType, type IpInfo } from '$types';
-import { addYears } from 'date-fns';
-import { db } from '$db';
-import { devices } from '$db/schema';
-import { eq } from 'drizzle-orm';
-import { createLogin } from '$lib/server/auth';
-import { cookieData, invalidMethod } from '$lib/server';
+import { login } from '$lib/server/models/User';
+import { completeLogin } from '$lib/server/auth';
+import { invalidMethod } from '$lib/server';
 import { PUBLIC_ORIGIN } from '$env/static/public';
 
-export const POST: RequestHandler = async ({ request, cookies, locals, fetch }) => {
-	const ip = locals.ip;
+export const POST: RequestHandler = async (event) => {
+	const { request, locals } = event;
 
 	if (locals.user) {
 		return json({ error: 'Already logged in.' }, { status: 400 });
@@ -39,34 +34,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals, fetch }) 
 		return json({ error: 'Invalid email or password.' }, { status: 402 });
 	}
 
-	const token = await createLogin(cookies, user.id, keep === true);
-
-	if (locals.device) {
-		await db
-			.update(devices)
-			.set({ sessionToken: token.token })
-			.where(eq(devices.deviceToken, locals.device.deviceToken));
-	} else {
-		const expires = addYears(new Date(), 1);
-		const deviceToken = await generateToken(user.id, TokenType.Device, expires);
-		const { countryCode, city, timezone } = (await (
-			await fetch('/api/os/ip', {
-				method: 'POST',
-				body: JSON.stringify({ ip })
-			})
-		).json()) as IpInfo;
-
-		await db.insert(devices).values({
-			deviceToken: deviceToken.token,
-			sessionToken: token.token,
-			userAgent: request.headers.get('user-agent') ?? '',
-			ip,
-			countryCode,
-			city,
-			timezone
-		});
-		cookies.set('deviceToken', deviceToken.token, cookieData(expires));
-	}
+	await completeLogin(event, user.id, keep === true);
 
 	return json({ success: true });
 };

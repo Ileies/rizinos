@@ -1,24 +1,36 @@
-import { Google } from 'arctic';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '$env/static/private';
+import { Discord, Google } from 'arctic';
+import {
+	DISCORD_CLIENT_ID,
+	DISCORD_CLIENT_SECRET,
+	GOOGLE_CLIENT_ID,
+	GOOGLE_CLIENT_SECRET
+} from '$env/static/private';
 import { PUBLIC_ORIGIN } from '$env/static/public';
 import type { Cookies } from '@sveltejs/kit';
 import { type RequestEvent } from '@sveltejs/kit';
 import { generateToken, getUserByToken } from '$lib/server/models/User';
-import { TokenType, type UserID } from '$types';
+import { TokenType, type IpInfo, type OAuthProvider, type UserID } from '$types';
 import { addDays, addMonths, addYears } from 'date-fns';
 import { getDeviceByToken } from '$lib/server/models/device';
 import { db } from '$db';
-import { tokens } from '$db/schema';
+import { devices, tokens } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { cookieData } from '$lib/server/index';
 
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
 	throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set');
 }
+if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
+	throw new Error('DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are not set');
+}
 
-const redirect_url = `${PUBLIC_ORIGIN}/login/google/callback`;
+const oauthCallbackUrl = (provider: OAuthProvider) =>
+	`https://api.${PUBLIC_ORIGIN}/auth/oauth/${provider}/callback`;
 
-export const google = new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirect_url);
+export const oauthProviders = {
+	google: new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, oauthCallbackUrl('google')),
+	discord: new Discord(DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, oauthCallbackUrl('discord'))
+} satisfies Record<OAuthProvider, Google | Discord>;
 
 export async function createLogin(cookies: Cookies, userId: UserID, keep = false) {
 	const token = await generateToken(
@@ -27,6 +39,43 @@ export async function createLogin(cookies: Cookies, userId: UserID, keep = false
 		keep ? addMonths(new Date(), 1) : addDays(new Date(), 1)
 	);
 	cookies.set('loginToken', token.token, cookieData(keep ? addMonths(new Date(), 1) : undefined));
+	return token;
+}
+
+/**
+ * Logs a user in and ensures the current device is registered/linked to the new session.
+ * Shared by password login and OAuth login/signup completion.
+ */
+export async function completeLogin(event: RequestEvent, userId: UserID, keep = false) {
+	const token = await createLogin(event.cookies, userId, keep);
+
+	if (event.locals.device) {
+		await db
+			.update(devices)
+			.set({ sessionToken: token.token })
+			.where(eq(devices.deviceToken, event.locals.device.deviceToken));
+	} else {
+		const expires = addYears(new Date(), 1);
+		const deviceToken = await generateToken(userId, TokenType.Device, expires);
+		const { countryCode, city, timezone } = (await (
+			await event.fetch('/api/os/ip', {
+				method: 'POST',
+				body: JSON.stringify({ ip: event.locals.ip })
+			})
+		).json()) as IpInfo;
+
+		await db.insert(devices).values({
+			deviceToken: deviceToken.token,
+			sessionToken: token.token,
+			userAgent: event.request.headers.get('user-agent') ?? '',
+			ip: event.locals.ip,
+			countryCode,
+			city,
+			timezone
+		});
+		event.cookies.set('deviceToken', deviceToken.token, cookieData(expires));
+	}
+
 	return token;
 }
 

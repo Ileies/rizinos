@@ -1,6 +1,7 @@
 export * from './device';
 export * from './misc';
 export * from './moderation';
+export * from './oauth';
 export * from './os';
 export * from './seo';
 export * from './token';

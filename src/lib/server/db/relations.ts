@@ -11,7 +11,8 @@ export const relations = defineRelations(schema, (r) => ({
 		dcUser: r.one.dcUsers({
 			from: r.users.id,
 			to: r.dcUsers.userId
-		})
+		}),
+		oauthAccounts: r.many.oauthAccounts()
 	},
 	tokens: {
 		user: r.one.users({
@@ -101,6 +102,13 @@ export const relations = defineRelations(schema, (r) => ({
 		user: r.one.users({
 			from: r.dcUsers.userId,
 			to: r.users.id
+		})
+	},
+	oauthAccounts: {
+		user: r.one.users({
+			from: r.oauthAccounts.userId,
+			to: r.users.id,
+			optional: false
 		})
 	}
 }));

@@ -16,6 +16,8 @@ export enum TokenType {
 	Verify = 'verify',
 	/** Discord verification */
 	Discord = 'discord',
+	/** Pending OAuth signup awaiting missing profile fields */
+	OAuthSignup = 'oauth_signup',
 	/** Minecraft verification */
 	Minecraft = 'minecraft',
 	/** Email unsubscribe */
