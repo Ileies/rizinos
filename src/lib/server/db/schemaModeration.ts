@@ -9,6 +9,7 @@ export const unbanRequests = pgTable('unban_requests', {
 	id: serial('id').primaryKey(),
 	type: text('type').notNull().$type<BanType>(),
 	subjectId: text('subject_id').notNull(),
+	banId: text('ban_id').notNull(),
 	label: text('label').notNull(),
 	message: text('message').notNull(),
 	status: text('status').notNull().default('pending'),

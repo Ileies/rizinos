@@ -9,5 +9,6 @@ export const dcUsers = pgTable('dc_users', {
 		.unique()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	bannedUntil: timestamp('banned'),
-	bannedReason: text('banned_reason')
+	bannedReason: text('banned_reason'),
+	banId: text('ban_id')
 });

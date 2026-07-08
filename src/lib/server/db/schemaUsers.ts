@@ -22,7 +22,8 @@ export const users = pgTable('users', {
 	isOnline: boolean('is_online').notNull().default(false),
 	emailOptOut: boolean('email_opt_out').notNull().default(false),
 	bannedUntil: timestamp('banned'),
-	bannedReason: text('banned_reason')
+	bannedReason: text('banned_reason'),
+	banId: text('ban_id')
 });
 
 export const tokens = pgTable('tokens', {

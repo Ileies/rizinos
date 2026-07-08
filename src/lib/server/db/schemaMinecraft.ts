@@ -21,6 +21,7 @@ export const mcUsers = pgTable('mc_users', {
 	welcomeMessage: text('welcome'),
 	bannedUntil: timestamp('banned'),
 	bannedReason: text('banned_reason'),
+	banId: text('ban_id'),
 	mutedUntil: timestamp('muted')
 });
 
