@@ -1,4 +1,4 @@
-import { pgTable, text } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { users } from './schemaUsers';
 
 export const dcUsers = pgTable('dc_users', {
@@ -7,5 +7,7 @@ export const dcUsers = pgTable('dc_users', {
 	userId: text('user_id')
 		.notNull()
 		.unique()
-		.references(() => users.id, { onDelete: 'cascade' })
+		.references(() => users.id, { onDelete: 'cascade' }),
+	bannedUntil: timestamp('banned'),
+	bannedReason: text('banned_reason')
 });

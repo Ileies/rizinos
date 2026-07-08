@@ -5,3 +5,4 @@ export * from './schemaMinechat';
 export * from './schemaMinecraft';
 export * from './schemaUsers';
 export * from './schemaFiles';
+export * from './schemaModeration';
