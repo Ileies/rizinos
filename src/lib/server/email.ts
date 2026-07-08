@@ -313,7 +313,7 @@ function buildHtml(opts: EmailOptions, unsubscribeUrl: string | null): string {
             </td></tr>
             <tr><td style="text-align:center;padding-bottom:8px;">
               <p style="margin:0;font-size:12px;color:${COLORS.muted};">
-                ${escapeHtml(APP_NAME)} &bull; offlimits IT &bull; Rheinberg, Germany
+                ${escapeHtml(APP_NAME)} &bull; Zürich, Switzerland
               </p>
             </td></tr>
             ${unsubscribeFooterHtml}
