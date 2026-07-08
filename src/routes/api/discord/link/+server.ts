@@ -39,7 +39,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!token || tokenIsExpired(token)) return json({ status: 3 }); // invalid or expired token
 
 	const { discordUserId } = token.data as { discordUserId: string };
-	await revokeToken(tokenString);
 
 	const [existingForUser, existingForDiscord] = await Promise.all([
 		db.query.dcUsers.findFirst({ where: { userId: locals.user.id } }),
@@ -56,6 +55,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		return json({ status: 3 });
 	}
 
+	await revokeToken(tokenString);
 	await notifyLinkSuccess(discordUserId, locals.user.username);
 
 	return json({ status: 0 });
