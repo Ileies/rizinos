@@ -19,6 +19,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	// TODO: At some point support these languages too:  'es', 'fr', 'pt', 'hi', 'ar'
 
 	return {
+		userId: locals.user.id,
 		username: locals.user.username
 	};
 };

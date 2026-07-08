@@ -96,5 +96,5 @@
 	<Notifications />
 	<AppLauncher />
 	<ContextMenu />
-	<PwaInstallBanner />
+	<PwaInstallBanner userId={data.userId} />
 </div>

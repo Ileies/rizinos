@@ -3,11 +3,18 @@
 	import { Download, X } from '@lucide/svelte';
 	import pwa from '$lib/client/pwa.svelte';
 	import * as Alert from '$shadcn/alert';
+	import type { UserID } from '$types';
 
-	const STORAGE_KEY = 'pwa-install-dismissed';
+	const { userId }: { userId: UserID } = $props();
+
+	const DISMISS_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 	let show = $state(false);
 	let installing = $state(false);
+
+	function storageKey() {
+		return `pwa-install-dismissed:${userId}`;
+	}
 
 	onMount(() => {
 		const isStandalone =
@@ -17,7 +24,8 @@
 
 		if (isStandalone) return;
 
-		const dismissed = localStorage.getItem(STORAGE_KEY) === 'true';
+		const dismissedAt = Number(localStorage.getItem(storageKey()));
+		const dismissed = Number.isFinite(dismissedAt) && Date.now() - dismissedAt < DISMISS_TTL_MS;
 
 		function onBeforeInstall(e: Event) {
 			e.preventDefault();
@@ -42,7 +50,7 @@
 
 	function dismiss() {
 		show = false;
-		localStorage.setItem(STORAGE_KEY, 'true');
+		localStorage.setItem(storageKey(), Date.now().toString());
 	}
 
 	async function install() {
