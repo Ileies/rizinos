@@ -39,7 +39,13 @@ const server = Bun.serve({
 				req.headers.get('x-forwarded-for') ?? server.requestIP(req)?.address ?? '::1'
 		});
 	},
-	websocket: websocketHandlers
+	websocket: {
+		...websocketHandlers,
+		// Detects unclean disconnects (crashes, network loss) via ping/pong so `close`
+		// still fires and `isOnline`/`lastOnline` don't stay stuck.
+		sendPings: true,
+		idleTimeout: 30
+	}
 });
 
 console.log(`Server running on http://localhost:${server.port}`);
