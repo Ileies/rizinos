@@ -6,10 +6,40 @@
 	"display": "standalone",
 	"background_color": "#ffffff",
 	"theme_color": "#648F32",
-	"lang": "de",
+	"lang": "en",
 	"dir": "ltr",
 	"orientation": "any",
 	"categories": ["productivity", "utilities"],
+	"screenshots": [
+		{
+			"src": "/screenshots/desktop-home.png",
+			"sizes": "1280x800",
+			"type": "image/png",
+			"form_factor": "wide",
+			"label": "RizinOS Desktop"
+		},
+		{
+			"src": "/screenshots/desktop-files.png",
+			"sizes": "1280x800",
+			"type": "image/png",
+			"form_factor": "wide",
+			"label": "File Manager"
+		},
+		{
+			"src": "/screenshots/mobile-home.png",
+			"sizes": "390x844",
+			"type": "image/png",
+			"form_factor": "narrow",
+			"label": "RizinOS on Mobile"
+		},
+		{
+			"src": "/screenshots/mobile-apps.png",
+			"sizes": "390x844",
+			"type": "image/png",
+			"form_factor": "narrow",
+			"label": "App Overview"
+		}
+	],
 	"icons": [
 		{
 			"src": "/icon-192.png",
