@@ -243,14 +243,14 @@ function buildHtml(opts: EmailOptions, unsubscribeUrl: string | null): string {
 	const unsubscribeFooterHtml = unsubscribeUrl
 		? `<tr><td style="padding-top:16px;border-top:1px solid ${COLORS.border};">
         <p style="margin:0;font-size:12px;color:${COLORS.muted};text-align:center;line-height:1.6;">
-          Du erhältst diese Mail, weil du ${APP_NAME}-Nutzer bist.<br>
-          <a href="${unsubscribeUrl}" style="color:${COLORS.muted};text-decoration:underline;">Benachrichtigungen abbestellen</a>
+          You are receiving this email because you are a ${APP_NAME} user.<br>
+          <a href="${unsubscribeUrl}" style="color:${COLORS.muted};text-decoration:underline;">Unsubscribe from notifications</a>
         </p>
       </td></tr>`
 		: '';
 
 	return `<!DOCTYPE html>
-<html lang="de" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -307,13 +307,13 @@ function buildHtml(opts: EmailOptions, unsubscribeUrl: string | null): string {
         <tr><td style="padding:28px 0 0 0;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr><td style="text-align:center;padding-bottom:12px;">
-              <a href="https://${DOMAIN}/impressum" style="font-size:12px;color:${COLORS.muted};text-decoration:none;margin:0 8px;">Impressum</a>
-              <a href="https://${DOMAIN}/datenschutz" style="font-size:12px;color:${COLORS.muted};text-decoration:none;margin:0 8px;">Datenschutz</a>
-              <a href="https://${DOMAIN}/agb" style="font-size:12px;color:${COLORS.muted};text-decoration:none;margin:0 8px;">AGB</a>
+              <a href="https://${DOMAIN}/legal" style="font-size:12px;color:${COLORS.muted};text-decoration:none;margin:0 8px;">Imprint</a>
+              <a href="https://${DOMAIN}/privacy" style="font-size:12px;color:${COLORS.muted};text-decoration:none;margin:0 8px;">Privacy Policy</a>
+              <a href="https://${DOMAIN}/terms" style="font-size:12px;color:${COLORS.muted};text-decoration:none;margin:0 8px;">Terms of Service</a>
             </td></tr>
             <tr><td style="text-align:center;padding-bottom:8px;">
               <p style="margin:0;font-size:12px;color:${COLORS.muted};">
-                ${escapeHtml(APP_NAME)} &bull; offlimits IT &bull; Rheinberg, Deutschland
+                ${escapeHtml(APP_NAME)} &bull; offlimits IT &bull; Rheinberg, Germany
               </p>
             </td></tr>
             ${unsubscribeFooterHtml}

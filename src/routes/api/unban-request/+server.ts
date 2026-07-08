@@ -8,20 +8,20 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { banId, message } = (await request.json()) as { banId?: string; message?: string };
 
 	if (!banId?.trim() || !message?.trim()) {
-		return json({ error: 'Ban-ID und Nachricht erforderlich.' }, { status: 400 });
+		return json({ error: 'Ban ID and message are required.' }, { status: 400 });
 	}
 
 	const normalizedBanId = banId.trim().toUpperCase();
 	const match = await findByBanId(normalizedBanId);
 	if (!match) {
-		return json({ error: 'Unbekannte Ban-ID.' }, { status: 400 });
+		return json({ error: 'Unknown ban ID.' }, { status: 400 });
 	}
 
 	const pending = await db.query.unbanRequests.findFirst({
 		where: { type: match.type, subjectId: match.subjectId, status: 'pending' }
 	});
 	if (pending) {
-		return json({ error: 'Es liegt bereits ein offener Antrag vor.' }, { status: 400 });
+		return json({ error: 'There is already an open request.' }, { status: 400 });
 	}
 
 	await db.insert(unbanRequests).values({

@@ -51,24 +51,23 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	await sendEmail({
 		to: data.email,
-		subject: `${PUBLIC_APP_NAME} - E-Mail bestätigen`,
+		subject: `${PUBLIC_APP_NAME} - Confirm your email`,
 		category: 'transactional',
-		preheader: 'Bestätige deine E-Mail-Adresse, um deinen Account zu aktivieren.',
-		greeting: `Hallo ${data.username},`,
+		preheader: 'Confirm your email address to activate your account.',
+		greeting: `Hi ${data.username},`,
 		blocks: [
 			{
 				type: 'text',
 				content:
-					'Willkommen bei RizinOS! Klicke auf den Button, um deine E-Mail-Adresse zu bestätigen und deinen Account zu aktivieren.'
+					'Welcome to RizinOS! Click the button below to confirm your email address and activate your account.'
 			},
 			{
 				type: 'alert',
 				level: 'warning',
-				content:
-					'Dieser Link ist 24 Stunden gültig. Hast du dich nicht registriert, kannst du diese E-Mail ignorieren.'
+				content: "This link is valid for 24 hours. If you didn't sign up, you can safely ignore this email."
 			}
 		],
-		cta: { label: 'E-Mail bestätigen', url: confirmUrl }
+		cta: { label: 'Confirm email', url: confirmUrl }
 	});
 
 	return json({ success: true });
