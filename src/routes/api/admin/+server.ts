@@ -2,8 +2,9 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import { db } from '$db';
 import { users, apps } from '$db/schema';
 import { eq } from 'drizzle-orm';
-import { Role, type Restrict, type UserID } from '$types';
+import { BanType, Role, type Restrict, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
+import { notifyBan } from '$lib/server/discordBot';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -123,6 +124,34 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (!userId) return json({ message: 'User ID required' }, { status: 400 });
 
 			await db.delete(users).where(eq(users.id, userId as UserID));
+			return json({ success: true });
+		}
+
+		case 'userBan': {
+			const userId = data.userId as UserID;
+			const until = data.until;
+			const reason = data.reason || null;
+
+			if (!userId) return json({ message: 'User ID required' }, { status: 400 });
+
+			const bannedUntil = until ? new Date(until) : null;
+			await db
+				.update(users)
+				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null })
+				.where(eq(users.id, userId));
+
+			if (bannedUntil) void notifyBan(BanType.Rizinos, userId, reason, bannedUntil);
+			return json({ success: true });
+		}
+
+		case 'userUnban': {
+			const userId = data.userId as UserID;
+			if (!userId) return json({ message: 'User ID required' }, { status: 400 });
+
+			await db
+				.update(users)
+				.set({ bannedUntil: null, bannedReason: null })
+				.where(eq(users.id, userId));
 			return json({ success: true });
 		}
 

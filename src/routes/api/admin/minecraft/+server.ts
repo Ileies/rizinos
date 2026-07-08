@@ -2,8 +2,9 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import { db } from '$db';
 import { mcWarps, mcWorlds, mcWorldGroups, mcUsers, mcInventories } from '$db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { Role, type Restrict, type UserID } from '$types';
+import { BanType, Role, type Restrict, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
+import { notifyBan } from '$lib/server/discordBot';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -255,6 +256,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				.update(mcUsers)
 				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null })
 				.where(eq(mcUsers.uuid, uuid));
+
+			if (bannedUntil) void notifyBan(BanType.Minecraft, uuid, reason, bannedUntil);
 			return json({ success: true });
 		}
 

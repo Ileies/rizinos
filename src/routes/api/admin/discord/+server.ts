@@ -2,8 +2,9 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import { db } from '$db';
 import { dcUsers } from '$db/schema';
 import { eq } from 'drizzle-orm';
-import { Role, type UserID } from '$types';
+import { BanType, Role, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
+import { executeDiscordBan, liftDiscordBan, notifyBan } from '$lib/server/discordBot';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -77,6 +78,38 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (!discordUserId) return json({ message: 'Discord User ID required' }, { status: 400 });
 
 			await db.delete(dcUsers).where(eq(dcUsers.discordUserId, discordUserId));
+			return json({ success: true });
+		}
+
+		case 'dcUserBan': {
+			const discordUserId = data.discordUserId;
+			const until = data.until;
+			const reason = data.reason || null;
+
+			if (!discordUserId) return json({ message: 'Discord User ID required' }, { status: 400 });
+
+			const bannedUntil = until ? new Date(until) : null;
+			await db
+				.update(dcUsers)
+				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null })
+				.where(eq(dcUsers.discordUserId, discordUserId));
+
+			if (bannedUntil) {
+				await executeDiscordBan(discordUserId, reason);
+				void notifyBan(BanType.Discord, discordUserId, reason, bannedUntil);
+			}
+			return json({ success: true });
+		}
+
+		case 'dcUserUnban': {
+			const discordUserId = data.discordUserId;
+			if (!discordUserId) return json({ message: 'Discord User ID required' }, { status: 400 });
+
+			await db
+				.update(dcUsers)
+				.set({ bannedUntil: null, bannedReason: null })
+				.where(eq(dcUsers.discordUserId, discordUserId));
+			await liftDiscordBan(discordUserId);
 			return json({ success: true });
 		}
 
