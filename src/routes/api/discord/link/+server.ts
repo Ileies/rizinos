@@ -7,6 +7,7 @@ import { dcUsers } from '$db/schema';
 import { generateToken } from '$lib/server/models/User';
 import { getToken, revokeToken, tokenIsExpired } from '$lib/server/models/token';
 import { TokenType } from '$types';
+import { notifyLinkSuccess } from '$lib/server/discordBot';
 
 /** Vom Discord-Bot aufgerufen, um einen Verknüpfungs-Token für eine `/link`-Anfrage zu erzeugen. */
 export const POST: RequestHandler = async ({ request }) => {
@@ -54,6 +55,8 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	} catch {
 		return json({ status: 3 });
 	}
+
+	await notifyLinkSuccess(discordUserId, locals.user.username);
 
 	return json({ status: 0 });
 };

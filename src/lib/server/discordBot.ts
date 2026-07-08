@@ -78,3 +78,8 @@ export async function executeDiscordBan(discordUserId: string, reason: string | 
 export async function liftDiscordBan(discordUserId: string): Promise<void> {
 	await callBot('/unban', { discordUserId });
 }
+
+/** Meldet dem Discord-Bot eine erfolgreich abgeschlossene Account-Verknüpfung zu Logging-Zwecken. */
+export async function notifyLinkSuccess(discordUserId: string, rizinosUsername: string): Promise<void> {
+	await callBot('/link/success', { discordUserId, rizinosUsername });
+}
