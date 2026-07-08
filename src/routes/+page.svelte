@@ -8,6 +8,7 @@
 	import os from '$lib/os.svelte';
 	import { browser } from '$app/environment';
 	import { Theme } from '$types';
+	import '$lib/client/websocket.svelte';
 
 	if (browser) {
 		window.addEventListener('resize', () => {
