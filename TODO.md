@@ -35,6 +35,13 @@
 - [ ] Media Player (Audio: MP3, OGG, FLAC - Video: MP4, WebM)
 - [ ] Text-Viewer / Editor
 
+## Internationalisierung / Lokalisierung
+
+- [ ] **`manifest.webmanifest` `lang` dynamisch** - Statt hardcoded `"en"`: Server-Route `/manifest.webmanifest/+server.ts` die `LOCALE`-Cookie ausliest und das Manifest mit dem passenden BCP-47-Tag zurückgibt
+- [ ] **Sprache in User-Settings** - Sprachpräferenz pro Nutzer in der DB speichern; in den OS-Einstellungen umschaltbar; `LOCALE`-Cookie beim Login auf die gespeicherte Präferenz setzen
+
+---
+
 ## Phase 4 - OS-Erfahrung
 
 - [ ] Snap-to-edge im Window Manager
