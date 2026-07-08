@@ -7,6 +7,7 @@ import { devices } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { createLogin } from '$lib/server/auth';
 import { cookieData, invalidMethod } from '$lib/server';
+import { PUBLIC_ORIGIN } from '$env/static/public';
 
 export const POST: RequestHandler = async ({ request, cookies, locals, fetch }) => {
 	const ip = locals.ip;
@@ -26,6 +27,14 @@ export const POST: RequestHandler = async ({ request, cookies, locals, fetch }) 
 	}
 
 	const user = await login(email, password);
+	if (user === 'banned') {
+		return json(
+			{
+				error: `Dieser Account wurde gesperrt. Unban-Antrag: https://${PUBLIC_ORIGIN}/unban-request?type=rizinos&id=${encodeURIComponent(email)}`
+			},
+			{ status: 403 }
+		);
+	}
 	if (!user) {
 		return json({ error: 'Invalid email or password.' }, { status: 402 });
 	}

@@ -111,12 +111,13 @@ export async function getLastOnline(userId: UserID): Promise<Date | undefined> {
 	)?.lastOnline;
 }
 
-export async function login(email: string, password: string): Promise<UserData | undefined> {
+export async function login(email: string, password: string): Promise<UserData | 'banned' | undefined> {
 	const userData = await db.query.users.findFirst({
 		where: { email: email },
 		columns: { isOnline: false }
 	});
 	if (!userData || !(await Bun.password.verify(password, userData.passwordHash))) return;
+	if (userData.bannedUntil && userData.bannedUntil > new Date()) return 'banned';
 	return userData;
 }
 
