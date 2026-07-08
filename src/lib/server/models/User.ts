@@ -102,13 +102,14 @@ export function hasRole(user: UserData, role: Role): boolean {
 	return user.roles.includes(role);
 }
 
+/** Returns the current date if the user is online, otherwise the timestamp of their last disconnect */
 export async function getLastOnline(userId: UserID): Promise<Date | undefined> {
-	return (
-		await db.query.users.findFirst({
-			where: { id: userId },
-			columns: { lastOnline: true }
-		})
-	)?.lastOnline;
+	const data = await db.query.users.findFirst({
+		where: { id: userId },
+		columns: { isOnline: true, lastOnline: true }
+	});
+	if (!data) return undefined;
+	return data.isOnline ? new Date() : data.lastOnline;
 }
 
 export async function login(
