@@ -27,10 +27,10 @@ export const POST: RequestHandler = async ({ request, cookies, locals, fetch }) 
 	}
 
 	const user = await login(email, password);
-	if (user === 'banned') {
+	if (user && 'banned' in user) {
 		return json(
 			{
-				error: `Dieser Account wurde gesperrt. Unban-Antrag: https://${PUBLIC_ORIGIN}/unban-request?type=rizinos&id=${encodeURIComponent(email)}`
+				error: `Dieser Account wurde gesperrt. Unban-Antrag: https://${PUBLIC_ORIGIN}/unban-request?id=${user.banId}`
 			},
 			{ status: 403 }
 		);

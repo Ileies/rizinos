@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { BanType, Role, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
 import { executeDiscordBan, liftDiscordBan, notifyBan } from '$lib/server/discordBot';
+import { generateBanId } from '$lib/server/models/Ban';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -89,14 +90,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (!discordUserId) return json({ message: 'Discord User ID required' }, { status: 400 });
 
 			const bannedUntil = until ? new Date(until) : null;
+			const banId = bannedUntil ? await generateBanId() : null;
 			await db
 				.update(dcUsers)
-				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null })
+				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null, banId })
 				.where(eq(dcUsers.discordUserId, discordUserId));
 
 			if (bannedUntil) {
 				await executeDiscordBan(discordUserId, reason);
-				void notifyBan(BanType.Discord, discordUserId, reason, bannedUntil);
+				void notifyBan(BanType.Discord, discordUserId, banId!, reason, bannedUntil);
 			}
 			return json({ success: true });
 		}
@@ -107,7 +109,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 			await db
 				.update(dcUsers)
-				.set({ bannedUntil: null, bannedReason: null })
+				.set({ bannedUntil: null, bannedReason: null, banId: null })
 				.where(eq(dcUsers.discordUserId, discordUserId));
 			await liftDiscordBan(discordUserId);
 			return json({ success: true });

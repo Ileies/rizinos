@@ -40,14 +40,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				case BanType.Minecraft:
 					await db
 						.update(mcUsers)
-						.set({ bannedUntil: null, bannedReason: null })
+						.set({ bannedUntil: null, bannedReason: null, banId: null })
 						.where(eq(mcUsers.uuid, request.subjectId));
 					break;
 
 				case BanType.Discord:
 					await db
 						.update(dcUsers)
-						.set({ bannedUntil: null, bannedReason: null })
+						.set({ bannedUntil: null, bannedReason: null, banId: null })
 						.where(eq(dcUsers.discordUserId, request.subjectId));
 					await liftDiscordBan(request.subjectId);
 					break;
@@ -55,7 +55,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				case BanType.Rizinos:
 					await db
 						.update(users)
-						.set({ bannedUntil: null, bannedReason: null })
+						.set({ bannedUntil: null, bannedReason: null, banId: null })
 						.where(eq(users.id, request.subjectId as UserID));
 					break;
 			}

@@ -5,6 +5,7 @@ import { eq, sql } from 'drizzle-orm';
 import { BanType, Role, type Restrict, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
 import { notifyBan } from '$lib/server/discordBot';
+import { generateBanId } from '$lib/server/models/Ban';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -252,12 +253,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (!uuid) return json({ message: 'UUID required' }, { status: 400 });
 
 			const bannedUntil = until ? new Date(until) : null;
+			const banId = bannedUntil ? await generateBanId() : null;
 			await db
 				.update(mcUsers)
-				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null })
+				.set({ bannedUntil, bannedReason: bannedUntil ? reason : null, banId })
 				.where(eq(mcUsers.uuid, uuid));
 
-			if (bannedUntil) void notifyBan(BanType.Minecraft, uuid, reason, bannedUntil);
+			if (bannedUntil) void notifyBan(BanType.Minecraft, uuid, banId!, reason, bannedUntil);
 			return json({ success: true });
 		}
 

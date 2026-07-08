@@ -50,20 +50,22 @@ async function callBot(path: string, body: Record<string, unknown>): Promise<boo
 export async function notifyBan(
 	type: BanType,
 	subjectId: string,
+	banId: string,
 	reason: string | null,
 	until: Date | null
 ): Promise<void> {
 	const discordUserId = await resolveDiscordUserId(type, subjectId);
 	if (!discordUserId) return;
 
-	const unbanUrl = `https://${PUBLIC_ORIGIN}/unban-request?type=${type}&id=${encodeURIComponent(subjectId)}`;
+	const unbanUrl = `https://${PUBLIC_ORIGIN}/unban-request?id=${encodeURIComponent(banId)}`;
 
 	await callBot('/dm/ban', {
 		discordUserId,
 		system: SYSTEM_LABELS[type],
 		reason,
 		until: until?.toISOString() ?? null,
-		unbanUrl
+		unbanUrl,
+		banId
 	});
 }
 
