@@ -64,7 +64,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			{
 				type: 'alert',
 				level: 'warning',
-				content: "This link is valid for 24 hours. If you didn't sign up, you can safely ignore this email."
+				content:
+					"This link is valid for 24 hours. If you didn't sign up, you can safely ignore this email."
 			}
 		],
 		cta: { label: 'Confirm email', url: confirmUrl }

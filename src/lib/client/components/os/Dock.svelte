@@ -160,7 +160,10 @@
 			{/if}
 		</DockField>
 		<!-- Clock -->
-		<DockField innerClasses="w-[72px] group-hover:bg-muted" onclick={() => (isClockOpen = !isClockOpen)}>
+		<DockField
+			innerClasses="w-[72px] group-hover:bg-muted"
+			onclick={() => (isClockOpen = !isClockOpen)}
+		>
 			<Clock />
 		</DockField>
 		<!-- Show Desktop -->
@@ -175,7 +178,9 @@
 
 {#if isVolumeOpen}
 	<Overlay onclose={() => (isVolumeOpen = false)}>
-		<div class="bg-card border-border fixed right-28 bottom-12 flex w-48 flex-col gap-3 rounded-lg border p-4 shadow-lg">
+		<div
+			class="bg-card border-border fixed right-28 bottom-12 flex w-48 flex-col gap-3 rounded-lg border p-4 shadow-lg"
+		>
 			<div class="flex items-center justify-between text-sm font-medium">
 				<span>Volume</span>
 				<span>{os.isMuted ? 'Muted' : `${os.volume}%`}</span>
@@ -190,7 +195,10 @@
 			/>
 			<button
 				class="hover:bg-muted flex items-center gap-2 rounded px-2 py-1 text-sm"
-				onclick={(e) => { e.stopPropagation(); os.isMuted = !os.isMuted; }}
+				onclick={(e) => {
+					e.stopPropagation();
+					os.isMuted = !os.isMuted;
+				}}
 			>
 				{#if os.isMuted}
 					<Volume size={14} />
@@ -206,7 +214,9 @@
 
 {#if isClockOpen}
 	<Overlay onclose={() => (isClockOpen = false)}>
-		<div class="bg-card border-border fixed right-2 bottom-12 flex w-52 flex-col items-center gap-1 rounded-lg border p-4 shadow-lg">
+		<div
+			class="bg-card border-border fixed right-2 bottom-12 flex w-52 flex-col items-center gap-1 rounded-lg border p-4 shadow-lg"
+		>
 			<div class="text-3xl font-light tabular-nums">{format(now.getTime(), 'HH:mm')}</div>
 			<div class="text-muted-foreground text-sm">{format(now.getTime(), 'ss')}s</div>
 			<div class="mt-1 text-sm font-medium">{format(now.getTime(), 'EEEE, d. MMMM yyyy')}</div>

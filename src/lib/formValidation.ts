@@ -14,7 +14,10 @@ export const formSchema = z.object({
 		.string()
 		.min(3, 'Username must be at least 3 characters')
 		.max(20, 'Username must be 20 characters or less')
-		.regex(/^[a-zA-Z0-9_-]+$/, 'Username may only contain letters, numbers, underscores and dashes'),
+		.regex(
+			/^[a-zA-Z0-9_-]+$/,
+			'Username may only contain letters, numbers, underscores and dashes'
+		),
 	birthdate: z.iso.date('Must be in YYYY-MM-DD format').refine((date) => {
 		const dateTime = new Date(date).getTime();
 		return !(dateTime < maxAge || dateTime > minAge);

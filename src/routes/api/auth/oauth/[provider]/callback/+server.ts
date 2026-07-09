@@ -70,7 +70,15 @@ export const GET: RequestHandler = async (event) => {
 		firstName: profile.firstName,
 		lastName: profile.lastName
 	};
-	const token = await generateToken(null, TokenType.OAuthSignup, addMinutes(new Date(), 15), pending);
+	const token = await generateToken(
+		null,
+		TokenType.OAuthSignup,
+		addMinutes(new Date(), 15),
+		pending
+	);
 
-	redirect(302, `https://${PUBLIC_ORIGIN}/signup/complete?token=${encodeURIComponent(token.token)}`);
+	redirect(
+		302,
+		`https://${PUBLIC_ORIGIN}/signup/complete?token=${encodeURIComponent(token.token)}`
+	);
 };

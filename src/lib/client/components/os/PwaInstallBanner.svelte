@@ -71,7 +71,9 @@
 </script>
 
 {#if show}
-	<div class="fixed top-2 right-2 z-[2147483635] w-64 rounded-lg border bg-card text-card-foreground shadow-lg">
+	<div
+		class="fixed top-2 right-2 z-[2147483635] w-64 rounded-lg border bg-card text-card-foreground shadow-lg"
+	>
 		<div class="p-3">
 			<div class="flex items-start gap-3">
 				<img src="/favicon.png" alt="RizinOS" class="size-12 shrink-0 rounded-xl" />
@@ -86,7 +88,9 @@
 							<X class="h-3.5 w-3.5" />
 						</button>
 					</div>
-					<p class="text-muted-foreground mt-1 text-xs">Als App installieren für die beste Erfahrung.</p>
+					<p class="text-muted-foreground mt-1 text-xs">
+						Als App installieren für die beste Erfahrung.
+					</p>
 				</div>
 			</div>
 			<button

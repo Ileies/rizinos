@@ -35,7 +35,10 @@ async function callBot(path: string, body: Record<string, unknown>): Promise<boo
 	try {
 		const res = await fetch(`${DISCORD_BOT_URL}${path}`, {
 			method: 'POST',
-			headers: { 'content-type': 'application/json', authorization: `Bearer ${DISCORD_BOT_SECRET}` },
+			headers: {
+				'content-type': 'application/json',
+				authorization: `Bearer ${DISCORD_BOT_SECRET}`
+			},
 			body: JSON.stringify(body)
 		});
 		if (!res.ok) Logger.warn(`Discord bot call to ${path} failed`, { status: res.status });
@@ -70,7 +73,10 @@ export async function notifyBan(
 }
 
 /** Bannt den User serverseitig vom Discord-Server. Nur für BanType.Discord relevant. */
-export async function executeDiscordBan(discordUserId: string, reason: string | null): Promise<void> {
+export async function executeDiscordBan(
+	discordUserId: string,
+	reason: string | null
+): Promise<void> {
 	await callBot('/ban', { discordUserId, reason });
 }
 
@@ -80,6 +86,9 @@ export async function liftDiscordBan(discordUserId: string): Promise<void> {
 }
 
 /** Meldet dem Discord-Bot eine erfolgreich abgeschlossene Account-Verknüpfung zu Logging-Zwecken. */
-export async function notifyLinkSuccess(discordUserId: string, rizinosUsername: string): Promise<void> {
+export async function notifyLinkSuccess(
+	discordUserId: string,
+	rizinosUsername: string
+): Promise<void> {
 	await callBot('/link/success', { discordUserId, rizinosUsername });
 }

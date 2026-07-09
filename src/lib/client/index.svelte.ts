@@ -30,18 +30,21 @@ async function hashFile(file: File): Promise<string> {
 
 // Uploads files into a VFS directory. Returns created VFSEntry objects.
 // Blobs that already exist on the server are not re-transferred.
-export async function uploadFiles(fileList: FileList, dirId: string | null = null): Promise<VFSEntry[]> {
+export async function uploadFiles(
+	fileList: FileList,
+	dirId: string | null = null
+): Promise<VFSEntry[]> {
 	const fileArray = Array.from(fileList);
 
 	// Hash all files client-side
 	const hashes = await Promise.all(fileArray.map(hashFile));
 
 	// Check which blobs already exist (dedup fast-path)
-	const { existing } = await fetch('/api/os/fso/check', {
+	const { existing } = (await fetch('/api/os/fso/check', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ hashes })
-	}).then((r) => r.json()) as { existing: string[] };
+	}).then((r) => r.json())) as { existing: string[] };
 	const existingSet = new Set(existing);
 
 	const results: VFSEntry[] = [];
@@ -74,9 +77,7 @@ export async function promptUploadFiles(dirId: string | null = null): Promise<VF
 	});
 }
 
-export async function promptUploadFolder(
-	dirId: string | null = null
-): Promise<VFSEntry[]> {
+export async function promptUploadFolder(dirId: string | null = null): Promise<VFSEntry[]> {
 	return new Promise((resolve, reject) => {
 		const input = document.createElement('input');
 		input.type = 'file';

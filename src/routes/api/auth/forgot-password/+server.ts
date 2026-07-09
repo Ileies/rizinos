@@ -38,7 +38,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			{
 				type: 'alert',
 				level: 'warning',
-				content: "This link is only valid for 1 hour. If you didn't request this, you can safely ignore this email."
+				content:
+					"This link is only valid for 1 hour. If you didn't request this, you can safely ignore this email."
 			}
 		],
 		cta: { label: 'Reset password', url: resetUrl }

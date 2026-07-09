@@ -28,7 +28,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const validation = passwordSchema.safeParse(password);
 	if (!validation.success) {
-		return json({ error: validation.error.issues[0]?.message ?? 'Invalid password.' }, { status: 400 });
+		return json(
+			{ error: validation.error.issues[0]?.message ?? 'Invalid password.' },
+			{ status: 400 }
+		);
 	}
 
 	const token = await getToken(tokenString, TokenType.Reset);
@@ -41,9 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	await db.update(users).set({ passwordHash }).where(eq(users.id, token.userId));
 
 	// Revoke reset token and all active sessions for this user
-	await db
-		.delete(tokens)
-		.where(eq(tokens.userId, token.userId));
+	await db.delete(tokens).where(eq(tokens.userId, token.userId));
 
 	return json({ success: true });
 };

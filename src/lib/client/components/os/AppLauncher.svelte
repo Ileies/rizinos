@@ -22,8 +22,6 @@
 				]);
 			});
 	};
-
-
 </script>
 
 {#if os.isAppLauncherOpen}
@@ -34,7 +32,10 @@
 				? 'h-svh w-svh'
 				: 'bottom-10'} bg-muted w-52 cursor-pointer text-lg"
 		>
-			<button class="hover:bg-muted/80 flex h-10 w-full items-center gap-4 p-3" onclick={() => launchApp('taskmgr')}>
+			<button
+				class="hover:bg-muted/80 flex h-10 w-full items-center gap-4 p-3"
+				onclick={() => launchApp('taskmgr')}
+			>
 				<SquareActivity />
 				Task Manager
 			</button>

@@ -85,7 +85,12 @@ export const SENDERS: Record<MailCategory, string> = {
 	newsletter: `"${APP_NAME} Newsletter" <newsletter@${DOMAIN}>`
 };
 
-const UNSUBSCRIBABLE: Set<MailCategory> = new Set(['welcome', 'onboarding', 'notifications', 'newsletter']);
+const UNSUBSCRIBABLE: Set<MailCategory> = new Set([
+	'welcome',
+	'onboarding',
+	'notifications',
+	'newsletter'
+]);
 
 // ---------------------------------------------------------------------------
 // HTML-Builder
