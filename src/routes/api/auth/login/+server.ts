@@ -25,7 +25,7 @@ export const POST: RequestHandler = async (event) => {
 	if (user && 'banned' in user) {
 		return json(
 			{
-				error: `Dieser Account wurde gesperrt. Unban-Antrag: https://${PUBLIC_ORIGIN}/unban-request?id=${user.banId}`
+				error: `Dieser Account wurde gesperrt. Unban-Antrag: https://${PUBLIC_ORIGIN}/unban-request/?id=${user.banId}`
 			},
 			{ status: 403 }
 		);

@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		discordUserId
 	});
 
-	return json({ token: token.token, url: `https://${PUBLIC_ORIGIN}/link?token=${token.token}` });
+	return json({ token: token.token, url: `https://${PUBLIC_ORIGIN}/link/?token=${token.token}` });
 };
 
 /** Vom eingeloggten User via rizinos-web aufgerufen, um die Verknüpfung mit einem Token zu bestätigen. */

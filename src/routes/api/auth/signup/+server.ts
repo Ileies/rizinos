@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		birthdate: new Date(data.birthdate)
 	});
 
-	const confirmUrl = `https://${PUBLIC_ORIGIN}/confirm-email?token=${encodeURIComponent(token.token)}`;
+	const confirmUrl = `https://${PUBLIC_ORIGIN}/confirm-email/?token=${encodeURIComponent(token.token)}`;
 
 	await sendEmail({
 		to: data.email,

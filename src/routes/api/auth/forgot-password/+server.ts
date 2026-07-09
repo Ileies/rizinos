@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const expires = addHours(new Date(), 1);
 	const token = await generateToken(user.id, TokenType.Reset, expires);
-	const resetUrl = `https://${PUBLIC_ORIGIN}/reset-password?token=${encodeURIComponent(token.token)}`;
+	const resetUrl = `https://${PUBLIC_ORIGIN}/reset-password/?token=${encodeURIComponent(token.token)}`;
 
 	await sendEmail({
 		to: email,

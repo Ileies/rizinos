@@ -60,7 +60,7 @@ export async function notifyBan(
 	const discordUserId = await resolveDiscordUserId(type, subjectId);
 	if (!discordUserId) return;
 
-	const unbanUrl = `https://${PUBLIC_ORIGIN}/unban-request?id=${encodeURIComponent(banId)}`;
+	const unbanUrl = `https://${PUBLIC_ORIGIN}/unban-request/?id=${encodeURIComponent(banId)}`;
 
 	await callBot('/dm/ban', {
 		discordUserId,

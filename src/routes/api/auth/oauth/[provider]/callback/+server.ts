@@ -79,6 +79,6 @@ export const GET: RequestHandler = async (event) => {
 
 	redirect(
 		302,
-		`https://${PUBLIC_ORIGIN}/signup/complete?token=${encodeURIComponent(token.token)}`
+		`https://${PUBLIC_ORIGIN}/signup/complete/?token=${encodeURIComponent(token.token)}`
 	);
 };
