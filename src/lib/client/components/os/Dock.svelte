@@ -207,9 +207,9 @@
 {#if isClockOpen}
 	<Overlay onclose={() => (isClockOpen = false)}>
 		<div class="bg-card border-border fixed right-2 bottom-12 flex w-52 flex-col items-center gap-1 rounded-lg border p-4 shadow-lg">
-			<div class="text-3xl font-light tabular-nums">{format(now, 'HH:mm')}</div>
-			<div class="text-muted-foreground text-sm">{format(now, 'ss')}s</div>
-			<div class="mt-1 text-sm font-medium">{format(now, 'EEEE, d. MMMM yyyy')}</div>
+			<div class="text-3xl font-light tabular-nums">{format(now.getTime(), 'HH:mm')}</div>
+			<div class="text-muted-foreground text-sm">{format(now.getTime(), 'ss')}s</div>
+			<div class="mt-1 text-sm font-medium">{format(now.getTime(), 'EEEE, d. MMMM yyyy')}</div>
 		</div>
 	</Overlay>
 {/if}

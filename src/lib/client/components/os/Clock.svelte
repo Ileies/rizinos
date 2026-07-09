@@ -11,6 +11,6 @@
 </script>
 
 <div class="flex flex-col items-end text-xs">
-	<div>{format(now, 'h:mm a')}</div>
-	<div>{format(now, 'M/d/y')}</div>
+	<div>{format(now.getTime(), 'h:mm a')}</div>
+	<div>{format(now.getTime(), 'M/d/y')}</div>
 </div>
