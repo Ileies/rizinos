@@ -1,11 +1,12 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { db } from '$db';
 import { users, apps } from '$db/schema';
-import { eq } from 'drizzle-orm';
+import { count, eq, ilike, or, type SQL } from 'drizzle-orm';
 import { BanType, Role, type Restrict, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
 import { notifyBan } from '$lib/server/discordBot';
 import { generateBanId } from '$lib/server/models/Ban';
+import { parsePage, parseSort } from '$lib/server/adminQuery';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -13,14 +14,42 @@ function isAdmin(locals: App.Locals) {
 
 const forbidden = () => json({ message: 'Forbidden' }, { status: 403 });
 
-export const GET: RequestHandler = async ({ locals }) => {
+const USER_SORT_FIELDS = ['username', 'email', 'credit', 'lastOnline'] as const;
+
+export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!isAdmin(locals)) return forbidden();
 
-	const [allUsers, allLogs, allApps] = await Promise.all([
+	const usersOrderBy = parseSort(url, 'users', USER_SORT_FIELDS) ?? { username: 'asc' };
+	const { limit, offset } = parsePage(url, 'users');
+	const search = url.searchParams.get('usersSearch')?.trim();
+	const usersFilter = search
+		? {
+				OR: [
+					{ username: { ilike: `%${search}%` } },
+					{ email: { ilike: `%${search}%` } },
+					{ firstName: { ilike: `%${search}%` } },
+					{ lastName: { ilike: `%${search}%` } }
+				]
+			}
+		: undefined;
+	const usersCountWhere: SQL | undefined = search
+		? or(
+				ilike(users.username, `%${search}%`),
+				ilike(users.email, `%${search}%`),
+				ilike(users.firstName, `%${search}%`),
+				ilike(users.lastName, `%${search}%`)
+			)
+		: undefined;
+
+	const [allUsers, [{ value: usersTotal }], allLogs, allApps] = await Promise.all([
 		db.query.users.findMany({
 			columns: { passwordHash: false, isOnline: false },
-			orderBy: (users, { asc }) => asc(users.username)
+			where: usersFilter,
+			orderBy: usersOrderBy,
+			limit,
+			offset
 		}),
+		db.select({ value: count() }).from(users).where(usersCountWhere),
 		db.query.logs.findMany({
 			orderBy: (logs, { desc }) => desc(logs.createdAt),
 			limit: 500
@@ -30,7 +59,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		})
 	]);
 
-	return json({ users: allUsers, logs: allLogs, apps: allApps });
+	return json({ users: allUsers, usersTotal, logs: allLogs, apps: allApps });
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {

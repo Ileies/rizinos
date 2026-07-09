@@ -1,11 +1,12 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { db } from '$db';
 import { mcWarps, mcWorlds, mcWorldGroups, mcUsers, mcInventories } from '$db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { count, eq, sql } from 'drizzle-orm';
 import { BanType, Role, type Restrict, type UserID } from '$types';
 import { hasRole } from '$lib/server/models/User';
 import { notifyBan } from '$lib/server/discordBot';
 import { generateBanId } from '$lib/server/models/Ban';
+import { parsePage, parseSort } from '$lib/server/adminQuery';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -13,27 +14,53 @@ function isAdmin(locals: App.Locals) {
 
 const forbidden = () => json({ message: 'Forbidden' }, { status: 403 });
 
-export const GET: RequestHandler = async ({ locals }) => {
+const PLAYER_SORT_FIELDS = ['name'] as const;
+const WARP_SORT_FIELDS = ['name'] as const;
+
+export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!isAdmin(locals)) return forbidden();
 
-	const [allWarps, allWorlds, allGroups, allMcUsers, allUsers] = await Promise.all([
-		db.query.mcWarps.findMany(),
+	const playersOrderBy = parseSort(url, 'players', PLAYER_SORT_FIELDS) ?? { name: 'asc' };
+	const { limit: playersLimit, offset: playersOffset } = parsePage(url, 'players');
+	const warpsOrderBy = parseSort(url, 'warps', WARP_SORT_FIELDS) ?? { name: 'asc' };
+	const { limit: warpsLimit, offset: warpsOffset } = parsePage(url, 'warps');
+
+	const [
+		allWarps,
+		[{ value: warpsTotal }],
+		allWorlds,
+		allGroups,
+		allMcUsers,
+		[{ value: mcUsersTotal }],
+		allUsers,
+		allMcUserIds
+	] = await Promise.all([
+		db.query.mcWarps.findMany({ orderBy: warpsOrderBy, limit: warpsLimit, offset: warpsOffset }),
+		db.select({ value: count() }).from(mcWarps),
 		db.query.mcWorlds.findMany(),
 		db.query.mcWorldGroups.findMany(),
 		db.query.mcUsers.findMany({
-			with: { user: { columns: { passwordHash: false, isOnline: false } } }
+			with: { user: { columns: { passwordHash: false, isOnline: false } } },
+			orderBy: playersOrderBy,
+			limit: playersLimit,
+			offset: playersOffset
 		}),
-		db.query.users.findMany({ columns: { id: true, username: true } })
+		db.select({ value: count() }).from(mcUsers),
+		db.query.users.findMany({ columns: { id: true, username: true } }),
+		db.query.mcUsers.findMany({ columns: { userId: true } })
 	]);
 
-	const assignedUserIds = new Set(allMcUsers.map((u) => u.userId));
+	// Computed from the full (unpaginated) mcUsers set, independent of the paginated players page above.
+	const assignedUserIds = new Set(allMcUserIds.map((u) => u.userId));
 	const unassignedUsers = allUsers.filter((u) => !assignedUserIds.has(u.id));
 
 	return json({
 		warps: allWarps,
+		warpsTotal,
 		worlds: allWorlds,
 		groups: allGroups,
 		mcUsers: allMcUsers,
+		mcUsersTotal,
 		users: allUsers,
 		unassignedUsers
 	});
