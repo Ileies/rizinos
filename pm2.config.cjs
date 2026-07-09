@@ -4,5 +4,5 @@ module.exports = {
 	script: 'bun',
 	args: 'server.js',
 	cwd: '/var/www/rizinos.com',
-	env: { NODE_ENV: 'production', PORT: '3001' }
+	env: { NODE_ENV: 'production', PORT: '3001', TZ: 'UTC' }
 };
