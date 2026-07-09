@@ -17,6 +17,7 @@
 
 - [ ] **Upload über WebSocket** statt REST - alle FSO-Calls in den WebSocket-Layer migrieren sobald das Protokoll definiert ist
 - [ ] **Upload-Feedback** im UI - Benachrichtigung/Fortschrittsanzeige sobald Upload startet
+- [ ] **Eigener MCP-Server für RizinOS** - OS-Funktionen (VFS, Apps, Notifications, etc.) als MCP-Tools bereitstellen, damit LLM-Agenten direkt mit dem OS interagieren können
 
 ## Phase 2 - Datei-UI im Desktop
 
