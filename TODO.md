@@ -1,10 +1,5 @@
 # RizinOS - Offene Punkte
 
-## Phase 1 - VFS Backend (laufend)
-
-- [ ] DB-Push abschließen (TTY erforderlich: `bun run db:push:prod` im Terminal ausführen)
-- [ ] `uploads/`-Verzeichnis beim Server-Start sicherstellen (dev-Mode schreibt nach `./uploads/`)
-
 ## Entfernte Funktionalität - wiederherstellen
 
 - [ ] **onprogress-Callback** in `uploadFiles`, `promptUploadFiles`, `promptUploadFolder` (`src/lib/client/index.svelte.ts`)
