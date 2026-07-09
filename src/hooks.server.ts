@@ -14,7 +14,7 @@ import { mkdir } from 'fs/promises';
 // keeps read/write round-trips consistent regardless of the host's system timezone.
 process.env.TZ = 'UTC';
 
-const ignoredUrls = ['/api/mc/getCredit'];
+const ignoredUrls = ['/api/mc/getCredit', '/'];
 
 const CORS_ORIGIN = 'https://rizinos.com';
 const CORS_HEADERS = {
