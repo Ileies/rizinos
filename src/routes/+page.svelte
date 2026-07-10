@@ -5,6 +5,7 @@
 	import ContextMenu from '$ui/os/ContextMenu.svelte';
 	import AppLauncher from '$ui/os/AppLauncher.svelte';
 	import PwaInstallBanner from '$ui/os/PwaInstallBanner.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 	import os from '$lib/os.svelte';
 	import { browser } from '$app/environment';
 	import { Theme } from '$types';
@@ -98,3 +99,4 @@
 	<ContextMenu />
 	<PwaInstallBanner userId={data.userId} />
 </div>
+<Modal />
