@@ -4,7 +4,6 @@
 	import type { Notification } from '$types';
 	import { fly } from 'svelte/transition';
 	import * as Alert from '$shadcn/alert';
-	// TODO: Transition doesn't work yet
 
 	const showSeconds = 5;
 	const icons = {
@@ -18,9 +17,10 @@
 		notification.createdAt.getTime() > new Date().getTime() - showSeconds * 1000;
 
 	$effect(() => {
-		setTimeout(() => {
+		const interval = setInterval(() => {
 			os.notifications = os.notifications.filter(filter);
-		}, showSeconds * 1000);
+		}, 1000);
+		return () => clearInterval(interval);
 	});
 
 	const freshNotifications = $derived(os.notifications.filter(filter));
@@ -43,7 +43,7 @@
 				<Alert.Root
 					variant={notification.type === 'error' ? 'destructive' : 'default'}
 					class="cursor-pointer {os.isMobile ? 'w-full' : ''}"
-					onclick={notification.actions[0].action}
+					onclick={() => notification.actions[0]?.action()}
 					role="none"
 				>
 					<Icon />
