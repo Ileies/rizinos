@@ -1,5 +1,11 @@
 import os from '$lib/os.svelte';
-import { type Action, NotificationType, type Process, type VFSEntry } from '$types';
+import {
+	type Action,
+	type FileSystemObject,
+	NotificationType,
+	type Process,
+	type VFSEntry
+} from '$types';
 import { blake3 } from '@noble/hashes/blake3.js';
 import { bytesToHex } from '@noble/hashes/utils.js';
 
@@ -62,6 +68,33 @@ export async function uploadFiles(
 		results.push(await res.json());
 	}
 	return results;
+}
+
+export async function loadDesktop(): Promise<void> {
+	const res = await fetch('/api/os/fso/list');
+	if (!res.ok) throw new Error('Desktop konnte nicht geladen werden.');
+	const entries = (await res.json()) as VFSEntry[];
+	os.desktop.files = entries.map((entry) => ({ entry, isSelected: false }));
+}
+
+export async function renameFso(fso: FileSystemObject, newName: string): Promise<void> {
+	const res = await fetch('/api/os/fso/move', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ id: fso.entry.id, newName })
+	});
+	if (!res.ok) throw new Error('Umbenennen fehlgeschlagen.');
+	fso.entry.name = newName;
+}
+
+export async function deleteFso(fso: FileSystemObject): Promise<void> {
+	const res = await fetch('/api/os/fso/delete', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ id: fso.entry.id })
+	});
+	if (!res.ok) throw new Error('Löschen fehlgeschlagen.');
+	os.desktop.files = os.desktop.files.filter((f) => f !== fso);
 }
 
 export async function promptUploadFiles(dirId: string | null = null): Promise<VFSEntry[]> {

@@ -1,33 +1,62 @@
 <script lang="ts">
 	import os from '$lib/os.svelte';
-	//import FileSystemObject from '$ui/os/FileSystemObject.svelte';
+	import FileSystemObject from '$ui/os/FileSystemObject.svelte';
 	import { showContextMenu } from '$lib/client/menu';
 	import type { ContextMenuAction } from '$types/contextMenu';
-	import { promptUploadFiles, uploadFiles } from '$lib/client/index.svelte';
+	import { loadDesktop, promptUploadFiles, uploadFiles } from '$lib/client/index.svelte';
 	import Window from '$ui/os/Window.svelte';
+	import { promptDialog } from '$lib/dialog.svelte';
 
-	const desktopPath = '/home/desktop';
+	const ICON_WIDTH = 104; // w-25 (100px) + horizontal margin
+	const ICON_HEIGHT = 132; // icon + label + vertical margin
+
+	$effect(() => {
+		os.desktop.cols = Math.max(1, Math.floor(os.screenSize.width / ICON_WIDTH));
+		os.desktop.rows = Math.max(1, Math.floor((os.screenSize.height - 40) / ICON_HEIGHT));
+	});
+
+	$effect(() => {
+		loadDesktop();
+	});
+
+	async function newFolder() {
+		const name = await promptDialog('Name of the new folder:', 'New Folder');
+		if (!name?.trim()) return;
+		const res = await fetch('/api/os/fso/mkdir', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: name.trim() })
+		});
+		if (!res.ok) return;
+		const entry = await res.json();
+		os.desktop.files = [...os.desktop.files, { entry, isSelected: false }];
+	}
+
+	function sortBy(key: 'name' | 'type' | 'updatedAt') {
+		os.desktop.files = [...os.desktop.files].sort((a, b) => {
+			if (!a || !b) return 0;
+			if (key === 'type') return a.entry.type.localeCompare(b.entry.type);
+			if (key === 'updatedAt') return b.entry.updatedAt.localeCompare(a.entry.updatedAt);
+			return a.entry.name.localeCompare(b.entry.name);
+		});
+	}
 
 	function oncontextmenu(event: MouseEvent) {
 		const { target } = event;
 		if (!target) return;
 
 		const contextMenu: ContextMenuAction[] = [
-			{ title: 'View', action: [] },
-			{ title: 'Sort by', action: [] },
-			{ title: 'Upload', action: () => promptUploadFiles('/desktop') },
 			{
-				title: 'Paste',
-				action: (x) => {}
+				title: 'Sort by',
+				action: [
+					{ title: 'Name', action: () => sortBy('name') },
+					{ title: 'Type', action: () => sortBy('type') },
+					{ title: 'Date modified', action: () => sortBy('updatedAt') }
+				]
 			},
-			{
-				title: 'New',
-				action: (x) => {}
-			},
-			{
-				title: 'Properties',
-				action: (x) => {}
-			}
+			{ title: 'Upload', action: () => promptUploadFiles(null) },
+			{ title: 'New Folder', action: newFolder },
+			{ title: 'Refresh', action: () => loadDesktop() }
 		];
 
 		showContextMenu(event, contextMenu);
@@ -37,14 +66,18 @@
 		event.preventDefault();
 		if (!event.dataTransfer) return;
 
-		if (event.dataTransfer.files) {
-			uploadFiles(event.dataTransfer.files, desktopPath);
+		if (event.dataTransfer.files.length) {
+			uploadFiles(event.dataTransfer.files, null).then(() => loadDesktop());
 			return;
 		}
 
-		const data = event.dataTransfer.getData('file');
-		if (!data || data === '/' || data === desktopPath || desktopPath.startsWith(data + '/')) return;
-		// move data to path
+		const sourceId = event.dataTransfer.getData('vfs-id');
+		if (!sourceId) return;
+		fetch('/api/os/fso/move', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id: sourceId, targetDirId: null })
+		}).then(() => loadDesktop());
 	}
 
 	function pointerDown() {
@@ -58,8 +91,9 @@
 		<Window {processData}></Window>
 	{/each}
 	<div
-		class="grid h-full w-full grid-cols-{os.desktop.cols} grid-rows-[{os.desktop
-			.rows}] left-0 p-1.25"
+		class="grid h-full w-full left-0 p-1.25"
+		style="grid-template-columns: repeat({os.desktop
+			.cols}, minmax(0, 1fr)); grid-template-rows: repeat({os.desktop.rows}, minmax(0, 1fr));"
 		id="desktop"
 		{oncontextmenu}
 		ondragover={(e) => e.preventDefault()}
@@ -69,15 +103,11 @@
 		tabindex="0"
 	>
 		{#each os.desktop.files as fso (fso)}
-			<div
-				class="m-0.25 w-25 border border-transparent p-1.25 hover:border-gray-600 hover:bg-gray-800"
-			>
-				{#if fso === null}
-					<div></div>
-				{:else}
-					<!--<FileSystemObject fso={fso}></FileSystemObject>-->
-				{/if}
-			</div>
+			{#if fso === null}
+				<div class="m-0.25 w-25 border border-transparent p-1.25"></div>
+			{:else}
+				<FileSystemObject {fso}></FileSystemObject>
+			{/if}
 		{/each}
 	</div>
 </div>

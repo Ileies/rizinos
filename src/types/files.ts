@@ -22,7 +22,6 @@ export interface VFSEntry {
 // Desktop icon representation (OS shell layer)
 export interface FileSystemObject {
 	entry: VFSEntry;
-	icon: string;
 	isSelected: boolean;
 }
 
