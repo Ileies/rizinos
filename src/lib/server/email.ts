@@ -207,7 +207,7 @@ function renderBlock(block: EmailBlock): string {
 			const border = block.secondary ? `2px solid ${COLORS.primary}` : 'none';
 			return `
         <tr><td style="padding:8px 0 20px 0;text-align:center;">
-          <a href="${block.url}" target="_blank" style="display:inline-block;background:${bg};color:${color};font-size:15px;font-weight:600;text-decoration:none;padding:13px 32px;border-radius:8px;border:${border};letter-spacing:.01em;">
+          <a href="${escapeHtml(block.url)}" target="_blank" style="display:inline-block;background:${bg};color:${color};font-size:15px;font-weight:600;text-decoration:none;padding:13px 32px;border-radius:8px;border:${border};letter-spacing:.01em;">
             ${escapeHtml(block.label)}
           </a>
         </td></tr>`;
@@ -233,7 +233,7 @@ function buildHtml(opts: EmailOptions, unsubscribeUrl: string | null): string {
 
 	const ctaHtml = opts.cta
 		? `<tr><td style="padding:8px 0 28px 0;text-align:center;">
-        <a href="${opts.cta.url}" target="_blank" style="display:inline-block;background:${COLORS.primary};color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:.01em;">
+        <a href="${escapeHtml(opts.cta.url)}" target="_blank" style="display:inline-block;background:${COLORS.primary};color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:.01em;">
           ${escapeHtml(opts.cta.label)}
         </a>
       </td></tr>`
