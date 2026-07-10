@@ -35,6 +35,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const token = await getToken(tokenString, TokenType.Reset);
+
 	if (!token || tokenIsExpired(token) || !token.userId) {
 		return json({ error: 'Invalid or expired reset token.' }, { status: 400 });
 	}
