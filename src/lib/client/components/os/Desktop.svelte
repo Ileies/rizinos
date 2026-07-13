@@ -3,7 +3,12 @@
 	import FileSystemObject from '$ui/os/FileSystemObject.svelte';
 	import { showContextMenu } from '$lib/client/menu';
 	import type { ContextMenuAction } from '$types/contextMenu';
-	import { loadDesktop, promptUploadFiles, uploadFiles } from '$lib/client/index.svelte';
+	import {
+		loadDesktop,
+		promptUploadFiles,
+		traverseDataTransferItems,
+		uploadFiles
+	} from '$lib/client/index.svelte';
 	import Window from '$ui/os/Window.svelte';
 	import { promptDialog } from '$lib/dialog.svelte';
 
@@ -62,12 +67,17 @@
 		showContextMenu(event, contextMenu);
 	}
 
-	function dropHandler(event: DragEvent) {
+	async function dropHandler(event: DragEvent) {
 		event.preventDefault();
 		if (!event.dataTransfer) return;
 
-		if (event.dataTransfer.files.length) {
-			uploadFiles(event.dataTransfer.files, null).then(() => loadDesktop());
+		const files = event.dataTransfer.items?.length
+			? await traverseDataTransferItems(event.dataTransfer.items)
+			: Array.from(event.dataTransfer.files);
+
+		if (files.length) {
+			await uploadFiles(files, null);
+			await loadDesktop();
 			return;
 		}
 

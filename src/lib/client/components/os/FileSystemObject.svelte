@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { type FileSystemObject, FileType } from '$types/files';
 	import { showContextMenu } from '$lib/client/menu';
-	import { deleteFso, downloadFile, renameFso, uploadFiles } from '$lib/client/index.svelte.js';
+	import {
+		deleteFso,
+		downloadFile,
+		renameFso,
+		traverseDataTransferItems,
+		uploadFiles
+	} from '$lib/client/index.svelte.js';
 	import { confirmDialog } from '$lib/dialog.svelte';
 
 	let { fso }: { fso: FileSystemObject } = $props();
@@ -68,9 +74,13 @@
 		event.stopPropagation();
 		if (!event.dataTransfer) return;
 
-		if (event.dataTransfer.files.length) {
-			// External file drop: upload into this directory
-			await uploadFiles(event.dataTransfer.files, fso.entry.id);
+		const files = event.dataTransfer.items?.length
+			? await traverseDataTransferItems(event.dataTransfer.items)
+			: Array.from(event.dataTransfer.files);
+
+		if (files.length) {
+			// External file/folder drop: upload into this directory
+			await uploadFiles(files, fso.entry.id);
 		} else {
 			// Internal drag: move VFS entry into this directory
 			const sourceId = event.dataTransfer.getData('vfs-id');

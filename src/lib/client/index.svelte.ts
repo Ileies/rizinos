@@ -34,10 +34,51 @@ async function hashFile(file: File): Promise<string> {
 	return bytesToHex(blake3(new Uint8Array(await file.arrayBuffer())));
 }
 
+async function readEntryFile(entry: FileSystemFileEntry): Promise<File> {
+	return new Promise((resolve, reject) => entry.file(resolve, reject));
+}
+
+async function readAllDirEntries(reader: FileSystemDirectoryReader): Promise<FileSystemEntry[]> {
+	// readEntries only returns a batch at a time, keep reading until it's exhausted
+	const entries: FileSystemEntry[] = [];
+	let batch: FileSystemEntry[];
+	do {
+		batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+		entries.push(...batch);
+	} while (batch.length > 0);
+	return entries;
+}
+
+async function traverseEntry(entry: FileSystemEntry, path = ''): Promise<File[]> {
+	if (entry.isFile) {
+		const file = await readEntryFile(entry as FileSystemFileEntry);
+		return [new File([file], path + file.name, { type: file.type, lastModified: file.lastModified })];
+	}
+	if (entry.isDirectory) {
+		const children = await readAllDirEntries((entry as FileSystemDirectoryEntry).createReader());
+		const nested = await Promise.all(
+			children.map((child) => traverseEntry(child, `${path}${entry.name}/`))
+		);
+		return nested.flat();
+	}
+	return [];
+}
+
+// Recursively resolves a drag-and-drop DataTransferItemList into a flat File list,
+// baking each file's folder structure into its name (e.g. "sub/folder/file.txt").
+export async function traverseDataTransferItems(items: DataTransferItemList): Promise<File[]> {
+	const entries = Array.from(items)
+		.map((item) => item.webkitGetAsEntry?.())
+		.filter((entry): entry is FileSystemEntry => entry !== null && entry !== undefined);
+	return (await Promise.all(entries.map((entry) => traverseEntry(entry)))).flat();
+}
+
 // Uploads files into a VFS directory. Returns created VFSEntry objects.
 // Blobs that already exist on the server are not re-transferred.
+// Sub-folders (via `webkitRelativePath` or a `/`-containing name from traverseDataTransferItems)
+// are recreated on the server as needed.
 export async function uploadFiles(
-	fileList: FileList,
+	fileList: FileList | File[],
 	dirId: string | null = null
 ): Promise<VFSEntry[]> {
 	const fileArray = Array.from(fileList);
@@ -53,18 +94,40 @@ export async function uploadFiles(
 	}).then((r) => r.json())) as { existing: string[] };
 	const existingSet = new Set(existing);
 
+	const dirIdCache = new Map<string, string | null>([['', dirId]]);
+	async function resolveDir(relDirPath: string): Promise<string | null> {
+		if (dirIdCache.has(relDirPath)) return dirIdCache.get(relDirPath)!;
+		const segments = relDirPath.split('/');
+		const name = segments.pop()!;
+		const parentId = await resolveDir(segments.join('/'));
+		const res = await fetch('/api/os/fso/mkdir', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name, dirId: parentId })
+		});
+		if (!res.ok) throw new Error(`Ordner konnte nicht erstellt werden: ${relDirPath}`);
+		const entry = (await res.json()) as VFSEntry;
+		dirIdCache.set(relDirPath, entry.id);
+		return entry.id;
+	}
+
 	const results: VFSEntry[] = [];
 	for (let i = 0; i < fileArray.length; i++) {
 		const file = fileArray[i];
 		const hash = hashes[i];
+		const relPath = file.webkitRelativePath || file.name;
+		const segments = relPath.split('/');
+		const name = segments.pop()!;
+		const targetDirId = await resolveDir(segments.join('/'));
+
 		const fd = new FormData();
 		fd.append('hash', hash);
-		fd.append('name', file.name);
-		if (dirId) fd.append('dirId', dirId);
+		fd.append('name', name);
+		if (targetDirId) fd.append('dirId', targetDirId);
 		if (!existingSet.has(hash)) fd.append('file', file);
 
 		const res = await fetch('/api/os/fso/upload', { method: 'POST', body: fd });
-		if (!res.ok) throw new Error(`Upload fehlgeschlagen: ${file.name}`);
+		if (!res.ok) throw new Error(`Upload fehlgeschlagen: ${name}`);
 		results.push(await res.json());
 	}
 	return results;
