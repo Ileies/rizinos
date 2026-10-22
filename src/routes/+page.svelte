@@ -5,11 +5,11 @@
 	import ContextMenu from '$ui/os/ContextMenu.svelte';
 	import AppLauncher from '$ui/os/AppLauncher.svelte';
 	import PwaInstallBanner from '$ui/os/PwaInstallBanner.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import os from '$lib/os.svelte';
-	import { browser } from '$app/environment';
+	import Modal from '#lib/components/Modal.svelte';
+	import os from '#lib/os.svelte.js';
+	import { browser } from '$app/env';
 	import { Theme } from '$types';
-	import '$lib/client/websocket.svelte';
+	import '#lib/client/websocket.svelte.js';
 
 	if (browser) {
 		window.addEventListener('resize', () => {

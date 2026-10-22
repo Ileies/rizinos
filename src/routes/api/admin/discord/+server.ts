@@ -3,9 +3,9 @@ import { db } from '$db';
 import { dcUsers } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { BanType, Role, type UserID } from '$types';
-import { hasRole } from '$lib/server/models/User';
-import { executeDiscordBan, liftDiscordBan, notifyBan } from '$lib/server/discordBot';
-import { generateBanId } from '$lib/server/models/Ban';
+import { hasRole } from '#lib/server/models/User.js';
+import { executeDiscordBan, liftDiscordBan, notifyBan } from '#lib/server/discordBot.js';
+import { generateBanId } from '#lib/server/models/Ban.js';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);

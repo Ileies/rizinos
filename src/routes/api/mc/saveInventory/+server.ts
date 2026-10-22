@@ -2,7 +2,7 @@ import { json, type RequestEvent } from '@sveltejs/kit';
 import { db } from '$db';
 import { mcInventories } from '$db/schema';
 import { and, eq } from 'drizzle-orm';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 
 export async function POST(event: RequestEvent) {
 	const { uuid, world, inventory } = await event.request.json();

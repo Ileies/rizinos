@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dialog } from '$lib/dialog.svelte';
+	import { dialog } from '#lib/dialog.svelte.js';
 	import * as Dialog from '$shadcn/dialog';
 	import { Button } from '$shadcn/button';
 	import { Input } from '$shadcn/input';

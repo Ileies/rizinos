@@ -1,14 +1,14 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
-import { type FormData, formSchema } from '$lib/formValidation';
-import { invalidMethod } from '$lib/server';
-import { sendEmail } from '$lib/server/email';
-import { generateToken } from '$lib/server/models/User';
+import { type FormData, formSchema } from '#lib/formValidation.js';
+import { invalidMethod } from '#lib/server/index.js';
+import { sendEmail } from '#lib/server/email.js';
+import { generateToken } from '#lib/server/models/User.js';
 import { db } from '$db';
 import { TokenType } from '$types';
 import { addDays } from 'date-fns';
-import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$env/static/public';
-import snowflake from '$lib/server/models/Snowflake';
+import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$app/env/public';
+import snowflake from '#lib/server/models/Snowflake.js';
 import type { UserID } from '$types';
 
 export const POST: RequestHandler = async ({ request }) => {

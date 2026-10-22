@@ -14,8 +14,8 @@ import {
 } from '$types';
 import { db } from '$db';
 import { transactions, users } from '$db/schema';
-import { addCredit, getSystemUser, getUserById, isSystemUser } from '$lib/server/models/User';
-import Logger from '$lib/server/models/Logger';
+import { addCredit, getSystemUser, getUserById, isSystemUser } from '#lib/server/models/User.js';
+import Logger from '#lib/server/models/Logger.js';
 
 export default class Transaction {
 	public readonly data: TransactionData;

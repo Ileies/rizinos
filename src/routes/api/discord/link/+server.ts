@@ -1,13 +1,13 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { addMinutes } from 'date-fns';
-import { DISCORD_LINK_SECRET } from '$env/static/private';
-import { PUBLIC_ORIGIN } from '$env/static/public';
+import { DISCORD_LINK_SECRET } from '$app/env/private';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import { db } from '$db';
 import { dcUsers } from '$db/schema';
-import { generateToken } from '$lib/server/models/User';
-import { getToken, revokeToken, tokenIsExpired } from '$lib/server/models/token';
+import { generateToken } from '#lib/server/models/User.js';
+import { getToken, revokeToken, tokenIsExpired } from '#lib/server/models/token.js';
 import { TokenType } from '$types';
-import { notifyLinkSuccess } from '$lib/server/discordBot';
+import { notifyLinkSuccess } from '#lib/server/discordBot.js';
 
 /** Vom Discord-Bot aufgerufen, um einen Verknüpfungs-Token für eine `/link`-Anfrage zu erzeugen. */
 export const POST: RequestHandler = async ({ request }) => {

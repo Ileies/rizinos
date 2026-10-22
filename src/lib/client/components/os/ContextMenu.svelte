@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Overlay from '$ui/os/Overlay.svelte';
-	import os from '$lib/os.svelte';
+	import os from '#lib/os.svelte.js';
 	import type { ContextMenu, ContextMenuAction } from '$types/contextMenu';
 
 	let subMenu: ContextMenu | null = $state(null);

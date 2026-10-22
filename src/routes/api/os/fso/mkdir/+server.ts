@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$db';
 import { files } from '$db/schema';
 import { sql } from 'drizzle-orm';
-import { listingPath, toVFSEntry } from '$lib/server/files';
+import { listingPath, toVFSEntry } from '#lib/server/files.js';
 import { FileType } from '$types';
 
 export const POST: RequestHandler = async ({ locals, request }) => {

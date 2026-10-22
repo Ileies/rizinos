@@ -3,7 +3,7 @@ import { db } from '$db';
 import { mcWarps } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import type { Restrict } from '$types/user';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 
 export async function POST(event: RequestEvent) {
 	const { warpName, location, restrict } = await event.request.json();

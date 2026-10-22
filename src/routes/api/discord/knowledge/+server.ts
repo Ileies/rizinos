@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { DISCORD_LINK_SECRET } from '$env/static/private';
+import { DISCORD_LINK_SECRET } from '$app/env/private';
 
 /** Vom Discord-Bot aufgerufen (KI-Tool "search_knowledge"). Aktuell nur ein Mock zum Testen der Anbindung. */
 export const POST: RequestHandler = async ({ request }) => {

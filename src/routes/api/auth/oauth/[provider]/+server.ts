@@ -1,8 +1,8 @@
 import { redirect, type RequestHandler } from '@sveltejs/kit';
 import { generateCodeVerifier, generateState } from 'arctic';
 import { addMinutes } from 'date-fns';
-import { oauthProviders } from '$lib/server/auth';
-import { cookieData, invalidMethod } from '$lib/server';
+import { oauthProviders } from '#lib/server/auth.js';
+import { cookieData, invalidMethod } from '#lib/server/index.js';
 import type { OAuthProvider } from '$types';
 
 const scopes: Record<OAuthProvider, string[]> = {

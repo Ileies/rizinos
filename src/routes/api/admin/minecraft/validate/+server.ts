@@ -1,6 +1,6 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { Role } from '$types';
-import { hasRole } from '$lib/server/models/User';
+import { hasRole } from '#lib/server/models/User.js';
 
 function formatUuid(id: string): string {
 	const s = id.replace(/-/g, '');

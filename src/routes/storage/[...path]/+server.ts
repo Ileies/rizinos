@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$db';
 import { blobs, files } from '$db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { storagePath } from '$lib/server/files';
+import { storagePath } from '#lib/server/files.js';
 import { FileType } from '$types';
 
 export const GET: RequestHandler = async ({ locals, params, url }) => {

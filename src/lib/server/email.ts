@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
-import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$env/static/public';
-import { SMTP_HOST, SMTP_PASSWORD, SMTP_USER } from '$env/static/private';
-import Logger from '$lib/server/models/Logger';
+import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$app/env/public';
+import { SMTP_HOST, SMTP_PASSWORD, SMTP_USER } from '$app/env/private';
+import Logger from '#lib/server/models/Logger.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,8 +44,17 @@ export type EmailBlock =
 	| { type: 'list'; items: string[]; ordered?: boolean }
 	| { type: 'code'; value: string; label?: string }
 	| { type: 'keyvalue'; rows: { label: string; value: string }[] }
-	| { type: 'alert'; level: 'info' | 'warning' | 'danger'; content: string }
-	| { type: 'button'; label: string; url: string; secondary?: boolean }
+	| {
+			type: 'alert';
+			level: 'info' | 'warning' | 'danger';
+			content: string;
+	  }
+	| {
+			type: 'button';
+			label: string;
+			url: string;
+			secondary?: boolean;
+	  }
 	| { type: 'image'; src: string; alt: string; width?: number };
 
 export interface EmailOptions {

@@ -1,8 +1,8 @@
-import { DISCORD_BOT_SECRET, DISCORD_BOT_URL } from '$env/static/private';
-import { PUBLIC_ORIGIN } from '$env/static/public';
+import { DISCORD_BOT_SECRET, DISCORD_BOT_URL } from '$app/env/private';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import { db } from '$db';
 import { BanType } from '$types';
-import Logger from '$lib/server/models/Logger';
+import Logger from '#lib/server/models/Logger.js';
 
 const SYSTEM_LABELS: Record<BanType, string> = {
 	[BanType.Minecraft]: 'RizinOS Minecraft',

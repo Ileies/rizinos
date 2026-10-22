@@ -1,4 +1,4 @@
-import os from '$lib/os.svelte';
+import os from '#lib/os.svelte.js';
 import type { WebsocketMessage } from '$types';
 
 export const wsMessage: { value: WebsocketMessage | null } = $state({ value: null });

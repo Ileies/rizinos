@@ -1,9 +1,9 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { users } from '$db/schemaUsers';
-import { getToken, revokeToken, tokenIsExpired } from '$lib/server/models/token';
+import { getToken, revokeToken, tokenIsExpired } from '#lib/server/models/token.js';
 import { TokenType } from '$types';
 import { db } from '$db';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 
 export const GET: RequestHandler = async ({ url }) => {
 	const tokenString = url.searchParams.get('token');

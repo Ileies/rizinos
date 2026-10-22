@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
-import { PUBLIC_ORIGIN } from '$env/static/public';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import { addYears } from 'date-fns';
-import { dev } from '$app/environment';
+import { dev } from '$app/env';
 
 export const invalidMethod = () => json({ message: 'Invalid method' });
 

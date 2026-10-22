@@ -1,5 +1,5 @@
 <script lang="ts">
-	import os from '$lib/os.svelte';
+	import os from '#lib/os.svelte.js';
 	import { Theme } from '$types';
 	import { Moon, Sun } from '@lucide/svelte';
 

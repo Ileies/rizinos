@@ -1,6 +1,6 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { invalidMethod } from '$lib/server';
-import { getToken, revokeToken, tokenIsExpired } from '$lib/server/models/token';
+import { invalidMethod } from '#lib/server/index.js';
+import { getToken, revokeToken, tokenIsExpired } from '#lib/server/models/token.js';
 import { TokenType } from '$types';
 import { db } from '$db';
 import { tokens, users } from '$db/schema';

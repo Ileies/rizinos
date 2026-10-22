@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
-import { PUBLIC_VERSION } from '$env/static/public';
-import { invalidMethod } from '$lib/server';
+import { PUBLIC_VERSION } from '$app/env/public';
+import { invalidMethod } from '#lib/server/index.js';
 import { db } from '$db';
 
 export async function POST() {

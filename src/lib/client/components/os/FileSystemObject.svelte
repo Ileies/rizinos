@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { type FileSystemObject, FileType } from '$types/files';
-	import { showContextMenu } from '$lib/client/menu';
+	import { showContextMenu } from '#lib/client/menu.js';
 	import {
 		deleteFso,
 		downloadFile,
 		renameFso,
 		traverseDataTransferItems,
 		uploadFiles
-	} from '$lib/client/index.svelte.js';
-	import { confirmDialog } from '$lib/dialog.svelte';
+	} from '#lib/client/index.svelte.js';
+	import { confirmDialog } from '#lib/dialog.svelte.js';
 
 	let { fso }: { fso: FileSystemObject } = $props();
 

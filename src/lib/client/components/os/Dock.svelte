@@ -1,7 +1,7 @@
 <script lang="ts">
-	import os from '$lib/os.svelte.js';
+	import os from '#lib/os.svelte.js';
 	import Clock from '$ui/os/Clock.svelte';
-	import { showContextMenu } from '$lib/client/menu';
+	import { showContextMenu } from '#lib/client/menu.js';
 	import { type TaskbarItem } from '$types';
 	import {
 		Battery,
@@ -15,7 +15,7 @@
 		VolumeX
 	} from '@lucide/svelte';
 	import DockField from '$ui/os/DockField.svelte';
-	import { focusProcess, launchApp } from '$lib/client/index.svelte';
+	import { focusProcess, launchApp } from '#lib/client/index.svelte.js';
 	import ThemeController from '$ui/os/ThemeController.svelte';
 	import Overlay from '$ui/os/Overlay.svelte';
 	import { Spring } from 'svelte/motion';

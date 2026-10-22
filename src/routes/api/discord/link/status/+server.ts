@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { DISCORD_LINK_SECRET } from '$env/static/private';
+import { DISCORD_LINK_SECRET } from '$app/env/private';
 import { db } from '$db';
 
 /** Vom Discord-Bot aufgerufen, um zu prüfen ob ein Discord-Account bereits verknüpft ist. */

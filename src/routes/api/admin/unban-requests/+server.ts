@@ -3,8 +3,8 @@ import { db } from '$db';
 import { dcUsers, mcUsers, unbanRequests, users } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { BanType, Role, type UserID } from '$types';
-import { hasRole } from '$lib/server/models/User';
-import { liftDiscordBan } from '$lib/server/discordBot';
+import { hasRole } from '#lib/server/models/User.js';
+import { liftDiscordBan } from '#lib/server/discordBot.js';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);

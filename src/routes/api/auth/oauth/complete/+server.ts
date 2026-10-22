@@ -1,10 +1,10 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
-import { formSchema } from '$lib/formValidation';
-import { completeLogin } from '$lib/server/auth';
-import { getUserByOAuthAccount, linkOAuthAccount } from '$lib/server/models/oauth';
-import { getToken, revokeToken, tokenIsExpired } from '$lib/server/models/token';
-import snowflake from '$lib/server/models/Snowflake';
+import { formSchema } from '#lib/formValidation.js';
+import { completeLogin } from '#lib/server/auth.js';
+import { getUserByOAuthAccount, linkOAuthAccount } from '#lib/server/models/oauth.js';
+import { getToken, revokeToken, tokenIsExpired } from '#lib/server/models/token.js';
+import snowflake from '#lib/server/models/Snowflake.js';
 import { db } from '$db';
 import { users } from '$db/schema';
 import { TokenType, type OAuthPendingSignup, type UserID } from '$types';

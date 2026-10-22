@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
-import { invalidMethod } from '$lib/server';
-import { getSystemUser } from '$lib/server/models/User';
-import Transaction from '$lib/server/models/Transaction';
+import { invalidMethod } from '#lib/server/index.js';
+import { getSystemUser } from '#lib/server/models/User.js';
+import Transaction from '#lib/server/models/Transaction.js';
 import type { RequestEvent } from './$types';
 import { db } from '$db';
 

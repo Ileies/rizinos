@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { unlink } from 'fs/promises';
-import { dev } from '$app/environment';
-import { STORAGE_DIRECTORY } from '$env/static/private';
+import { dev } from '$app/env';
+import { STORAGE_DIRECTORY } from '$app/env/private';
 import { db } from '$db';
 import { blobs, files } from '$db/schema';
 import { eq, inArray, sql } from 'drizzle-orm';

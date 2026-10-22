@@ -1,16 +1,16 @@
 <script lang="ts">
-	import os from '$lib/os.svelte';
+	import os from '#lib/os.svelte.js';
 	import FileSystemObject from '$ui/os/FileSystemObject.svelte';
-	import { showContextMenu } from '$lib/client/menu';
+	import { showContextMenu } from '#lib/client/menu.js';
 	import type { ContextMenuAction } from '$types/contextMenu';
 	import {
 		loadDesktop,
 		promptUploadFiles,
 		traverseDataTransferItems,
 		uploadFiles
-	} from '$lib/client/index.svelte';
+	} from '#lib/client/index.svelte.js';
 	import Window from '$ui/os/Window.svelte';
-	import { promptDialog } from '$lib/dialog.svelte';
+	import { promptDialog } from '#lib/dialog.svelte.js';
 
 	const ICON_WIDTH = 104; // w-25 (100px) + horizontal margin
 	const ICON_HEIGHT = 132; // icon + label + vertical margin

@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { FileType } from '$types';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 
 type Category = 'folder' | 'image' | 'video' | 'audio' | 'archive' | 'text' | 'file';
 

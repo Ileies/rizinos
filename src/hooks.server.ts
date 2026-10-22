@@ -1,13 +1,13 @@
-import { error, type Handle, json } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import { db } from '$db';
 import { users } from '$db/schema';
 import { eq } from 'drizzle-orm';
-import Logger from '$lib/server/models/Logger';
-import { authenticate } from '$lib/server/auth';
-import { sequence } from '@sveltejs/kit/hooks';
-import { getToken } from '$lib/server/models/token';
+import Logger from '#lib/server/models/Logger.js';
+import { authenticate } from '#lib/server/auth.js';
+import { sequence, type Handle } from '@sveltejs/kit/hooks';
+import { getToken } from '#lib/server/models/token.js';
 import { TokenType } from '$types';
-import { dev } from '$app/environment';
+import { dev } from '$app/env';
 import { mkdir } from 'fs/promises';
 // Postgres 'timestamp' columns are timezone-naive; Bun's SQL driver writes them in UTC
 // but reads them back interpreted in the process's local timezone. Bun caches the local
@@ -51,7 +51,7 @@ const checks: Handle = async ({ event, resolve }) => {
 	// Verify database connectivity
 	await db.execute('select 1').catch((e: unknown) => {
 		Logger.error('Database is offline.', e);
-		error(500, { message: 'Database is offline.' });
+		error(500, 'Database is offline.');
 	});
 
 	// Authenticate the request

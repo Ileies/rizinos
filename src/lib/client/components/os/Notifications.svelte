@@ -1,5 +1,5 @@
 <script lang="ts">
-	import os from '$lib/os.svelte';
+	import os from '#lib/os.svelte.js';
 	import { CircleAlert, CircleCheck, Info, OctagonX } from '@lucide/svelte';
 	import type { Notification } from '$types';
 	import { fly } from 'svelte/transition';

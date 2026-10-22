@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Download, X } from '@lucide/svelte';
-	import pwa from '$lib/client/pwa.svelte';
+	import pwa from '#lib/client/pwa.svelte.js';
 	import * as Alert from '$shadcn/alert';
 	import type { UserID } from '$types';
 

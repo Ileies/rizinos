@@ -1,7 +1,7 @@
 import type { ContextMenuAction } from '$types/contextMenu';
-import os from '$lib/os.svelte';
-import { getSelectionText } from '$lib/client/index.svelte';
-import { browser } from '$app/environment';
+import os from '#lib/os.svelte.js';
+import { getSelectionText } from '#lib/client/index.svelte.js';
+import { browser } from '$app/env';
 
 export function showContextMenu(event: MouseEvent, actions: ContextMenuAction[]) {
 	event.preventDefault();

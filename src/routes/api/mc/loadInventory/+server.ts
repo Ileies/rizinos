@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 import type { RequestEvent } from './$types';
 import { db } from '$db';
 

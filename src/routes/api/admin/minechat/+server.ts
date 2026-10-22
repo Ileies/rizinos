@@ -3,7 +3,7 @@ import { db } from '$db';
 import { minechatUsers, minechatHooks, minechatServers } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { Role } from '$types';
-import { hasRole } from '$lib/server/models/User';
+import { hasRole } from '#lib/server/models/User.js';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);

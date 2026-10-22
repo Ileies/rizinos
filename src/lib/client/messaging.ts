@@ -1,4 +1,4 @@
-import os from '$lib/os.svelte';
+import os from '#lib/os.svelte.js';
 
 /**
  * Sends a message to a specific app process

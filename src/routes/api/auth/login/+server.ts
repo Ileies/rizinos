@@ -1,8 +1,8 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { login } from '$lib/server/models/User';
-import { completeLogin } from '$lib/server/auth';
-import { invalidMethod } from '$lib/server';
-import { PUBLIC_ORIGIN } from '$env/static/public';
+import { login } from '#lib/server/models/User.js';
+import { completeLogin } from '#lib/server/auth.js';
+import { invalidMethod } from '#lib/server/index.js';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 
 export const POST: RequestHandler = async (event) => {
 	const { request, locals } = event;

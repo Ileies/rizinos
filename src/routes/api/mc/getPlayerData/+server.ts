@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
-import { hasRole } from '$lib/server/models/User';
-import { invalidMethod } from '$lib/server';
+import { hasRole } from '#lib/server/models/User.js';
+import { invalidMethod } from '#lib/server/index.js';
 import type { RequestEvent } from './$types';
 import { db } from '$db';
 import { Role } from '$types';

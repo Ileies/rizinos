@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Overlay from '$ui/os/Overlay.svelte';
-	import { addNotification, launchApp } from '$lib/client/index.svelte';
-	import os from '$lib/os.svelte';
+	import { addNotification, launchApp } from '#lib/client/index.svelte.js';
+	import os from '#lib/os.svelte.js';
 	import { LogOut, Settings, SquareActivity, Users } from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
 	import { NotificationType } from '$types';

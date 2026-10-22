@@ -1,6 +1,6 @@
 import type { WebsocketData, WebsocketMessage } from '$types';
-import { getUserByToken, setOnline } from '$lib/server/models/User';
-import { getDeviceByToken } from '$lib/server/models/device';
+import { getUserByToken, setOnline } from '#lib/server/models/User.js';
+import { getDeviceByToken } from '#lib/server/models/device.js';
 import type { Server, ServerWebSocket } from 'bun';
 
 export async function handleWebSocketUpgrade(req: Request, server: Server) {

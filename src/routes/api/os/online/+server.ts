@@ -1,6 +1,6 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
-import { isOnline } from '$lib/server/models/User';
-import { invalidMethod } from '$lib/server';
+import { isOnline } from '#lib/server/models/User.js';
+import { invalidMethod } from '#lib/server/index.js';
 import type { UserID } from '$types';
 import type { RequestHandler } from './$types';
 

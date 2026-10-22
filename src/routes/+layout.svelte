@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { PUBLIC_APP_NAME } from '$env/static/public';
+	import { PUBLIC_APP_NAME } from '$app/env/public';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 

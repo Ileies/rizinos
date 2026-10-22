@@ -1,4 +1,4 @@
-import { PUBLIC_ORIGIN } from '$env/static/public';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import type { DefaultSeo } from '$types/seo';
 
 export const load = () => {

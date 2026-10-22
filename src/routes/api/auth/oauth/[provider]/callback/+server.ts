@@ -1,11 +1,11 @@
 import { redirect, type RequestHandler } from '@sveltejs/kit';
 import { addMinutes } from 'date-fns';
-import { PUBLIC_ORIGIN } from '$env/static/public';
-import { completeLogin, oauthProviders } from '$lib/server/auth';
-import { cookieData } from '$lib/server';
-import { fetchOAuthProfile } from '$lib/server/oauthProfile';
-import { getUserByOAuthAccount, linkOAuthAccount } from '$lib/server/models/oauth';
-import { generateToken, getUserByEmail } from '$lib/server/models/User';
+import { PUBLIC_ORIGIN } from '$app/env/public';
+import { completeLogin, oauthProviders } from '#lib/server/auth.js';
+import { cookieData } from '#lib/server/index.js';
+import { fetchOAuthProfile } from '#lib/server/oauthProfile.js';
+import { getUserByOAuthAccount, linkOAuthAccount } from '#lib/server/models/oauth.js';
+import { generateToken, getUserByEmail } from '#lib/server/models/User.js';
 import { TokenType, type OAuthPendingSignup, type OAuthProvider } from '$types';
 
 const loginUrl = `https://${PUBLIC_ORIGIN}/login`;
@@ -22,7 +22,7 @@ export const GET: RequestHandler = async (event) => {
 	};
 
 	if (!(provider in oauthProviders)) {
-		redirect(302, `${loginUrl}?error=oauth_failed`);
+		redirect(302, `${loginUrl}?error=oauth_failed`, { external: true });
 	}
 
 	const code = url.searchParams.get('code');
@@ -33,25 +33,25 @@ export const GET: RequestHandler = async (event) => {
 	clearOauthCookies();
 
 	if (!code || !state || !storedState || !codeVerifier || state !== storedState) {
-		redirect(302, `${loginUrl}?error=oauth_failed`);
+		redirect(302, `${loginUrl}?error=oauth_failed`, { external: true });
 	}
 
 	let oauthTokens;
 	try {
 		oauthTokens = await oauthProviders[provider].validateAuthorizationCode(code, codeVerifier);
 	} catch {
-		redirect(302, `${loginUrl}?error=oauth_failed`);
+		redirect(302, `${loginUrl}?error=oauth_failed`, { external: true });
 	}
 
 	const profile = await fetchOAuthProfile(provider, oauthTokens);
 	if (!profile) {
-		redirect(302, `${loginUrl}?error=oauth_failed`);
+		redirect(302, `${loginUrl}?error=oauth_failed`, { external: true });
 	}
 
 	const linkedUser = await getUserByOAuthAccount(provider, profile.providerId);
 	if (linkedUser) {
 		await completeLogin(event, linkedUser.id, true);
-		redirect(302, redirectTo);
+		redirect(302, redirectTo, { external: true });
 	}
 
 	if (profile.emailVerified) {
@@ -59,7 +59,7 @@ export const GET: RequestHandler = async (event) => {
 		if (existing) {
 			await linkOAuthAccount(existing.id, provider, profile.providerId);
 			await completeLogin(event, existing.id, true);
-			redirect(302, redirectTo);
+			redirect(302, redirectTo, { external: true });
 		}
 	}
 
@@ -70,6 +70,7 @@ export const GET: RequestHandler = async (event) => {
 		firstName: profile.firstName,
 		lastName: profile.lastName
 	};
+
 	const token = await generateToken(
 		null,
 		TokenType.OAuthSignup,
@@ -79,6 +80,7 @@ export const GET: RequestHandler = async (event) => {
 
 	redirect(
 		302,
-		`https://${PUBLIC_ORIGIN}/signup/complete/?token=${encodeURIComponent(token.token)}`
+		`https://${PUBLIC_ORIGIN}/signup/complete/?token=${encodeURIComponent(token.token)}`,
+		{ external: true }
 	);
 };

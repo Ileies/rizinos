@@ -1,10 +1,10 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { invalidMethod } from '$lib/server';
-import { sendEmail } from '$lib/server/email';
-import { getUserByEmail, generateToken } from '$lib/server/models/User';
+import { invalidMethod } from '#lib/server/index.js';
+import { sendEmail } from '#lib/server/email.js';
+import { getUserByEmail, generateToken } from '#lib/server/models/User.js';
 import { TokenType } from '$types';
 import { addHours } from 'date-fns';
-import { PUBLIC_ORIGIN } from '$env/static/public';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const { email } = (await request.json()) as { email?: string };

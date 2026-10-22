@@ -1,9 +1,7 @@
-import { Server } from '../build/server/index.js';
-import { manifest, base } from '../build/server/manifest.js';
-import { handleWebSocketUpgrade, websocketHandlers } from '$lib/server/websocket';
+import { server as app, base, app_path } from '../build/adapter-node.js';
+import { handleWebSocketUpgrade, websocketHandlers } from '#lib/server/websocket.js';
 import { join } from 'node:path';
 
-const app = new Server(manifest);
 await app.init({ env: process.env as Record<string, string> });
 
 const clientDir = join(import.meta.dir, 'client' + base);
@@ -28,7 +26,7 @@ const server = Bun.serve({
 		const file = Bun.file(join(clientDir, pathname));
 		if (await file.exists()) {
 			const headers: HeadersInit = {};
-			if (pathname.startsWith(`/${manifest.appPath}/immutable/`)) {
+			if (pathname.startsWith(`/${app_path}/immutable/`)) {
 				headers['cache-control'] = 'public,max-age=31536000,immutable';
 			}
 			return new Response(file, { headers });

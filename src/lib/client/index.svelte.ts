@@ -1,4 +1,4 @@
-import os from '$lib/os.svelte';
+import os from '#lib/os.svelte.js';
 import {
 	type Action,
 	type FileSystemObject,
@@ -52,7 +52,9 @@ async function readAllDirEntries(reader: FileSystemDirectoryReader): Promise<Fil
 async function traverseEntry(entry: FileSystemEntry, path = ''): Promise<File[]> {
 	if (entry.isFile) {
 		const file = await readEntryFile(entry as FileSystemFileEntry);
-		return [new File([file], path + file.name, { type: file.type, lastModified: file.lastModified })];
+		return [
+			new File([file], path + file.name, { type: file.type, lastModified: file.lastModified })
+		];
 	}
 	if (entry.isDirectory) {
 		const children = await readAllDirEntries((entry as FileSystemDirectoryEntry).createReader());

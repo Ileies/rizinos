@@ -3,9 +3,9 @@ import type { RequestHandler } from './$types';
 import { db } from '$db';
 import { files } from '$db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { listingPath, toVFSEntry } from '$lib/server/files';
+import { listingPath, toVFSEntry } from '#lib/server/files.js';
 import { FileType } from '$types';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 
 export const GET = invalidMethod;
 

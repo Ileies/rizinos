@@ -1,8 +1,8 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { invalidMethod } from '$lib/server';
+import { invalidMethod } from '#lib/server/index.js';
 import { db } from '$db';
 import { unbanRequests } from '$db/schema';
-import { findByBanId } from '$lib/server/models/Ban';
+import { findByBanId } from '#lib/server/models/Ban.js';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const { banId, message } = (await request.json()) as { banId?: string; message?: string };

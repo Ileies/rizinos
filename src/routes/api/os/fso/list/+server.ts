@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$db';
 import { files } from '$db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { listDirectory, listingPath } from '$lib/server/files';
+import { listDirectory, listingPath } from '#lib/server/files.js';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	if (!locals.user) error(401, 'Nicht angemeldet.');

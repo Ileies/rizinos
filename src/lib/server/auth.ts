@@ -4,18 +4,18 @@ import {
 	DISCORD_CLIENT_SECRET,
 	GOOGLE_CLIENT_ID,
 	GOOGLE_CLIENT_SECRET
-} from '$env/static/private';
-import { PUBLIC_ORIGIN } from '$env/static/public';
+} from '$app/env/private';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import type { Cookies } from '@sveltejs/kit';
 import { type RequestEvent } from '@sveltejs/kit';
-import { generateToken, getUserByToken } from '$lib/server/models/User';
+import { generateToken, getUserByToken } from '#lib/server/models/User.js';
 import { TokenType, type IpInfo, type OAuthProvider, type UserID } from '$types';
 import { addDays, addMonths, addYears } from 'date-fns';
-import { getDeviceByToken } from '$lib/server/models/device';
+import { getDeviceByToken } from '#lib/server/models/device.js';
 import { db } from '$db';
 import { devices, tokens } from '$db/schema';
 import { eq } from 'drizzle-orm';
-import { cookieData } from '$lib/server/index';
+import { cookieData } from '#lib/server/index.js';
 
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
 	throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set');
@@ -57,6 +57,7 @@ export async function completeLogin(event: RequestEvent, userId: UserID, keep = 
 	} else {
 		const expires = addYears(new Date(), 1);
 		const deviceToken = await generateToken(userId, TokenType.Device, expires);
+
 		const { countryCode, city, timezone } = (await (
 			await event.fetch('/api/os/ip', {
 				method: 'POST',

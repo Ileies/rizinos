@@ -3,7 +3,7 @@ import { type Restrict, Role, type Token, TokenType, type UserData, type UserID 
 import { db } from '$db';
 import { tokens, users } from '$db/schema';
 import crypto from 'crypto';
-import { epoch } from '$lib/server/models/Snowflake';
+import { epoch } from '#lib/server/models/Snowflake.js';
 import { addMonths } from 'date-fns';
 
 export async function getUserByToken(token: string): Promise<UserData | undefined> {

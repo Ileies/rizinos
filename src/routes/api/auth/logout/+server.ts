@@ -1,7 +1,7 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
-import { getToken, revokeToken } from '$lib/server/models/token';
+import { getToken, revokeToken } from '#lib/server/models/token.js';
 import { TokenType } from '$types';
-import { cookieData, invalidMethod } from '$lib/server';
+import { cookieData, invalidMethod } from '#lib/server/index.js';
 
 export async function GET(event: RequestEvent) {
 	const token = await getToken(event.cookies.get('loginToken') ?? '');
