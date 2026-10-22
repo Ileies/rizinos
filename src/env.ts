@@ -1,9 +1,7 @@
 import { defineEnvVars } from '@sveltejs/kit/env';
 
 export const variables = defineEnvVars({
-	PUBLIC_ORIGIN: { public: true, static: true },
-	PUBLIC_APP_NAME: { public: true, static: true },
-	PUBLIC_VERSION: { public: true, static: true },
+	ORIGIN: { static: true },
 	DISCORD_LINK_SECRET: { static: true },
 	DISCORD_CLIENT_ID: { static: true },
 	DISCORD_CLIENT_SECRET: { static: true },

@@ -217,7 +217,7 @@ bun run build      # build to build/
 bun run deploy     # runs scripts/deploy.ts
 ```
 
-`scripts/deploy.ts` copies `.env` and `package.json` into `build/`, SSHes to `root@${PUBLIC_ORIGIN}`, rsyncs the bundle, installs dependencies, and restarts `rizinos.service` with systemd. The deployment succeeds only if dependency installation, the restart, and the service status check succeed.
+`ORIGIN` is the canonical site URL, including its scheme, for example `https://rizinos.com`. `scripts/deploy.ts` extracts its host for SSH and the deployment path. It copies `.env` and `package.json` into `build/`, rsyncs the bundle, installs dependencies, and restarts `rizinos.service` with systemd. The deployment succeeds only if dependency installation, the restart, and the service status check succeed.
 
 The systemd service is defined in `/etc/nixos/hosts/pronix/default.nix`. It runs `bun ./server.js` in `/var/www/rizinos.com` with `PORT=3001`, `NODE_ENV=production`, and `TZ=UTC`. View logs with `journalctl -u rizinos.service` on the server.
 

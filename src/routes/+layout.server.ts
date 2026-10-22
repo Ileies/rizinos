@@ -1,4 +1,4 @@
-import { PUBLIC_ORIGIN } from '$app/env/public';
+import { ORIGIN } from '$app/env/private';
 import type { DefaultSeo } from '$types/seo';
 
 export const load = () => {
@@ -8,8 +8,8 @@ export const load = () => {
 		twitterCard: 'summary_large_image',
 		twitterSite: `@rizinos`,
 		ogType: 'website',
-		ogUrl: `https://${PUBLIC_ORIGIN}/`,
-		ogImage: `${PUBLIC_ORIGIN}/socialcard.jpeg`,
+		ogUrl: `${ORIGIN}/`,
+		ogImage: `${ORIGIN}/socialcard.jpeg`,
 		keywords: 'RizinOS,Linux,macOS,Windows,rizino,rizin,Ileies,Blitz,OS',
 		robots: 'noindex, nofollow'
 	};

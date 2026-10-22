@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
-import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$app/env/public';
-import { SMTP_HOST, SMTP_PASSWORD, SMTP_USER } from '$app/env/private';
+import { ORIGIN, SMTP_HOST, SMTP_PASSWORD, SMTP_USER } from '$app/env/private';
 import Logger from '#lib/server/models/Logger.js';
 
 // ---------------------------------------------------------------------------
@@ -78,8 +77,8 @@ export interface EmailOptions {
 // Interne Konfiguration
 // ---------------------------------------------------------------------------
 
-const DOMAIN = PUBLIC_ORIGIN;
-const APP_NAME = PUBLIC_APP_NAME;
+const DOMAIN = new URL(ORIGIN).hostname;
+const APP_NAME = 'RizinOS';
 
 export const SENDERS: Record<MailCategory, string> = {
 	transactional: `"${APP_NAME}" <no-reply@${DOMAIN}>`,

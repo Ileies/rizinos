@@ -4,7 +4,7 @@ import { sendEmail } from '#lib/server/email.js';
 import { getUserByEmail, generateToken } from '#lib/server/models/User.js';
 import { TokenType } from '$types';
 import { addHours } from 'date-fns';
-import { PUBLIC_ORIGIN } from '$app/env/public';
+import { ORIGIN } from '$app/env/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const { email } = (await request.json()) as { email?: string };
@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const expires = addHours(new Date(), 1);
 	const token = await generateToken(user.id, TokenType.Reset, expires);
-	const resetUrl = `https://${PUBLIC_ORIGIN}/reset-password/?token=${encodeURIComponent(token.token)}`;
+	const resetUrl = `${ORIGIN}/reset-password/?token=${encodeURIComponent(token.token)}`;
 
 	await sendEmail({
 		to: email,

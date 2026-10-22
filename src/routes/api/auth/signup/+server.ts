@@ -7,7 +7,7 @@ import { generateToken } from '#lib/server/models/User.js';
 import { db } from '$db';
 import { TokenType } from '$types';
 import { addDays } from 'date-fns';
-import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from '$app/env/public';
+import { ORIGIN } from '$app/env/private';
 import snowflake from '#lib/server/models/Snowflake.js';
 import type { UserID } from '$types';
 
@@ -47,11 +47,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		birthdate: new Date(data.birthdate)
 	});
 
-	const confirmUrl = `https://${PUBLIC_ORIGIN}/confirm-email/?token=${encodeURIComponent(token.token)}`;
+	const confirmUrl = `${ORIGIN}/confirm-email/?token=${encodeURIComponent(token.token)}`;
 
 	await sendEmail({
 		to: data.email,
-		subject: `${PUBLIC_APP_NAME} - Confirm your email`,
+		subject: `RizinOS - Confirm your email`,
 		category: 'transactional',
 		preheader: 'Confirm your email address to activate your account.',
 		greeting: `Hi ${data.username},`,

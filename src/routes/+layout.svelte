@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.css';
-	import { PUBLIC_APP_NAME } from '$app/env/public';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
@@ -16,7 +15,7 @@
 </script>
 
 <svelte:head>
-	<meta content={PUBLIC_APP_NAME} name="application-name" />
+	<meta content="RizinOS" name="application-name" />
 	<meta content={page.data.seo.pageDescription} name="description" />
 	<meta content={page.data.seo.keywords} name="keywords" />
 	<meta content={page.data.seo.robots} name="robots" />

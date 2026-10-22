@@ -2,7 +2,7 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import { login } from '#lib/server/models/User.js';
 import { completeLogin } from '#lib/server/auth.js';
 import { invalidMethod } from '#lib/server/index.js';
-import { PUBLIC_ORIGIN } from '$app/env/public';
+import { ORIGIN } from '$app/env/private';
 
 export const POST: RequestHandler = async (event) => {
 	const { request, locals } = event;
@@ -25,7 +25,7 @@ export const POST: RequestHandler = async (event) => {
 	if (user && 'banned' in user) {
 		return json(
 			{
-				error: `Dieser Account wurde gesperrt. Unban-Antrag: https://${PUBLIC_ORIGIN}/unban-request/?id=${user.banId}`
+				error: `Dieser Account wurde gesperrt. Unban-Antrag: ${ORIGIN}/unban-request/?id=${user.banId}`
 			},
 			{ status: 403 }
 		);
