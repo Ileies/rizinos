@@ -1,5 +1,5 @@
 {
-	"extends": "./node_modules/$app/tsconfig.json",
+	"extends": "$app/tsconfig",
 	"include": [
 		".svelte-kit/ambient.d.ts",
 		".svelte-kit/non-ambient.d.ts",
@@ -12,6 +12,16 @@
 	],
 	"exclude": ["src/server.ts"],
 	"compilerOptions": {
+		"paths": {
+			"$db": ["./src/lib/server/db"],
+			"$db/*": ["./src/lib/server/db/*"],
+			"$types": ["./src/types"],
+			"$types/*": ["./src/types/*"],
+			"$ui": ["./src/lib/client/components"],
+			"$ui/*": ["./src/lib/client/components/*"],
+			"$shadcn": ["./src/lib/components"],
+			"$shadcn/*": ["./src/lib/components/*"]
+		},
 		"sourceMap": true,
 		"strict": true,
 		"types": ["$app/types", "bun-types"]

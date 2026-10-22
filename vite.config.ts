@@ -10,16 +10,13 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit({
 			preprocess: vitePreprocess(),
-			adapter: adapter(),
-			alias: {
-				$db: './src/lib/server/db',
-				$types: './src/types',
-				$ui: './src/lib/client/components',
-				$shadcn: './src/lib/components'
-			}
+			adapter: adapter()
 		}),
 		devtoolsJson()
 	],
+	resolve: {
+		tsconfigPaths: true
+	},
 	server: {
 		proxy: {
 			'/ws': {

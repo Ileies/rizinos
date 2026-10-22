@@ -76,7 +76,6 @@
 		"@noble/hashes": "^2.2.0"
 	},
 	"imports": {
-		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
 	}
 }
