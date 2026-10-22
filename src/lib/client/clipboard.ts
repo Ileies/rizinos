@@ -1,5 +1,5 @@
 // Definition der erlaubten Types
-export type ClipboardType = 'unknown' | 'text' | 'image' | 'json' | 'file';
+export type ClipboardType = 'unknown' | 'text' | 'image' | 'json' | 'file' | 'null' | `${string}/${string}`;
 
 // Basisinterface für Clipboard-Einträge
 export interface ClipboardEntry<T = unknown> {
@@ -137,9 +137,9 @@ export class ClipboardHistory implements Stack<ClipboardEntry> {
 				if (ArrayBuffer.isView(data) || data instanceof ArrayBuffer) {
 					determinedType = 'unknown';
 				} else if (data instanceof Blob) {
-					determinedType = data.type || 'unknown';
+					determinedType = (data.type as `${string}/${string}`) || 'unknown';
 				} else if (data instanceof File) {
-					determinedType = data.type || 'unknown';
+					determinedType = (data.type as `${string}/${string}`) || 'unknown';
 				} else if (data instanceof ReadableStream) {
 					determinedType = 'application/stream';
 				} else if (Array.isArray(data)) {

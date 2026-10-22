@@ -59,5 +59,5 @@ export const mcInventories = pgTable('mc_inventories', {
 	worldGroup: text('world_group')
 		.notNull()
 		.references(() => mcWorldGroups.name, { onDelete: 'cascade' }),
-	inventory: json('inventory').notNull()
+	inventory: json('inventory').$type<unknown[]>().notNull()
 });

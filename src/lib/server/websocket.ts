@@ -3,7 +3,7 @@ import { getUserByToken, setOnline } from '#lib/server/models/User.js';
 import { getDeviceByToken } from '#lib/server/models/device.js';
 import type { Server, ServerWebSocket } from 'bun';
 
-export async function handleWebSocketUpgrade(req: Request, server: Server) {
+export async function handleWebSocketUpgrade(req: Request, server: Server<WebsocketData>) {
 	const cookies = req.headers.get('Cookie')?.split('; ');
 	if (!cookies) return new Response('Upgrade failed: No cookies', { status: 500 });
 	const loginToken = cookies.find((c) => c.startsWith('loginToken='))?.split('=')[1];
