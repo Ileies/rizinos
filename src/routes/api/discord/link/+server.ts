@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { addMinutes } from 'date-fns';
 import { DISCORD_LINK_SECRET } from '$app/env/private';
-import { ORIGIN } from '$app/env/private';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import { db } from '$db';
 import { dcUsers } from '$db/schema';
 import { generateToken } from '#lib/server/models/User.js';
@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		discordUserId
 	});
 
-	return json({ token: token.token, url: `${ORIGIN}/link/?token=${token.token}` });
+	return json({ token: token.token, url: `https://${PUBLIC_ORIGIN}/link/?token=${token.token}` });
 };
 
 /** Vom eingeloggten User via rizinos-web aufgerufen, um die Verknüpfung mit einem Token zu bestätigen. */

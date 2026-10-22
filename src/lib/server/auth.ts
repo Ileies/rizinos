@@ -5,7 +5,7 @@ import {
 	GOOGLE_CLIENT_ID,
 	GOOGLE_CLIENT_SECRET
 } from '$app/env/private';
-import { ORIGIN } from '$app/env/private';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import type { Cookies } from '@sveltejs/kit';
 import { type RequestEvent } from '@sveltejs/kit';
 import { generateToken, getUserByToken } from '#lib/server/models/User.js';
@@ -24,12 +24,8 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
 	throw new Error('DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are not set');
 }
 
-const oauthCallbackUrl = (provider: OAuthProvider) => {
-	const url = new URL(ORIGIN);
-	url.hostname = `api.${url.hostname}`;
-	url.pathname = `/auth/oauth/${provider}/callback`;
-	return url.toString();
-};
+const oauthCallbackUrl = (provider: OAuthProvider) =>
+	`https://api.${PUBLIC_ORIGIN}/auth/oauth/${provider}/callback`;
 
 export const oauthProviders = {
 	google: new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, oauthCallbackUrl('google')),

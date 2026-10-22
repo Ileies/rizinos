@@ -1,6 +1,6 @@
 import { redirect, type RequestHandler } from '@sveltejs/kit';
 import { addMinutes } from 'date-fns';
-import { ORIGIN } from '$app/env/private';
+import { PUBLIC_ORIGIN } from '$app/env/public';
 import { completeLogin, oauthProviders } from '#lib/server/auth.js';
 import { cookieData } from '#lib/server/index.js';
 import { fetchOAuthProfile } from '#lib/server/oauthProfile.js';
@@ -8,9 +8,8 @@ import { getUserByOAuthAccount, linkOAuthAccount } from '#lib/server/models/oaut
 import { generateToken, getUserByEmail } from '#lib/server/models/User.js';
 import { TokenType, type OAuthPendingSignup, type OAuthProvider } from '$types';
 
-const loginUrl = `${ORIGIN}/login`;
-const appUrl = new URL(ORIGIN);
-appUrl.hostname = `app.${appUrl.hostname}`;
+const loginUrl = `https://${PUBLIC_ORIGIN}/login`;
+const appUrl = `https://app.${PUBLIC_ORIGIN}`;
 
 export const GET: RequestHandler = async (event) => {
 	const { params, url, cookies } = event;
@@ -30,7 +29,7 @@ export const GET: RequestHandler = async (event) => {
 	const state = url.searchParams.get('state');
 	const storedState = cookies.get('oauthState');
 	const codeVerifier = cookies.get('oauthCodeVerifier');
-	const redirectTo = cookies.get('oauthRedirect') || appUrl.toString();
+	const redirectTo = cookies.get('oauthRedirect') || appUrl;
 	clearOauthCookies();
 
 	if (!code || !state || !storedState || !codeVerifier || state !== storedState) {
@@ -81,7 +80,7 @@ export const GET: RequestHandler = async (event) => {
 
 	redirect(
 		302,
-		`${ORIGIN}/signup/complete/?token=${encodeURIComponent(token.token)}`,
+		`https://${PUBLIC_ORIGIN}/signup/complete/?token=${encodeURIComponent(token.token)}`,
 		{ external: true }
 	);
 };

@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { PUBLIC_VERSION } from '$app/env/public';
 import { invalidMethod } from '#lib/server/index.js';
 import { db } from '$db';
 
@@ -9,11 +10,11 @@ export async function POST() {
 	const warps = await db.query.mcWarps.findMany();
 	console.log(
 		'[mc/start:11] responding: version=%s, worth=%d entries, warps=%d entries',
-		__APP_VERSION__,
+		PUBLIC_VERSION,
 		worth.length,
 		warps.length
 	);
-	return json({ version: __APP_VERSION__, worth, warps });
+	return json({ version: PUBLIC_VERSION, worth, warps });
 }
 
 export const GET = invalidMethod;
