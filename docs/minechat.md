@@ -68,6 +68,10 @@ backend. The bot ignores bot/webhook messages to prevent loops. Attachments alon
 are not relayed. Channel membership refreshes every 30 seconds and after link or
 unlink commands. API failures do not cause a Discord reconnect. Startup checks
 Discord's session quota and waits for its reset when necessary.
+The production systemd service waits 60 seconds between unexpected crashes and
+allows at most five starts within one hour. It then remains failed rather than
+restarting indefinitely. After fixing a fatal problem, use
+`systemctl reset-failed discord-minechat` and `systemctl start discord-minechat`.
 
 ### Minecraft plugin actions
 
