@@ -44,7 +44,7 @@ In production, nginx routes traffic on one origin:
 | Icons           | `@lucide/svelte`                                                          |
 | Auth            | Cookie-based sessions (loginToken + deviceToken); Google OAuth via Arctic |
 | i18n            | Custom Vite plugin, 4 locales: de / en / cn / ru                          |
-| Process manager | PM2 (production)                                                          |
+| Process manager | systemd (production)                                                      |
 
 ---
 
@@ -217,9 +217,9 @@ bun run build      # build to build/
 bun run deploy     # runs scripts/deploy.ts
 ```
 
-`scripts/deploy.ts` copies config files into `build/`, SSHes to `root@${PUBLIC_ORIGIN}`, rsyncs the bundle, installs dependencies, and restarts PM2.
+`scripts/deploy.ts` copies `.env` and `package.json` into `build/`, SSHes to `root@${PUBLIC_ORIGIN}`, rsyncs the bundle, installs dependencies, and restarts `rizinos.service` with systemd. The deployment succeeds only if dependency installation, the restart, and the service status check succeed.
 
-PM2 config: `pm2.config.cjs`. The server runs on `PORT` env var (default `3001` in production).
+The systemd service is defined in `/etc/nixos/hosts/pronix/default.nix`. It runs `bun ./server.js` in `/var/www/rizinos.com` with `PORT=3001`, `NODE_ENV=production`, and `TZ=UTC`. View logs with `journalctl -u rizinos.service` on the server.
 
 The static frontend (`rizinos-web`) is deployed separately. See [`../rizinos-web/CLAUDE.md`](../rizinos-web/CLAUDE.md).
 

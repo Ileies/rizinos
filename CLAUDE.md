@@ -106,6 +106,6 @@ Alle ausgehenden Mails über `sendEmail()` aus `#lib/server/email.ts` verschicke
 bun run deploy       # runs scripts/deploy.ts
 ```
 
-PM2 config at `pm2.config.cjs`. Server runs on `PORT` env var (default 3000).
+Deployment restarts the systemd service `rizinos.service` and checks that it is active. The service is defined in `/etc/nixos/hosts/pronix/default.nix` and runs `bun ./server.js` in `/var/www/rizinos.com` with `PORT=3001`, `NODE_ENV=production`, and `TZ=UTC`. View logs on the server with `journalctl -u rizinos.service`.
 
 **Production nginx config** lives in the NixOS flake at `/etc/nixos/hosts/pronix/default.nix` (host `pronix`, the production server). `app.rizinos.com` proxies entirely to this backend (Bun on `:3001`), including `/ws` (WebSocket). `rizinos.com` serves the static frontend (`rizinos-web`). `api.rizinos.com` also proxies to this backend. Apply changes on the server with `sudo nixos-rebuild switch --flake /etc/nixos#pronix` (not the local `prenix` host).
