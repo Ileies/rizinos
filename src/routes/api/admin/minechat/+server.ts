@@ -1,9 +1,12 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { db } from '$db';
-import { minechatUsers, minechatHooks, minechatServers } from '$db/schema';
+import { minechatUsers, minechatHooks, minechatServers, minechatCredentials } from '$db/schema';
 import { eq } from 'drizzle-orm';
 import { Role } from '$types';
 import { hasRole } from '#lib/server/models/User.js';
+import { randomBytes } from 'node:crypto';
+import { isIP } from 'node:net';
+import { hashSecret } from '#lib/server/minechat/protocol.js';
 
 function isAdmin(locals: App.Locals) {
 	return !!locals.user && hasRole(locals.user, Role.Admin);
@@ -29,6 +32,20 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const { action, ...data } = (await request.json()) as Record<string, string> & { action: string };
 
 	switch (action) {
+		case 'serverKey': {
+			const serverId = data.serverId?.trim();
+			if (!serverId || !(await db.query.minechatServers.findFirst({ where: { serverId } })))
+				return json({ message: 'Unknown server ID' }, { status: 404 });
+			const key = randomBytes(32).toString('base64url');
+			await db
+				.insert(minechatCredentials)
+				.values({ serverId, secretHash: hashSecret(key) })
+				.onConflictDoUpdate({
+					target: minechatCredentials.serverId,
+					set: { secretHash: hashSecret(key) }
+				});
+			return json({ success: true, key }, { headers: { 'Cache-Control': 'no-store' } });
+		}
 		case 'userCreate': {
 			const minecraftUuid = data.minecraftUuid?.trim();
 			const discordUserId = data.discordUserId?.trim();
@@ -130,6 +147,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			const ip = data.ip?.trim();
 
 			if (!serverId || !ip) return json({ message: 'Server ID and IP required' }, { status: 400 });
+			if (!isIP(ip))
+				return json({ message: 'A numeric IPv4 or IPv6 address is required' }, { status: 400 });
 
 			try {
 				await db.insert(minechatServers).values({ serverId, ip });
@@ -144,6 +163,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			const ip = data.ip?.trim();
 
 			if (!serverId || !ip) return json({ message: 'Server ID and IP required' }, { status: 400 });
+			if (!isIP(ip))
+				return json({ message: 'A numeric IPv4 or IPv6 address is required' }, { status: 400 });
 
 			try {
 				await db.update(minechatServers).set({ ip }).where(eq(minechatServers.serverId, serverId));
