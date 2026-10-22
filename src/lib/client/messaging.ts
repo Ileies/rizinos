@@ -1,5 +1,18 @@
 import os from '#lib/os.svelte.js';
 
+interface AppWindow {
+	sendMessage(message: AppMessage): boolean;
+}
+
+const appWindows = new Map<number, AppWindow>();
+
+export function registerAppWindow(processId: number, appWindow: AppWindow): () => void {
+	appWindows.set(processId, appWindow);
+	return () => {
+		if (appWindows.get(processId) === appWindow) appWindows.delete(processId);
+	};
+}
+
 /**
  * Sends a message to a specific app process
  * @param processId The ID of the process to send the message to
@@ -7,16 +20,8 @@ import os from '#lib/os.svelte.js';
  * @returns Whether the message was sent successfully
  */
 export function sendMessageToApp<T>(processId: number, message: AppMessage<T>): boolean {
-	// Find the Window component for this process
-	const windowElement = document.querySelector(`[data-pid="${processId}"]`) as HTMLElement | null;
-	if (!windowElement) {
-		console.error(`No window found for process ${processId}`);
-		return false;
-	}
-
-	// Get the Window component instance
-	const windowComponent = windowElement.__svelte;
-	if (!windowComponent?.sendMessage) {
+	const windowComponent = appWindows.get(processId);
+	if (!windowComponent) {
 		console.error(`Window component for process ${processId} not found`);
 		return false;
 	}

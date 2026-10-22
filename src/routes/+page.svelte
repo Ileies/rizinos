@@ -83,7 +83,9 @@
 	}
 
 	const { data } = $props();
-	os.username = data.username;
+	$effect(() => {
+		os.username = data.username;
+	});
 </script>
 
 <div

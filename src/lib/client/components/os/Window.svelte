@@ -3,8 +3,11 @@
 	import { type Process } from '$types/os';
 	import { Maximize, Minimize, Minus, X } from '@lucide/svelte';
 	import { closeProcess, focusProcess } from '#lib/client/index.svelte.js';
+	import { registerAppWindow } from '#lib/client/messaging.js';
 
 	const { processData }: { processData: Process } = $props();
+
+	$effect(() => registerAppWindow(processData.id, { sendMessage }));
 
 	let windowContainer: HTMLDivElement;
 	let app: HTMLIFrameElement;
@@ -111,6 +114,7 @@
 
 <div
 	bind:this={windowContainer}
+	role="group"
 	class="bg-card text-foreground fixed box-border flex flex-col {os.isMobile
 		? ''
 		: 'border shadow-lg ' +
@@ -127,6 +131,7 @@
 >
 	<!--Navigation bar-->
 	<div
+		role="group"
 		class="z-10 flex h-8 justify-between {os.focusedProcessId === processData.id
 			? 'bg-background'
 			: 'bg-muted'}"
@@ -134,6 +139,7 @@
 	>
 		<img alt="Icon" class="m-1 h-5.5 w-5.5" src={icon} />
 		<div
+			role="group"
 			onpointerdown={(e) => {
 				e.stopPropagation();
 				focusProcess(processData);
