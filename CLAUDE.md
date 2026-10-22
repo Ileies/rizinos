@@ -73,7 +73,7 @@ Messages live in `messages/*.json` (per-topic files: `common.json`, `home.json`,
 A Vite plugin (`src/lib/i18n-plugin.ts`) compiles these into `src/lib/messages.ts` (auto-generated, gitignored) at dev/build time. Default locale is `de`. Import translation functions directly:
 
 ```ts
-import { title, description } from '$lib/messages';
+import { title, description } from '#lib/messages';
 ```
 
 ## Database Schema
@@ -89,12 +89,12 @@ Schema is split by domain in `src/lib/server/db/`:
 
 ## E-Mail
 
-Alle ausgehenden Mails über `sendEmail()` aus `$lib/server/email.ts` verschicken. Siehe [`docs/email.md`](docs/email.md) für Kategorien, Absenderadressen, Blöcke und Beispiele.
+Alle ausgehenden Mails über `sendEmail()` aus `#lib/server/email.ts` verschicken. Siehe [`docs/email.md`](docs/email.md) für Kategorien, Absenderadressen, Blöcke und Beispiele.
 
 ## Key Conventions
 
 - Svelte 5 runes throughout (`$state`, `$derived`, `$effect`, `$props`)
-- `$lib/` imports, never relative paths from `src/`
+- `#lib/` imports, never relative paths from `src/`
 - shadcn-svelte imported as `$shadcn/<component>` (configured in tsconfig)
 - `restrict` column in Minecraft tables = permission-gated access control
 - Snowflake IDs for users/files; serial/text PKs elsewhere

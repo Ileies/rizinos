@@ -37,7 +37,7 @@ In production, nginx routes traffic on one origin:
 | Layer           | Technology                                                                |
 | --------------- | ------------------------------------------------------------------------- |
 | Runtime         | Bun                                                                       |
-| Framework       | SvelteKit 2 + Svelte 5 (runes only)                                       |
+| Framework       | SvelteKit 3 + Svelte 5 (runes only)                                       |
 | Adapter         | `adapter-node` + custom `src/server.ts` WebSocket server                  |
 | Database        | PostgreSQL via Drizzle ORM                                                |
 | Styling         | Tailwind CSS v4 + shadcn-svelte                                           |
@@ -53,7 +53,14 @@ In production, nginx routes traffic on one origin:
 ### Prerequisites
 
 - [Bun](https://bun.sh) >= 1.0
+- Node.js >= 22.17 for SvelteKit tooling
 - PostgreSQL running locally (see `.env.template`)
+
+SvelteKit configuration lives in `vite.config.ts`; environment variables are declared in
+`src/env.ts`. The `#lib` imports are configured through `package.json`; custom aliases
+remain in `vite.config.ts`. The
+TypeScript config extends `node_modules/$app/tsconfig.json` by relative path so Bun
+also resolves those aliases when building or running the custom WebSocket server.
 
 ### Install
 
@@ -157,7 +164,7 @@ messages/                  # i18n source files (JSON per topic)
 
 | Alias     | Points to                   |
 | --------- | --------------------------- |
-| `$lib`    | `src/lib`                   |
+| `#lib`    | `src/lib`                   |
 | `$db`     | `src/lib/server/db`         |
 | `$types`  | `src/types`                 |
 | `$ui`     | `src/lib/client/components` |

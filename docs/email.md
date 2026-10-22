@@ -1,6 +1,6 @@
 # E-Mail-System
 
-Alle ausgehenden Mails laufen über `$lib/server/email.ts`. Es gibt zwei Funktionen:
+Alle ausgehenden Mails laufen über `#lib/server/email.ts`. Es gibt zwei Funktionen:
 
 - `sendEmail()` - Template-Mail mit automatischem HTML, Absender und RFC-Headers
 - `sendRawMail()` - direkter SMTP-Versand ohne Template, für Plaintext oder Sonderfälle
@@ -8,7 +8,7 @@ Alle ausgehenden Mails laufen über `$lib/server/email.ts`. Es gibt zwei Funktio
 ## Verwendung
 
 ```ts
-import { sendEmail, sendRawMail, SENDERS } from '$lib/server/email';
+import { sendEmail, sendRawMail, SENDERS } from '#lib/server/email.js';
 
 // Template-Mail (Normalfall)
 await sendEmail({
