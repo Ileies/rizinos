@@ -98,6 +98,9 @@ async function announceIncident(id: string, event: StatusNotice['event']) {
 
 export async function createIncident(input: z.infer<typeof v.incidentCreate>, authorId: UserID) {
 	await assertComponents(input.components);
+	// Timestamps are passed explicitly: the columns are timezone-naive and must always hold UTC,
+	// whereas the database `now()` default follows the Postgres session timezone.
+	const now = new Date();
 	const [incident] = await db
 		.insert(statusIncidents)
 		.values({
@@ -107,13 +110,20 @@ export async function createIncident(input: z.infer<typeof v.incidentCreate>, au
 			source: 'manual',
 			published: input.publish,
 			authorId,
-			resolvedAt: input.status === 'resolved' ? new Date() : null
+			startedAt: now,
+			createdAt: now,
+			updatedAt: now,
+			resolvedAt: input.status === 'resolved' ? now : null
 		})
 		.returning({ id: statusIncidents.id });
 	await replaceIncidentComponents(incident.id, input.components);
-	await db
-		.insert(statusIncidentUpdates)
-		.values({ incidentId: incident.id, status: input.status, body: input.body, authorId });
+	await db.insert(statusIncidentUpdates).values({
+		incidentId: incident.id,
+		status: input.status,
+		body: input.body,
+		authorId,
+		createdAt: now
+	});
 
 	invalidatePublicStatus();
 	await announceIncident(incident.id, input.status === 'resolved' ? 'resolved' : 'created');
@@ -144,7 +154,7 @@ export async function updateIncident(input: z.infer<typeof v.incidentUpdate>, au
 	if (body)
 		await db
 			.insert(statusIncidentUpdates)
-			.values({ incidentId: incident.id, status, body, authorId });
+			.values({ incidentId: incident.id, status, body, authorId, createdAt: new Date() });
 
 	invalidatePublicStatus();
 	const changed = statusChanged || !!body || !!input.title || !!input.impact || !!input.components;
@@ -215,6 +225,7 @@ export async function createMaintenance(
 ) {
 	await assertComponents(input.components);
 	if (!input.components.length) throw new StatusError('Pick at least one component');
+	const now = new Date();
 	const [m] = await db
 		.insert(statusMaintenance)
 		.values({
@@ -222,7 +233,9 @@ export async function createMaintenance(
 			description: input.description,
 			startsAt: input.startsAt,
 			endsAt: input.endsAt,
-			authorId
+			authorId,
+			createdAt: now,
+			updatedAt: now
 		})
 		.returning({ id: statusMaintenance.id });
 	await replaceMaintenanceComponents(m.id, input.components);
