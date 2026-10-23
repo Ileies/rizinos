@@ -107,3 +107,48 @@ export async function notifyLinkSuccess(
 ): Promise<void> {
 	await callBot('/link/success', { discordUserId, rizinosUsername });
 }
+
+export interface StatusNotice {
+	kind: 'incident' | 'maintenance';
+	event: 'created' | 'updated' | 'resolved' | 'cancelled';
+	id: string;
+	title: string;
+	/** Incident status or maintenance phase. */
+	status: string;
+	impact?: string;
+	/** Display names of the affected components. */
+	components: string[];
+	/** Latest update text or the maintenance description. */
+	body?: string;
+	startsAt?: string;
+	endsAt?: string;
+	/** Message to edit in place. Omitted on creation. */
+	messageId?: string | null;
+}
+
+/**
+ * Posts or edits a status notice in the Discord status channel. Returns the id of the
+ * message so later updates edit it in place, or null when the bot could not deliver it.
+ */
+export async function notifyStatus(notice: StatusNotice): Promise<string | null> {
+	try {
+		const res = await fetch(`${DISCORD_BOT_URL}/status/notify`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				authorization: `Bearer ${DISCORD_BOT_SECRET}`
+			},
+			body: JSON.stringify({ ...notice, url: `https://${PUBLIC_ORIGIN}/status` }),
+			signal: AbortSignal.timeout(10_000)
+		});
+		if (!res.ok) {
+			Logger.warn('Discord status notice failed', { status: res.status });
+			return null;
+		}
+		const data = (await res.json()) as { messageId?: string };
+		return data.messageId ?? null;
+	} catch (err) {
+		Logger.warn('Discord status notice failed', err);
+		return null;
+	}
+}
