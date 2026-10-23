@@ -76,8 +76,24 @@ Copy `.env.template` to `.env` and fill in the required values (database URL, Go
 
 ```sh
 bun run db:push      # push Drizzle schema to the database
+bun run db:push:prod # push Drizzle schema to production, connecting automatically
 bun run db:studio    # open Drizzle Studio in the browser
 ```
+
+Production commands use `scripts/with-production-db.ts`. It checks PostgreSQL at
+`192.168.10.85:5432`, then `127.0.0.1:15432`. If both fail, it opens a persistent
+SSH tunnel through `ros` with `ssh -f -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 15432:127.0.0.1:5432 ros`
+and verifies the forwarded connection. The command receives `NODE_ENV=production`
+and the selected `DATABASE_URL`, which Drizzle uses.
+
+Reuse it for other commands, for example:
+
+```sh
+bun scripts/with-production-db.ts bun node_modules/drizzle-kit/bin.cjs studio --verbose
+```
+
+Scripts can also import `resolveProductionDatabase()` from the wrapper to obtain
+the production database URL directly.
 
 ### Develop
 
