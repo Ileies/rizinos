@@ -7,3 +7,4 @@ export * from './schemaOAuth';
 export * from './schemaUsers';
 export * from './schemaFiles';
 export * from './schemaModeration';
+export * from './schemaContact';
