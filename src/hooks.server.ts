@@ -15,7 +15,7 @@ import { startContactRetention } from '#lib/server/contact/retention.js';
 // UTC offset on first Date access, so TZ must be set via the process environment
 // (via .env or the systemd service) before startup -- setting it here is too late.
 
-const ignoredUrls = ['/api/mc/getCredit', '/'];
+const ignoredUrls = ['/api/mc/getCredit', '/', '/api/status', '/api/status/banner'];
 
 const CORS_ORIGIN = 'https://rizinos.com';
 const CORS_HEADERS = {
