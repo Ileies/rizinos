@@ -85,11 +85,16 @@ Schema is split by domain in `src/lib/server/db/`:
 - `schemaMinechat.ts` - minechatUsers, minechatServers, minechatHooks
 - `schemaFiles.ts` - file_meta (VFS)
 - `schemaDiscord.ts` - dcUsers
+- `schemaContact.ts` - contact form messages, staff replies, screenshots (see [`docs/contact.md`](docs/contact.md))
 - `schemaApps.ts`, `schemaLog.ts`
 
 ## E-Mail
 
 Alle ausgehenden Mails über `sendEmail()` aus `#lib/server/email.ts` verschicken. Siehe [`docs/email.md`](docs/email.md) für Kategorien, Absenderadressen, Blöcke und Beispiele.
+
+## Contact Form
+
+`POST /api/contact` (+ `GET /api/contact/challenge`) backs the public contact page, `/api/admin/contact` the inbox. Logic lives in `src/lib/server/contact/`; keep the pure modules free of `$app` imports so `tests/contact.test.ts` can run them. See [`docs/contact.md`](docs/contact.md) for the flow, abuse protection, retention and the topic/mailbox routing.
 
 ## Key Conventions
 
