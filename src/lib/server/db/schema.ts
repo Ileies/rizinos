@@ -8,3 +8,4 @@ export * from './schemaUsers';
 export * from './schemaFiles';
 export * from './schemaModeration';
 export * from './schemaContact';
+export * from './schemaStatus';
