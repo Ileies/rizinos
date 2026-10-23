@@ -85,6 +85,21 @@ export async function liftDiscordBan(discordUserId: string): Promise<void> {
 	await callBot('/unban', { discordUserId });
 }
 
+/** Meldet dem Discord-Bot eine neue Kontaktnachricht, damit das Team sie im Staff-Kanal sieht. Schlägt lautlos fehl. */
+export async function notifyContact(info: {
+	ref: string;
+	topic: string;
+	subject: string;
+	preview: string;
+	attachments: number;
+	signedIn: boolean;
+}): Promise<void> {
+	await callBot('/contact/notify', {
+		...info,
+		adminUrl: `https://${PUBLIC_ORIGIN}/admin`
+	});
+}
+
 /** Meldet dem Discord-Bot eine erfolgreich abgeschlossene Account-Verknüpfung zu Logging-Zwecken. */
 export async function notifyLinkSuccess(
 	discordUserId: string,
