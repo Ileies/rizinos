@@ -9,6 +9,7 @@ import { getToken } from '#lib/server/models/token.js';
 import { TokenType } from '$types';
 import { dev } from '$app/env';
 import { mkdir } from 'fs/promises';
+import { startContactRetention } from '#lib/server/contact/retention.js';
 // Postgres 'timestamp' columns are timezone-naive; Bun's SQL driver writes them in UTC
 // but reads them back interpreted in the process's local timezone. Bun caches the local
 // UTC offset on first Date access, so TZ must be set via the process environment
@@ -28,6 +29,9 @@ const CORS_HEADERS = {
 await db.update(users).set({ isOnline: false }).where(eq(users.isOnline, true));
 
 if (dev) await mkdir('./uploads', { recursive: true });
+
+// Contact messages are deleted automatically once their retention period has passed.
+startContactRetention();
 
 const checks: Handle = async ({ event, resolve }) => {
 	// Get client IP, preferring forwarded IP from proxy if available
