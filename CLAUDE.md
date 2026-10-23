@@ -86,6 +86,7 @@ Schema is split by domain in `src/lib/server/db/`:
 - `schemaFiles.ts` - file_meta (VFS)
 - `schemaDiscord.ts` - dcUsers
 - `schemaContact.ts` - contact form messages, staff replies, screenshots (see [`docs/contact.md`](docs/contact.md))
+- `schemaStatus.ts` - status page components, probe results, incidents, maintenance (see [`docs/status.md`](docs/status.md))
 - `schemaApps.ts`, `schemaLog.ts`
 
 ## E-Mail
@@ -95,6 +96,10 @@ Alle ausgehenden Mails über `sendEmail()` aus `#lib/server/email.ts` verschicke
 ## Contact Form
 
 `POST /api/contact` (+ `GET /api/contact/challenge`) backs the public contact page, `/api/admin/contact` the inbox. Logic lives in `src/lib/server/contact/`; keep the pure modules free of `$app` imports so `tests/contact.test.ts` can run them. See [`docs/contact.md`](docs/contact.md) for the flow, abuse protection, retention and the topic/mailbox routing.
+
+## Status Page
+
+`GET /api/status` and `/api/status/banner` (public, cached) and `/api/admin/status` (admin) serve the status page at rizinos.com/status. Probing is done by the separate service [`../rizinos-status`](../rizinos-status), not by this server. Logic lives in `src/lib/server/status/`; keep `types.ts`, `summary.ts` and `validate.ts` free of `$app` and `$db` imports so `tests/status.test.ts` can run them. Status code must pass explicit UTC `Date`s instead of relying on `defaultNow()`. See [`docs/status.md`](docs/status.md) for the data flow, state rules, incident handling and rollout order.
 
 ## Key Conventions
 
